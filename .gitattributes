@@ -1,0 +1,8 @@
+* text=auto
+
+# senza questo git converte i fine riga dentro i binari e li corrompe
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.zip  binary

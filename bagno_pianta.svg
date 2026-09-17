@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="24.80cm" height="18.80cm" viewBox="0 0 620 470">
+<defs>
+<marker id="tick" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+  <line x1="1" y1="7" x2="7" y2="1" stroke="#444" stroke-width="1"/></marker>
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
+.t1 { font-size: 11px; font-weight: bold; }
+.t2 { font-size: 6.5px; }
+.t3 { font-size: 7px; font-weight: bold; }
+.lbl { font-size: 6px; }
+.lbls { font-size: 5px; fill: #555; }
+.lblw { font-size: 5px; fill: #ffffff; }
+.dim { font-size: 5.5px; fill: #333; }
+.dl { stroke: #666; stroke-width: 0.6; }
+.ext { stroke: #999; stroke-width: 0.4; stroke-dasharray: 3 2; }
+.tile { stroke: #c9d3dc; stroke-width: 0.5; }
+.riv { fill: #e9c9a8; stroke: none; }
+.fix { fill: #ffffff; stroke: #1f5673; stroke-width: 1.2; }
+.fixl { fill: none; stroke: #1f5673; stroke-width: 0.8; }
+.glass { stroke: #1f5673; stroke-width: 2.6; }
+.leaf { stroke: #1f5673; stroke-width: 1.6; stroke-dasharray: 5 2; }
+.door { stroke: #c0392b; stroke-width: 1.2; stroke-dasharray: 4 2; fill: none; }
+</style></defs>
+<rect x="0.00" y="0.00" width="620.00" height="470.00" class="" fill="#ffffff"/>
+<text x="14.00" y="16.00" class="t1" text-anchor="start">BAGNO - pianta di progetto</text>
+<text x="14.00" y="28.00" class="t2" text-anchor="start">Vano finito 391 x 154 cm - 6.50 mq - perimetro 12.86 m - rivestimento interno 2 cm - piastrelle 90x90</text>
+<g transform="translate(70,125)">
+<polygon points="-12.00,-12.00 407.00,-12.00 407.00,39.00 381.00,39.00 381.00,68.00 404.00,68.00 404.00,170.00 102.00,170.00 102.00,245.00 -12.00,245.00" fill="#4a4a4a"/>
+<rect x="369.00" y="27.00" width="26.00" height="53.00" class="" fill="#4a4a4a"/>
+<rect x="395.00" y="-12.00" width="31.00" height="182.00" class="" fill="#4a4a4a"/>
+<rect x="-12.00" y="-12.00" width="438.00" height="12.00" class="" fill="#00b050" opacity="0.85"/>
+<polygon points="0.00,0.00 395.00,0.00 395.00,27.00 369.00,27.00 369.00,80.00 392.00,80.00 392.00,158.00 90.00,158.00 90.00,233.00 0.00,233.00" class="riv"/>
+<polygon points="2.00,2.00 393.00,2.00 393.00,25.00 367.00,25.00 367.00,82.00 390.00,82.00 390.00,156.00 88.00,156.00 88.00,231.00 2.00,231.00" fill="#ffffff" stroke="#8a8a8a" stroke-width="0.4"/>
+<line x1="92.20" y1="2.00" x2="92.20" y2="156.00" class="tile" />
+<line x1="182.40" y1="2.00" x2="182.40" y2="156.00" class="tile" />
+<line x1="272.60" y1="2.00" x2="272.60" y2="156.00" class="tile" />
+<line x1="362.80" y1="2.00" x2="362.80" y2="156.00" class="tile" />
+<line x1="2.00" y1="92.20" x2="390.00" y2="92.20" class="tile" />
+<line x1="2.00" y1="182.40" x2="88.00" y2="182.40" class="tile" />
+<text x="8.00" y="11.00" class="lbls" text-anchor="start">partenza posa</text>
+<rect x="393.00" y="80.00" width="33.00" height="51.00" class="" fill="#ffffff" stroke="#4a4a4a" stroke-width="0.5"/>
+<line x1="426.00" y1="80.00" x2="426.00" y2="131.00" class="glass" />
+<text x="405.00" y="105.50" class="lblw" text-anchor="middle" transform="rotate(-90 405.00 105.50)">FINESTRA 51</text>
+<rect x="-12.00" y="50.00" width="14.00" height="85.00" class="" fill="#ffffff"/>
+<rect x="-10.00" y="135.00" width="8.00" height="90.00" class="door" />
+<line x1="-6.00" y1="141.00" x2="-6.00" y2="219.00" class="door" />
+<path d="M -8.0,213 L -6.0,221 L -4.0,213" fill="none" stroke="#c0392b" stroke-width="1"/>
+<text x="-19.00" y="92.50" class="lbls" text-anchor="middle" transform="rotate(-90 -19.00 92.50)">PORTA SCORREVOLE A SCOMPARSA 80</text>
+<rect x="29.00" y="2.00" width="120.00" height="38.00" class="fix" rx="3"/>
+<rect x="36.00" y="8.00" width="106.00" height="26.00" class="fixl" rx="4"/>
+<circle cx="89.0" cy="15.0" r="3" class="fixl"/>
+<text x="89.00" y="23.00" class="lbl" text-anchor="middle">MOBILE LAVABO 120x38</text>
+<rect x="176.00" y="2.00" width="37.00" height="48.00" class="fix" rx="3"/>
+<rect x="176.00" y="2.00" width="37.00" height="14.00" class="fixl" />
+<ellipse cx="194.5" cy="37" rx="14" ry="17" class="fixl"/>
+<text x="194.50" y="58.00" class="lbl" text-anchor="middle">WC 37x48</text>
+<rect x="221.00" y="2.00" width="37.00" height="48.00" class="fix" rx="3"/>
+<ellipse cx="239.5" cy="32" rx="14" ry="20" class="fixl"/>
+<text x="239.50" y="58.00" class="lbl" text-anchor="middle">BIDET 37x48</text>
+<rect x="287.00" y="2.00" width="80.00" height="154.00" class="" fill="#dff1fb" stroke="#1f5673" stroke-width="1.2"/>
+<circle cx="327.0" cy="79.0" r="4" class="fixl"/>
+<text x="355.00" y="79.00" class="lbl" text-anchor="middle" transform="rotate(-90 355.00 79.00)">PIATTO DOCCIA 154x80</text>
+<rect x="206.00" y="121.00" width="35.00" height="35.00" class="fix" rx="3"/>
+<rect x="210.00" y="147.00" width="27.00" height="5.00" class="fixl" />
+<text x="223.50" y="140.50" class="lbl" text-anchor="middle">SGABELLO 35x35</text>
+<rect x="96.00" y="131.00" width="110.00" height="25.00" class="fix" rx="3"/>
+<line x1="96.00" y1="131.00" x2="206.00" y2="131.00" class="fixl" />
+<line x1="151.00" y1="131.00" x2="151.00" y2="156.00" class="fixl" />
+<text x="151.00" y="145.50" class="lbl" text-anchor="middle">MOBILETTO 110x25</text>
+<rect x="15.00" y="163.50" width="60.00" height="60.00" class="fix" rx="3"/>
+<circle cx="45.0" cy="193.5" r="19" class="fixl"/>
+<text x="45.00" y="195.50" class="lbl" text-anchor="middle">LAVATRICE 60x60</text>
+<line x1="287.00" y1="2.00" x2="287.00" y2="156.00" class="glass" />
+<line x1="282.00" y1="62.00" x2="282.00" y2="122.00" class="leaf" />
+<line x1="282.00" y1="122.00" x2="282.00" y2="134.00" class="dl" />
+<path d="M 282,136 l -2.5,-6 l 5,0 Z" fill="#1f5673"/>
+<line x1="298.00" y1="2.00" x2="298.00" y2="62.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="295.00" y="32.00" class="dim" text-anchor="middle" transform="rotate(-90 295.00 32.00)">LUCE 60</text>
+<line x1="315.00" y1="2.00" x2="315.00" y2="122.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="312.00" y="62.00" class="dim" text-anchor="middle" transform="rotate(-90 312.00 62.00)">ANTA SCORR. 120</text>
+<line x1="315.00" y1="122.00" x2="315.00" y2="156.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="312.00" y="139.00" class="dim" text-anchor="middle" transform="rotate(-90 312.00 139.00)">FISSO 34</text>
+<rect x="367.00" y="82.00" width="23.00" height="74.00" class="" fill="none" stroke="#9aa5b1" stroke-width="0.6" stroke-dasharray="3 2"/>
+<text x="378.00" y="119.00" class="lbls" text-anchor="middle" transform="rotate(-90 378.00 119.00)">nicchia 23x74</text>
+<text x="383.00" y="55.00" class="lblw" text-anchor="middle" transform="rotate(-90 383.00 55.00)">COLONNA SCARICO</text>
+<line x1="2.00" y1="-4.00" x2="2.00" y2="-38.00" class="ext" />
+<line x1="29.00" y1="-4.00" x2="29.00" y2="-38.00" class="ext" />
+<line x1="2.00" y1="-36.00" x2="29.00" y2="-36.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="15.50" y="-39.00" class="dim" text-anchor="middle">27</text>
+<line x1="29.00" y1="-4.00" x2="29.00" y2="-38.00" class="ext" />
+<line x1="149.00" y1="-4.00" x2="149.00" y2="-38.00" class="ext" />
+<line x1="29.00" y1="-36.00" x2="149.00" y2="-36.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="89.00" y="-39.00" class="dim" text-anchor="middle">LAVABO 120</text>
+<line x1="149.00" y1="-4.00" x2="149.00" y2="-38.00" class="ext" />
+<line x1="176.00" y1="-4.00" x2="176.00" y2="-38.00" class="ext" />
+<line x1="149.00" y1="-36.00" x2="176.00" y2="-36.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="162.50" y="-39.00" class="dim" text-anchor="middle">27</text>
+<line x1="176.00" y1="-4.00" x2="176.00" y2="-38.00" class="ext" />
+<line x1="258.00" y1="-4.00" x2="258.00" y2="-38.00" class="ext" />
+<line x1="176.00" y1="-36.00" x2="258.00" y2="-36.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="217.00" y="-39.00" class="dim" text-anchor="middle">WC+BIDET 82</text>
+<line x1="258.00" y1="-4.00" x2="258.00" y2="-38.00" class="ext" />
+<line x1="287.00" y1="-4.00" x2="287.00" y2="-38.00" class="ext" />
+<line x1="258.00" y1="-36.00" x2="287.00" y2="-36.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="272.50" y="-39.00" class="dim" text-anchor="middle">29</text>
+<line x1="287.00" y1="-4.00" x2="287.00" y2="-38.00" class="ext" />
+<line x1="367.00" y1="-4.00" x2="367.00" y2="-38.00" class="ext" />
+<line x1="287.00" y1="-36.00" x2="367.00" y2="-36.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="327.00" y="-39.00" class="dim" text-anchor="middle">DOCCIA 80</text>
+<line x1="2.00" y1="-40.00" x2="2.00" y2="-80.00" class="ext" />
+<line x1="393.00" y1="-4.00" x2="393.00" y2="-58.00" class="ext" />
+<line x1="2.00" y1="-56.00" x2="393.00" y2="-56.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="197.50" y="-59.00" class="dim" text-anchor="middle">391 finito</text>
+<line x1="0.00" y1="-4.00" x2="0.00" y2="-80.00" class="ext" />
+<line x1="395.00" y1="-4.00" x2="395.00" y2="-80.00" class="ext" />
+<line x1="0.00" y1="-76.00" x2="395.00" y2="-76.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="197.50" y="-79.00" class="dim" text-anchor="middle">395 al grezzo</text>
+<line x1="-4.00" y1="2.00" x2="-38.00" y2="2.00" class="ext" />
+<line x1="-4.00" y1="156.00" x2="-38.00" y2="156.00" class="ext" />
+<line x1="-36.00" y1="2.00" x2="-36.00" y2="156.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="-39.00" y="79.00" class="dim" text-anchor="middle" transform="rotate(-90 -39.00 79.00)">154 finito</text>
+<line x1="-54.00" y1="0.00" x2="-54.00" y2="158.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="-57.00" y="79.00" class="dim" text-anchor="middle" transform="rotate(-90 -57.00 79.00)">158 grezzo</text>
+<line x1="118.00" y1="40.00" x2="118.00" y2="121.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="115.00" y="80.50" class="dim" text-anchor="middle" transform="rotate(-90 115.00 80.50)">81 sgabello-lavabo</text>
+<line x1="200.00" y1="50.00" x2="200.00" y2="131.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="197.00" y="90.50" class="dim" text-anchor="middle" transform="rotate(-90 197.00 90.50)">81</text>
+<line x1="272.00" y1="50.00" x2="272.00" y2="156.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="269.00" y="103.00" class="dim" text-anchor="middle" transform="rotate(-90 269.00 103.00)">106</text>
+<line x1="2.00" y1="240.00" x2="88.00" y2="240.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="45.00" y="237.00" class="dim" text-anchor="middle">86</text>
+<line x1="85.00" y1="156.00" x2="85.00" y2="231.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="82.00" y="193.50" class="dim" text-anchor="middle" transform="rotate(-90 82.00 193.50)">75</text>
+<text x="200.00" y="-16.00" class="lbls" text-anchor="middle">muro nuovo 12 cm  -  CAMERA MATRIMONIALE</text>
+<text x="240.00" y="167.00" class="lblw" text-anchor="middle">CAMERETTA</text>
+<text x="-19.00" y="200.00" class="lbls" text-anchor="middle" transform="rotate(-90 -19.00 200.00)">DISIMPEGNO</text>
+<text x="415.00" y="40.00" class="lblw" text-anchor="middle" transform="rotate(-90 415.00 40.00)">MURO PERIMETRALE</text>
+</g>
+<rect x="505.00" y="125.00" width="100.00" height="158.00" class="" fill="#f5f7f9" stroke="#9aa5b1" stroke-width="0.6"/>
+<text x="511.00" y="139.00" class="t3" text-anchor="start">PIASTRELLE 90x90</text>
+<text x="511.00" y="152.00" class="t2" text-anchor="start">lastra: 0.81 mq - fuga 2 mm</text>
+<text x="511.00" y="160.00" class="t2" text-anchor="start"></text>
+<text x="511.00" y="168.00" class="t3" text-anchor="start">PAVIMENTO  6.50 mq</text>
+<text x="511.00" y="176.00" class="t2" text-anchor="start">  file intere: 4 x 2</text>
+<text x="511.00" y="184.00" class="t2" text-anchor="start">  taglio in fondo: 30 cm</text>
+<text x="511.00" y="192.00" class="t2" text-anchor="start">  taglio lato cameretta: 64 cm</text>
+<text x="511.00" y="200.00" class="t2" text-anchor="start">  taglio fondo nicchia: 49 cm</text>
+<text x="511.00" y="208.00" class="t2" text-anchor="start">  lastre (+15%): 10</text>
+<text x="511.00" y="216.00" class="t2" text-anchor="start"></text>
+<text x="511.00" y="224.00" class="t3" text-anchor="start">RIVESTIMENTO h 180 cm</text>
+<text x="511.00" y="232.00" class="t2" text-anchor="start">  12.86 m x 1.80 m - vuoti</text>
+<text x="511.00" y="240.00" class="t2" text-anchor="start">  = 21.50 mq</text>
+<text x="511.00" y="248.00" class="t2" text-anchor="start">  2 corsi interi da 90</text>
+<text x="511.00" y="256.00" class="t2" text-anchor="start">  spessore in opera: 2 cm</text>
+<text x="511.00" y="264.00" class="t2" text-anchor="start">  lastre (+15%): 31</text>
+<text x="511.00" y="272.00" class="t2" text-anchor="start"></text>
+<text x="511.00" y="280.00" class="t3" text-anchor="start">TOTALE 41 lastre = 33.2 mq</text>
+<text x="14.00" y="382.00" class="t2" text-anchor="start">Rivestimento interno 2 cm (piastrella + colla) su tutte le pareti: misure FINITE 154 x 391 cm contro 158 x 395 al grezzo. Tutte le quote e l'arredo si riferiscono al finito.</text>
+<text x="14.00" y="393.00" class="t2" text-anchor="start">Sanitari accentrati sul tratto libero 2-287: interasse wc-bidet 45 cm, luce laterale 27 cm. Wc e bidet sospesi, profondi 48. Passaggio libero 81 cm davanti al mobiletto, 106 cm nel resto del vano.</text>
+<text x="14.00" y="404.00" class="t2" text-anchor="start">Box a nicchia 154: anta scorrevole a 2 pannelli, 120 da chiusa e 60 da aperta, + fisso 34. Luce netta di accesso alla doccia 60 cm.</text>
+<text x="14.00" y="415.00" class="t2" text-anchor="start">Piatto doccia 154x80 su misura a filo colonna di scarico; nicchia 23x74 sotto la finestra da tamponare (seduta h 45). Porta 80x210 a scomparsa: parete finita min. 12,5 cm.</text>
+<text x="14.00" y="426.00" class="t2" text-anchor="start">Colonna montante di scarico nell'angolo di fondo, dietro al piatto: dal wc lo scarico corre ~2 m sotto pavimento (verificare pendenza e massetto).</text>
+<text x="14.00" y="438.00" class="dim" text-anchor="start">scala 1:25 alla stampa 100%</text>
+<rect x="14.00" y="442.00" width="300.00" height="6.00" class="" fill="none" stroke="#333" stroke-width="0.6"/>
+<rect x="14.00" y="442.00" width="100.00" height="6.00" class="" fill="#333"/>
+<text x="14.00" y="455.00" class="dim" text-anchor="middle">0</text>
+<text x="114.00" y="455.00" class="dim" text-anchor="middle">1</text>
+<rect x="214.00" y="442.00" width="100.00" height="6.00" class="" fill="#333"/>
+<text x="214.00" y="455.00" class="dim" text-anchor="middle">2</text>
+<text x="314.00" y="455.00" class="dim" text-anchor="middle">3 m</text>
+</svg>
