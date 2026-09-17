@@ -55,7 +55,6 @@ ARREDO = [
     ("bidet", "BIDET 37x48", 221, 2, 37, 48),
     ("doccia", "PIATTO DOCCIA 154x80", 287, 2, 80, 154),
     ("sedia", "SGABELLO 35x35", 206, 121, 35, 35),
-    ("mobiletto", "MOBILETTO 110x25", 96, 131, 110, 25),
     ("lavatrice", "LAVATRICE 60x60", 15, 163.5, 60, 60),
 ]
 
@@ -70,7 +69,7 @@ QUOTE_X = [
 
 NOTE = [
     "Rivestimento interno 2 cm (piastrella + colla) su tutte le pareti: misure FINITE 154 x 391 cm contro 158 x 395 al grezzo. Tutte le quote e l'arredo si riferiscono al finito.",
-    "Sanitari accentrati sul tratto libero 2-287: interasse wc-bidet 45 cm, luce laterale 27 cm. Wc e bidet sospesi, profondi 48. Passaggio libero 81 cm davanti al mobiletto, 106 cm nel resto del vano.",
+    "Sanitari accentrati sul tratto libero 2-287: interasse wc-bidet 45 cm, luce laterale 27 cm. Wc e bidet sospesi, profondi 48. Passaggio libero 106 cm per tutto il vano.",
     "Box a nicchia 154: anta scorrevole a 2 pannelli, 120 da chiusa e 60 da aperta, + fisso 34. Luce netta di accesso alla doccia 60 cm.",
     "Piatto doccia 154x80 su misura a filo colonna di scarico; nicchia 23x74 sotto la finestra da tamponare (seduta h 45). Porta 80x210 a scomparsa: parete finita min. 12,5 cm.",
     "Colonna montante di scarico nell'angolo di fondo, dietro al piatto: dal wc lo scarico corre ~2 m sotto pavimento (verificare pendenza e massetto).",
@@ -346,7 +345,6 @@ line(-4, 156, -38, 156, "ext")
 dim_v(min(YF), 156, -36, "154 finito")
 dim_v(min(YG), 158, -54, "158 grezzo")
 dim_v(40, 121, 118, "81 sgabello-lavabo")
-dim_v(50, 131, 200, "81")
 dim_v(50, 156, 272, "106")
 dim_h(min(XF), 88, 240, "86")
 dim_v(156, max(YF), 85, "75")

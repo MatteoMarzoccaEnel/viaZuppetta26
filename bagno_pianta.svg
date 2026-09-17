@@ -64,10 +64,6 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="206.00" y="121.00" width="35.00" height="35.00" class="fix" rx="3"/>
 <rect x="210.00" y="147.00" width="27.00" height="5.00" class="fixl" />
 <text x="223.50" y="140.50" class="lbl" text-anchor="middle">SGABELLO 35x35</text>
-<rect x="96.00" y="131.00" width="110.00" height="25.00" class="fix" rx="3"/>
-<line x1="96.00" y1="131.00" x2="206.00" y2="131.00" class="fixl" />
-<line x1="151.00" y1="131.00" x2="151.00" y2="156.00" class="fixl" />
-<text x="151.00" y="145.50" class="lbl" text-anchor="middle">MOBILETTO 110x25</text>
 <rect x="15.00" y="163.50" width="60.00" height="60.00" class="fix" rx="3"/>
 <circle cx="45.0" cy="193.5" r="19" class="fixl"/>
 <text x="45.00" y="195.50" class="lbl" text-anchor="middle">LAVATRICE 60x60</text>
@@ -124,8 +120,6 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="-57.00" y="79.00" class="dim" text-anchor="middle" transform="rotate(-90 -57.00 79.00)">158 grezzo</text>
 <line x1="118.00" y1="40.00" x2="118.00" y2="121.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="115.00" y="80.50" class="dim" text-anchor="middle" transform="rotate(-90 115.00 80.50)">81 sgabello-lavabo</text>
-<line x1="200.00" y1="50.00" x2="200.00" y2="131.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
-<text x="197.00" y="90.50" class="dim" text-anchor="middle" transform="rotate(-90 197.00 90.50)">81</text>
 <line x1="272.00" y1="50.00" x2="272.00" y2="156.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="269.00" y="103.00" class="dim" text-anchor="middle" transform="rotate(-90 269.00 103.00)">106</text>
 <line x1="2.00" y1="240.00" x2="88.00" y2="240.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
@@ -157,7 +151,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="511.00" y="272.00" class="t2" text-anchor="start"></text>
 <text x="511.00" y="280.00" class="t3" text-anchor="start">TOTALE 41 lastre = 33.2 mq</text>
 <text x="14.00" y="382.00" class="t2" text-anchor="start">Rivestimento interno 2 cm (piastrella + colla) su tutte le pareti: misure FINITE 154 x 391 cm contro 158 x 395 al grezzo. Tutte le quote e l'arredo si riferiscono al finito.</text>
-<text x="14.00" y="393.00" class="t2" text-anchor="start">Sanitari accentrati sul tratto libero 2-287: interasse wc-bidet 45 cm, luce laterale 27 cm. Wc e bidet sospesi, profondi 48. Passaggio libero 81 cm davanti al mobiletto, 106 cm nel resto del vano.</text>
+<text x="14.00" y="393.00" class="t2" text-anchor="start">Sanitari accentrati sul tratto libero 2-287: interasse wc-bidet 45 cm, luce laterale 27 cm. Wc e bidet sospesi, profondi 48. Passaggio libero 106 cm per tutto il vano.</text>
 <text x="14.00" y="404.00" class="t2" text-anchor="start">Box a nicchia 154: anta scorrevole a 2 pannelli, 120 da chiusa e 60 da aperta, + fisso 34. Luce netta di accesso alla doccia 60 cm.</text>
 <text x="14.00" y="415.00" class="t2" text-anchor="start">Piatto doccia 154x80 su misura a filo colonna di scarico; nicchia 23x74 sotto la finestra da tamponare (seduta h 45). Porta 80x210 a scomparsa: parete finita min. 12,5 cm.</text>
 <text x="14.00" y="426.00" class="t2" text-anchor="start">Colonna montante di scarico nell'angolo di fondo, dietro al piatto: dal wc lo scarico corre ~2 m sotto pavimento (verificare pendenza e massetto).</text>

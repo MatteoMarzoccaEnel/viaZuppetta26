@@ -129,7 +129,6 @@ ARREDO = [
     ("BAGNO", "WC", 344, 346, 48, 37, "wc"),
     ("BAGNO", "BIDET", 344, 391, 48, 37, "wc"),
     ("BAGNO", "DOCCIA 156x80", 344, 457, 156, 80, "doccia"),
-    ("BAGNO", "MOBILETTO 110x25", 473, 237, 25, 110, "box"),
     ("BAGNO", "ATTACCAPANNI 60x5", 493, 360, 5, 60, "appendi"),
     ("BAGNO", "LAVATRICE", 506, 170, 60, 60, "box"),
     ("BAGNO", "SPECCHIO 100x2", 344, 209, 2, 100, "specchio"),
