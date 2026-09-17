@@ -323,6 +323,10 @@ HTML = r"""<!DOCTYPE html>
        background:rgba(0,0,0,.55);padding:14px 18px 16px;border-radius:8px;pointer-events:none;
        min-width:250px}
   #leg h3{margin:0 0 10px;font-size:13px;letter-spacing:.14em;color:#ffd479}
+  #posa{margin:0 0 12px;padding:7px 9px;border-radius:5px;background:rgba(255,212,121,.12);
+        border-left:3px solid #ffd479}
+  #posa b{display:block;font-size:13px;color:#ffd479;margin-bottom:2px}
+  #posa span{color:#cfd8e0;font-size:11.5px;line-height:1.45}
   #leg .r{display:flex;align-items:center;gap:8px;margin:6px 0}
   #leg .k{flex:0 0 96px;display:flex;gap:4px}
   kbd{display:inline-block;min-width:15px;text-align:center;font:bold 11px Arial;
@@ -340,6 +344,8 @@ HTML = r"""<!DOCTYPE html>
 </style></head><body>
 <div id="hud"><span id="pos"></span></div>
 <div id="leg">
+  <h3>POSA</h3>
+  <div id="posa"></div>
   <h3>COMANDI</h3>
   <div class="r"><span class="k"><kbd>W</kbd><kbd>S</kbd></span>avanti / indietro seguendo lo sguardo</div>
   <div class="r"><span class="k"><kbd>A</kbd><kbd>D</kbd></span>spostarsi di lato</div>
@@ -642,6 +648,13 @@ let iPosa = 0;
 const gPosa = D.posa.map((cfg, i) => {
   const g = costruisciPosa(cfg, i); g.visible = (i === 0); return g;
 });
+function mostraPosa(){
+  const c = D.posa[iPosa];
+  document.getElementById('posa').innerHTML =
+    '<b>' + c.nome + '</b><span>' + c.nota + '<br>modulo ' + c.modulo.toFixed(2)
+    + ' cm &middot; rivestimento h ' + c.hriv.toFixed(0) + ' cm</span>';
+}
+mostraPosa();
 
 // ---------- infissi ----------
 function badge(n, x, y, z){
@@ -982,6 +995,7 @@ addEventListener('keydown', e=>{
       gPosa[iPosa].visible = false;
       iPosa = (iPosa + 1) % gPosa.length;
       gPosa[iPosa].visible = true;
+      mostraPosa();
       dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
     }
     if (e.code === 'KeyE'){
