@@ -227,6 +227,11 @@ def Rrect(x, y, w, h):
     return (min(a, c), min(b, d), w, h)
 
 
+def _rett(x0, y0, x1, y1, *resto):
+    x, y, w, h = Rrect(x0, y0, x1 - x0, y1 - y0)
+    return (x, y, x + w, y + h) + resto
+
+
 # ---- ricalco della tavola originale (muri reali, travi, spallette, balconi) ----
 PDF = r"c:\WORK\GH\TAV 02_STATO DI PROGETTO.pdf"
 PT_M = 27.76            # pt per metro
@@ -333,6 +338,39 @@ TRAVI = [
 CONTROSOFFITTI = [
     (343, 73, 370, 483, H_TRAVE, 85, "bagno, fascia lato lavabo"),
 ]
+
+# ---- canalizzato caldo/freddo ----
+# Cassonetto in cartongesso nel corridoio, intradosso a filo trave e larghezza
+# pari a quella del corridoio; i tre tratti sono interrotti dai pilastri P7 e P8
+# che scendono fin dentro il passaggio. (x0, y0, x1, y1, tratto) nel rilievo.
+H_CANALE = H_TRAVE
+CANALI_RILIEVO = [
+    (209, 30, 370, 152, "C1"),      # dal muro del ripostiglio alla trave T3
+    (400, 17, 773, 152, "C2"),      # da P7 a P8
+    (807, 17, 1197, 152, "C3"),     # da P8 alla trave T1, nella zona giorno
+    (1197, 37, 1228, 152, "C3"),    # ultimo tratto: il filo nord rientra di 20
+]
+TRATTI_CANALE = {
+    "C1": "ripostiglio - trave T3",
+    "C2": "trave T3 - trave T2",
+    "C3": "trave T2 - trave T1 (zona giorno)",
+}
+
+# bocchette di mandata: (x, y, verso, locale). Quelle orizzontali attraversano
+# la parete alta della stanza sopra la porta, "giu" scarica dal piano inferiore.
+BOCCHETTA = (60.0, 20.0)     # luce della griglia: larghezza x altezza
+Z_BOCCHETTA = 252.0          # base delle griglie orizzontali (fra trave e soffitto)
+BOCCHETTE_RILIEVO = [
+    (266, 162, "s", "LETTO MATRIMONIALE"),
+    (435, 162, "s", "BAGNO"),
+    (642, 162, "s", "LETTO SINGOLO"),
+    (1000, 152, "s", "ZONA GIORNO"),
+    (1150, 152, "s", "ZONA GIORNO"),
+    (290, 91, "giu", "DISIMPEGNO"),
+    (590, 91, "giu", "DISIMPEGNO"),
+]
+CANALI = [_rett(*c) for c in CANALI_RILIEVO]
+BOCCHETTE = [R(x, y) + (v, lo) for x, y, v, lo in BOCCHETTE_RILIEVO]
 
 # =====================================================================
 # GEOMETRIA
@@ -852,6 +890,16 @@ for i, (lo, lb, x, y, w, h, tp) in enumerate(ARREDO):
 print("\nL = larghezza lungo il muro, P = profondita' dal muro, H = altezza,")
 print("sosp. = quota di attacco da terra per gli elementi sospesi (cm)")
 print()
+print(f"CANALIZZATO CALDO/FREDDO - cassonetto in cartongesso, intradosso {H_CANALE:.0f} cm")
+print(f"{'tratto':8}{'da x':>7}{'a x':>7}{'largh.':>8}{'lungh.':>8}  percorso")
+print("-" * 70)
+for _x0, _y0, _x1, _y1, _lb in CANALI_RILIEVO:
+    print(f"{_lb:8}{_x0:7.0f}{_x1:7.0f}{_y1-_y0:8.0f}{_x1-_x0:8.0f}  {TRATTI_CANALE[_lb]}")
+print(f"\n{len(BOCCHETTE_RILIEVO)} bocchette da {BOCCHETTA[0]:.0f}x{BOCCHETTA[1]:.0f} cm "
+      f"(orizzontali con base a {Z_BOCCHETTA:.0f} cm):")
+for _x, _y, _v, _lo in BOCCHETTE_RILIEVO:
+    print(f"    {_lo:22}{'a scendere' if _v == 'giu' else 'orizzontale':14} x {_x:.0f}")
+print()
 print("CONFRONTO FORMATI (ognuno con la sua origine di posa ottimale)")
 print(f"{'n':>2}  {'configurazione':30}{'modulo':>8}{'origine X/Y':>14}{'intere':>8}"
       f"{'tagliate':>9}{'listelli':>9}{'lato min':>10}{'lastre':>8}{'sfrido':>8}")
@@ -1088,6 +1136,28 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
         rect(x0, y0, x1 - x0, y1 - y0, extra='fill="#5d4037" stroke="#3e2723"')
         txt((x0 + x1) / 2, (y0 + y1) / 2 + 4,
             f"{lb} {x1-x0:.0f}x{y1-y0:.0f}", "num", alone=True)
+
+    # canalizzato: cassonetto in cartongesso e bocchette di mandata
+    # un tratto puo' essere spezzato in piu' rettangoli: l'etichetta va sul maggiore
+    _lungo = {}
+    for c in CANALI:
+        if c[2] - c[0] > _lungo.get(c[4], (0, 0, 0))[2] - _lungo.get(c[4], (0, 0, 0))[0]:
+            _lungo[c[4]] = c
+    for x0, y0, x1, y1, lb in CANALI:
+        rect(x0, y0, x1 - x0, y1 - y0,
+             extra='fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" '
+                   'stroke-width="1.2" stroke-dasharray="3,3"')
+        if _lungo[lb][0] == x0:
+            txt((x0 + x1) / 2, (y0 + y1) / 2 - 22,
+                f"CANALIZZATO {lb}  intradosso {H_CANALE:.0f}", "lbl", alone=True)
+    bw, bh = BOCCHETTA
+    for x, y, verso, locale in BOCCHETTE:
+        if verso == "giu":
+            rect(x - bw / 2, y - bh / 2, bw, bh,
+                 extra='fill="#0288d1" fill-opacity="0.55" stroke="#01579b"')
+        else:
+            rect(x - bw / 2, y - 4, bw, 8,
+                 extra='fill="#0288d1" fill-opacity="0.75" stroke="#01579b"')
 
     # arredi impilati (lavatrice + kit + asciugatrice) hanno lo stesso ingombro:
     # le etichette vanno sfalsate o diventano un groviglio

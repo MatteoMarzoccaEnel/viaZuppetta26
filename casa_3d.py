@@ -308,6 +308,8 @@ DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobil
             riv=riv, batt=batt, quote=quote, etichette=etichette, aree=aree,
             muretti=muretti, posa=POSA,
             balconi=BALCONI, box=cp.BOX, contro=cp.CONTROSOFFITTI,
+            canali=cp.CANALI, bocchette=cp.BOCCHETTE, hcan=cp.H_CANALE,
+            boc=list(cp.BOCCHETTA), zboc=cp.Z_BOCCHETTA,
             vicino=BALCONI_VICINO, separe=SEPARE, colring=COL_RING,
             h=H_INT, hbatt=H_BATT, hpar=BALC_P, spanta=SP_ANTA,
             colanta=cp.PORTE_COLORE, start=[1380, 655], guarda=0,
@@ -924,6 +926,28 @@ for (const [x0,y0,x1,y1,z,passo,lb] of D.contro){
     const l = new THREE.PointLight(0xfff0d8, 1.8, 4, 2);
     l.position.set(fx, z*S - 0.06, fz); scene.add(l);
   }
+}
+
+// ---------- canalizzato caldo/freddo ----------
+// cassonetto in cartongesso a filo trave: sotto resta libero il passaggio
+const matGriglia = new THREE.MeshStandardMaterial({color:0xd8d8d4, roughness:0.55, metalness:0.35});
+for (const [x0,y0,x1,y1,lb] of D.canali){
+  const alt = D.h - D.hcan;
+  const c = new THREE.Mesh(new THREE.BoxGeometry((x1-x0)*S, alt*S, (y1-y0)*S), matMuro);
+  c.position.set((x0+x1)/2*S, (D.hcan + alt/2)*S, (y0+y1)/2*S);
+  c.castShadow = c.receiveShadow = true; scene.add(c);
+}
+// le griglie sporgono di pochi millimetri dalla faccia che le ospita; il verso
+// "s" del rilievo guarda verso la stanza, cioe' z decrescente nel disegno
+for (const [x,y,verso,locale] of D.bocchette){
+  const [bw,bh] = D.boc;
+  const g = verso === 'giu'
+    ? new THREE.Mesh(new THREE.BoxGeometry(bw*S, 0.02, bh*S), matGriglia)
+    : new THREE.Mesh(new THREE.BoxGeometry(bw*S, bh*S, 0.02), matGriglia);
+  g.position.set(x*S,
+                 verso === 'giu' ? D.hcan*S - 0.01 : (D.zboc + bh/2)*S,
+                 y*S - (verso === 'giu' ? 0 : 0.02));
+  scene.add(g);
 }
 
 // ---------- quote ----------

@@ -831,6 +831,23 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="773.0" y="601.0" width="31.0" height="20.0" class="" fill="#5d4037" stroke="#3e2723"/>
 <text x="788.5" y="615.0" class="num" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">P8 31x20</text>
 <text x="788.5" y="615.0" class="num" text-anchor="middle">P8 31x20</text>
+<rect x="209.0" y="486.0" width="161.0" height="122.0" class="" fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" stroke-width="1.2" stroke-dasharray="3,3"/>
+<text x="289.5" y="525.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">CANALIZZATO C1  intradosso 240</text>
+<text x="289.5" y="525.0" class="lbl" text-anchor="middle">CANALIZZATO C1  intradosso 240</text>
+<rect x="400.0" y="486.0" width="373.0" height="135.0" class="" fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" stroke-width="1.2" stroke-dasharray="3,3"/>
+<text x="586.5" y="531.5" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">CANALIZZATO C2  intradosso 240</text>
+<text x="586.5" y="531.5" class="lbl" text-anchor="middle">CANALIZZATO C2  intradosso 240</text>
+<rect x="807.0" y="486.0" width="390.0" height="135.0" class="" fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" stroke-width="1.2" stroke-dasharray="3,3"/>
+<text x="1002.0" y="531.5" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">CANALIZZATO C3  intradosso 240</text>
+<text x="1002.0" y="531.5" class="lbl" text-anchor="middle">CANALIZZATO C3  intradosso 240</text>
+<rect x="1197.0" y="486.0" width="31.0" height="115.0" class="" fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" stroke-width="1.2" stroke-dasharray="3,3"/>
+<rect x="236.0" y="472.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
+<rect x="405.0" y="472.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
+<rect x="612.0" y="472.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
+<rect x="970.0" y="482.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
+<rect x="1120.0" y="482.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
+<rect x="260.0" y="537.0" width="60.0" height="20.0" class="" fill="#0288d1" fill-opacity="0.55" stroke="#01579b"/>
+<rect x="560.0" y="537.0" width="60.0" height="20.0" class="" fill="#0288d1" fill-opacity="0.55" stroke="#01579b"/>
 <rect x="0.0" y="478.0" width="40.0" height="130.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
 <line x1="0.0" y1="543.0" x2="40.0" y2="543.0" class="fixl" />
 <text x="24.0" y="543.0" class="lbl" text-anchor="middle" transform="rotate(-90 24.0 543.0)">RP-01 SCAFFALI L130 P40 H220</text>
