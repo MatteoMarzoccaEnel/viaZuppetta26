@@ -270,8 +270,9 @@ for i, (loc, label, x, y, w, h, tipo) in enumerate(cp.ARREDO):
 for k, (tipo, x0, y0, x1, y1, lb) in enumerate(cp.APERTURE, 1):
     lw = max(abs(x1 - x0), abs(y1 - y0))
     z0, z1 = VANI[tipo]
+    fin = f"  {cp.PORTE_FINITURA}" if tipo in ("porta", "passaggio", "battente") else ""
     etichette.append([(x0 + x1) / 2, (y0 + y1) / 2, z1 + 22,
-                      f"{k}: {lw:.0f}x{z1-z0:.0f}", "#b03020"])
+                      f"{k}: {lw:.0f}x{z1-z0:.0f}{fin}", "#b03020"])
 
 def facce_riv(h_tot):
     """Le facce del rivestimento del bagno fino all'altezza data."""
@@ -309,7 +310,7 @@ DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobil
             balconi=BALCONI, box=cp.BOX, contro=cp.CONTROSOFFITTI,
             vicino=BALCONI_VICINO, separe=SEPARE, colring=COL_RING,
             h=H_INT, hbatt=H_BATT, hpar=BALC_P, spanta=SP_ANTA,
-            start=[1380, 655], guarda=0)
+            colanta=cp.PORTE_COLORE, start=[1380, 655], guarda=0)
 
 HTML = r"""<!DOCTYPE html>
 <html lang="it"><head><meta charset="utf-8">
@@ -546,22 +547,28 @@ soffitto.castShadow = true;   // senza questo la luce passerebbe e non si vedreb
 // bianco di calce, leggermente caldo: il bianco puro appiattisce gli spigoli
 const matMuro  = new THREE.MeshStandardMaterial({color:0xf1eee7, roughness:0.96});
 const matPvc   = new THREE.MeshStandardMaterial({color:0xf4f3f0, roughness:0.35});
-const matAnta  = new THREE.MeshStandardMaterial({color:0xf2f0ec, roughness:0.5});
-(function(){                                  // laminato delle porte
+const matAnta  = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.45});
+(function(){            // laminato bianco: venatura verticale e grana, non una tinta piatta
   const N=512, c=document.createElement('canvas'); c.width=c.height=N;
   const k=c.getContext('2d');
-  k.fillStyle='#dbd0bc'; k.fillRect(0,0,N,N);
-  for(let i=0;i<170;i++){
-    k.strokeStyle='rgba('+(150+Math.random()*45|0)+','+(126+Math.random()*38|0)+','
-      +(96+Math.random()*32|0)+',.22)';
-    k.lineWidth=1+Math.random()*2.6; k.beginPath();
-    const y=Math.random()*N; k.moveTo(0,y);
-    k.bezierCurveTo(N/3,y+Math.random()*9-4.5,2*N/3,y+Math.random()*9-4.5,N,y+Math.random()*7-3.5);
+  k.fillStyle = D.colanta; k.fillRect(0,0,N,N);
+  for(let i=0;i<240;i++){
+    k.strokeStyle = Math.random()<0.5 ? 'rgba(255,255,255,.34)' : 'rgba(146,140,128,.10)';
+    k.lineWidth = 0.5 + Math.random()*1.8;
+    const x = Math.random()*N;
+    k.beginPath(); k.moveTo(x, 0);
+    k.bezierCurveTo(x+Math.random()*5-2.5, N/3, x+Math.random()*5-2.5, 2*N/3,
+                    x+Math.random()*4-2, N);
     k.stroke();
+  }
+  for(let i=0;i<9000;i++){      // grana: rompe il riflesso uniforme della plastica
+    k.fillStyle = Math.random()<0.5 ? 'rgba(255,255,255,.12)' : 'rgba(120,114,104,.07)';
+    k.fillRect(Math.random()*N, Math.random()*N, 1, 1);
   }
   const t=new THREE.CanvasTexture(c);
   t.colorSpace=THREE.SRGBColorSpace; t.wrapS=t.wrapT=THREE.RepeatWrapping;
-  matAnta.map=t; matAnta.needsUpdate=true;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  matAnta.map=t; matAnta.bumpMap=t; matAnta.bumpScale=0.12; matAnta.needsUpdate=true;
 })();
 const matCls   = new THREE.MeshStandardMaterial({color:0xcfccc6, roughness:0.95});
 // la trasmissione fisica rende il vetro quasi invisibile: meglio un azzurro traslucido

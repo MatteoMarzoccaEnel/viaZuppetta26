@@ -71,6 +71,11 @@ ALT_VANO = {"porta": 210, "battente": 210, "passaggio": 210,
             "finestra": 135, "portafinestra": 225}
 SP_EST = 30.0        # spessore delle murature perimetrali
 
+# finitura delle porte: laminato dello stesso bianco caldo delle pareti, cosi'
+# le scomparse spariscono nel muro e il corridoio non viene spezzato
+PORTE_COLORE = "#f1ece1"
+PORTE_FINITURA = "laminato RAL 9010"
+
 # ---- locali (poligoni rettilinei nel sistema di rilievo) ----
 LOCALI = {
     "RIPOSTIGLIO": dict(peso=0.5, poly=[(0, 30), (199, 30), (199, 152), (0, 152)]),
