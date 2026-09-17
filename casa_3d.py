@@ -55,7 +55,7 @@ QUOTE_TRASVERSALI = {"DISIMPEGNO"}   # larghezza misurata tratto per tratto
 COL_RING = "#2f4f3a"
 
 
-def incorpora(path, lato=1024, q=90):
+def incorpora(path, lato=1024, q=90, quadra=True):
     """Immagine come data URI: da file:// il browser non puo' usarne una locale."""
     try:
         from PIL import Image
@@ -63,10 +63,16 @@ def incorpora(path, lato=1024, q=90):
     except Exception:
         return None
     if max(im.size) > lato:
-        im = im.resize((lato, lato), Image.LANCZOS)
+        im = im.resize((lato, lato), Image.LANCZOS) if quadra else _ridotta(im, lato)
     buf = io.BytesIO()
     im.save(buf, "JPEG", quality=q)
     return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def _ridotta(im, lato):
+    from PIL import Image
+    k = lato / max(im.size)
+    return im.resize((round(im.size[0] * k), round(im.size[1] * k)), Image.LANCZOS)
 
 
 BASE_DIR = r"c:\WORK\GH" + "\\"
@@ -226,7 +232,10 @@ for orizz, c, a, b, dentro, sp in PELLI:
             muri.append([va, vb, cc, orizz, z1, H_INT, sp])
 
 for x, y, w, h, lb in cp.SETTI:
-    muri.append([y, y + h, x + w / 2, False, 0, H_INT, w])
+    if w <= h:
+        muri.append([y, y + h, x + w / 2, False, 0, H_INT, w])
+    else:
+        muri.append([x, x + w, y + h / 2, True, 0, H_INT, h])
 
 # il percorso del battiscopa lo calcola la pianta: vincoli.py ne verifica la contiguita'
 for nome, tratti in cp.BATTISCOPA.items():
@@ -257,8 +266,6 @@ for m in muri:
 muri[:] = unici
 
 for i, (loc, label, x, y, w, h, tipo) in enumerate(cp.ARREDO):
-    if tipo == "cucina":
-        continue          # in pianta e' solo il profilo: in 3D ci sono i 5 moduli
     alt, base = cp.altezza(label, tipo)
     if tipo == "muretto":
         muretti.append([x, y, w, h, base, alt])
@@ -313,6 +320,7 @@ DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobil
             vicino=BALCONI_VICINO, separe=SEPARE, colring=COL_RING,
             h=H_INT, hbatt=H_BATT, hpar=BALC_P, spanta=SP_ANTA,
             colanta=cp.PORTE_COLORE, start=[1380, 655], guarda=0,
+            texcucina=incorpora(BASE_DIR + "cucina.png", quadra=False),
             avvio=cp.POSA_ATTIVA)
 
 HTML = r"""<!DOCTYPE html>
@@ -832,7 +840,23 @@ for (const [a,b,c,o,z0,z1,tipo,dentro,verso,num,card,spMuro] of D.ante){
 }
 
 // ---------- arredo ----------
+// il fronte cucina e' un solo volume: la composizione reale sta nella foto
+// applicata alla faccia +X, l'unica in vista
+let texCucina = null;
+if (D.texcucina){
+  texCucina = new THREE.TextureLoader().load(D.texcucina);
+  texCucina.colorSpace = THREE.SRGBColorSpace;
+}
 for (const [x,y,w,h,base,alt,col,tipo] of D.mobili){
+  if (tipo === 'cucina' && texCucina){
+    const fianco = new THREE.MeshStandardMaterial({color:0xdedad2, roughness:0.85});
+    const fronte = new THREE.MeshStandardMaterial({map:texCucina, roughness:0.7});
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w*S, alt*S, h*S),
+                             [fronte, fianco, fianco, fianco, fianco, fianco]);
+    m.position.set((x+w/2)*S, (base+alt/2)*S, (y+h/2)*S);
+    m.castShadow = m.receiveShadow = true; scene.add(m);
+    continue;
+  }
   if (tipo === 'muretto'){
     // rivestito come le pareti: facce e piano con le UV in coordinate mondo,
     // cosi' le fughe proseguono quelle del rivestimento

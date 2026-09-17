@@ -158,18 +158,19 @@ ARREDO = [
     # muro a x 797: la cassettiera riempie la nicchia e sporge di 5 cm
     ("DISIMPEGNO", "CASSETTIERA 427x18", 370, 17, 427, 18, "cassetti"),
 
-    # fronte cucina 360 lungo il muro giorno/notte: dal basso verso l'alto
-    ("ZONA GIORNO", "", 807, 170, 60, 360, "cucina"),
-    ("ZONA GIORNO", "FRIGO", 807, 170, 60, 60, "elettro"),
-    ("ZONA GIORNO", "LAVELLO 2V 120", 807, 230, 60, 120, "lavello"),
-    ("ZONA GIORNO", "LAVAST.", 807, 350, 60, 60, "elettro"),
-    ("ZONA GIORNO", "COTTURA", 807, 410, 60, 60, "fuochi"),
-    ("ZONA GIORNO", "FORNO", 807, 470, 60, 60, "elettro"),
+    # fronte cucina in un unico blocco lungo il muro giorno/notte: colonne,
+    # basi e pensili stanno dentro l'ingombro 332x61, alto 231
+    ("ZONA GIORNO", "CUCINA 332x61", 807, 170, 61, 332, "cucina"),
     ("ZONA GIORNO", "MOBILE TV 180x45", 1017, 17, 180, 45, "box"),
 ]
 
 # setti di nuova costruzione: (x, y, larghezza, profondita', etichetta)
-SETTI = [(1242, 37, 10, 85, "SETTO 10x85")]
+# il secondo prolunga nella zona giorno il muro del corridoio e fa da spalla
+# alla cucina: la sua faccia interna e' a filo del fianco sinistro del mobile
+SETTI = [
+    (1242, 37, 10, 85, "SETTO 10x85"),
+    (807, 160, 61, 10, "SETTO 10x61"),
+]
 
 # ---- muri di PROGETTO (verdi in tavola): sono gli unici spostabili ----
 # (asse, (quota faccia 1, quota faccia 2), etichetta) nel sistema di rilievo.
@@ -645,7 +646,7 @@ BATTISCOPA = battiscopa_locali()
 
 # tipo -> (altezza, quota di attacco: 0 = appoggiato a terra)
 H_TIPO = {
-    "letto": (45, 0), "divano": (80, 0), "cucina": (90, 0), "elettro": (85, 0),
+    "letto": (45, 0), "divano": (80, 0), "cucina": (231, 0), "elettro": (85, 0),
     "lavello": (90, 0), "fuochi": (90, 0), "doccia": (4, 0),
     "wc": (25, 15),                       # sospeso: seduta a 40
     "appendi": (8, 165), "box": (75, 0), "cassetti": (150, 0),
