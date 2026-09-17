@@ -45,7 +45,7 @@ PIASTRELLA = 90.0
 FUGA = 0.2
 POSA_ORIGINE = (RIV_SP, RIV_SP)  # angolo di partenza della prima lastra intera
 RIV_CORSI = cp.RIV_CORSI  # corsi di rivestimento a parete: si cambia in casa_pianta.py
-RIV_H = RIV_CORSI * PIASTRELLA + (RIV_CORSI - 1) * FUGA
+RIV_H = cp.H_RIV          # l'ultimo corso e' tagliato a filo dell'intradosso trave
 SFRIDO = 0.15
 
 # Arredo: (chiave, etichetta, x, y, ingombro lungo X, ingombro lungo Y)
@@ -372,7 +372,7 @@ righe = [
     f"RIVESTIMENTO h {RIV_H:.0f} cm",
     f"  {PERIM:.2f} m x {RIV_H/100:.2f} m - vuoti",
     f"  = {RIV_MQ:.2f} mq",
-    f"  {RIV_CORSI} corsi interi da {PIASTRELLA:.0f}",
+    f"  {RIV_CORSI} corsi da {cp.PIASTRELLA:.0f}, l'ultimo tagliato",
     f"  spessore in opera: {RIV_SP} cm",
     f"  lastre (+{SFRIDO*100:.0f}%): {n_riv}",
     "",

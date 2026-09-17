@@ -29,17 +29,22 @@ LARG_TRAVE, H_TRAVE = 30.0, 240.0    # sezione e intradosso delle travi in c.a.
 # ---- configurazioni di posa a confronto: si scorrono con B nel modello 3D ----
 # Il formato entra nel modulo della griglia, quindi ogni configurazione ha una
 # sua origine ottimale e un suo conteggio di lastre: non sono varianti grafiche.
-# riv_h impone l'altezza del rivestimento: l'ultimo corso viene tagliato.
+# Il rivestimento del bagno chiude sempre all'intradosso della trave: cambia
+# solo il numero di corsi necessari a raggiungerla.
 FORMATI = [
-    dict(nome="90x90, rivestimento 2 corsi", piastrella=90.0, fuga=0.15, riv_corsi=2,
+    dict(piastrella=90.0, fuga=0.15,
          tex_pav="pavimento.png", tex_riv="piastrelle.png"),
-    dict(nome="90x90, 3 corsi a filo trave", piastrella=90.0, fuga=0.15, riv_corsi=3,
-         riv_h=H_TRAVE, tex_pav="pavimento.png", tex_riv="piastrelle.png"),
-    dict(nome="80x80, 3 corsi a filo trave", piastrella=80.0, fuga=0.15, riv_corsi=3,
-         riv_h=H_TRAVE, tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
-    dict(nome="60x60, 4 corsi a filo trave", piastrella=60.0, fuga=0.15, riv_corsi=4,
-         riv_h=H_TRAVE, tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
+    dict(piastrella=80.0, fuga=0.15,
+         tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
+    dict(piastrella=60.0, fuga=0.15,
+         tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
 ]
+for _f in FORMATI:
+    # ultimo corso tagliato: si posa il minimo indispensabile per arrivare in quota
+    _f["riv_corsi"] = math.ceil((H_TRAVE + _f["fuga"]) / (_f["piastrella"] + _f["fuga"]))
+    _f["riv_h"] = H_TRAVE
+    _p = int(_f["piastrella"])
+    _f["nome"] = f"{_p}x{_p}, {_f['riv_corsi']} corsi a filo trave"
 # valori della configurazione attiva, rimpiazzati da usa_formato()
 FORMATO = FORMATI[0]
 PIASTRELLA = FORMATO["piastrella"]
@@ -740,20 +745,25 @@ def analizza(ox, oy):
     return tot, per_loc
 
 
-def obiettivo(ox, oy, solo_zg=False):
+def obiettivo(ox, oy, modo="materiale"):
     """Costo reale, calcolato sulle stesse celle che finiscono nel disegno."""
     tot, per = analizza(ox, oy)
+    inutili = {n: sum(1 for c in l["celle"] if not c["intera"] and c["lato"] < 10)
+               for n, l in per.items()}
+    if modo == "materiale":
+        # meno lastre acquistate, poi meno pezzi da tagliare: i listelli restano
+        # penalizzati perche' in opera sono lenti e fragili
+        return (tot["lastre"] * 10 + tot["tagli"] + tot["sliver"] * 3
+                + sum(inutili.values()) * 10)
     s = 0.0
     for nome, d in LOCALI.items():
         l = per[nome]
-        inutilizzabili = sum(1 for c in l["celle"] if not c["intera"] and c["lato"] < 10)
-        s += d["peso"] * (inutilizzabili * 30 + l["sliver"] * 8 + l["medi"] * 2
+        s += d["peso"] * (inutili[nome] * 30 + l["sliver"] * 8 + l["medi"] * 2
                           + (1 - l["q_intere"]) * 20)
     s += tot["lastre"] * 0.5
-    if solo_zg:
+    if modo == "zg":
         zg = per["ZONA GIORNO"]
-        inut = sum(1 for c in zg["celle"] if not c["intera"] and c["lato"] < 10)
-        s = -zg["intere"] * 100 + inut * 500 + zg["sliver"] * 40 + s * 0.05
+        s = -zg["intere"] * 100 + inutili["ZONA GIORNO"] * 500 + zg["sliver"] * 40 + s * 0.05
     return s
 
 
@@ -769,22 +779,21 @@ def _candidati(idx):
     return sorted(set(out))
 
 
-def cerca(solo_zg=False):
+def cerca(modo="materiale"):
     best, arg = None, (0.0, 0.0)
     for o in _candidati(0):
         for p in _candidati(1):
-            s = obiettivo(o, p, solo_zg)
+            s = obiettivo(o, p, modo)
             if best is None or s < best:
                 best, arg = s, (o, p)
     return arg
 
 
 def _varianti():
-    zgx, zgy, _, _ = LOCALI["ZONA GIORNO"]["bb"]
     v = {
-        "A": dict(o=cerca(), titolo="A - equilibrata: minimizza i listelli in tutta la casa (zona giorno pesata x4)"),
-        "B": dict(o=cerca(solo_zg=True), titolo="B - zona giorno prioritaria: massimo numero di lastre intere nell'ambiente principale"),
-        "C": dict(o=(zgx % MODULO, zgy % MODULO), titolo="C - partenza con lastra intera dall'angolo della zona giorno"),
+        "A": dict(o=cerca("materiale"), titolo="A - minimo consumo: meno lastre e meno tagli in tutta la casa"),
+        "B": dict(o=cerca("equilibrio"), titolo="B - equilibrata: minimizza i listelli locale per locale (zona giorno pesata x4)"),
+        "C": dict(o=cerca("zg"), titolo="C - zona giorno prioritaria: massimo numero di lastre intere nell'ambiente principale"),
     }
     for k, d in v.items():
         d["nome"] = k
@@ -810,7 +819,7 @@ def usa_formato(i):
     return FORMATO
 
 
-POSA_ATTIVA = 2
+POSA_ATTIVA = 1
 for _a in _sys_argv:
     if _a.startswith("--posa="):
         POSA_ATTIVA = int(_a.split("=", 1)[1])
