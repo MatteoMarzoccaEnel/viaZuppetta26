@@ -84,9 +84,10 @@ PORTE_FINITURA = "laminato RAL 9010"
 # ---- locali (poligoni rettilinei nel sistema di rilievo) ----
 LOCALI = {
     "RIPOSTIGLIO": dict(peso=0.5, poly=[(0, 30), (199, 30), (199, 152), (0, 152)]),
-    # il muro bagno/camera e' l'unico da 12 cm (scarico a incasso dietro al bidet),
-    # tutti gli altri sono da 10: il bagno resta 158, i 3 cm vanno alla camera
-    "LETTO MATRIMONIALE": dict(peso=1.5, poly=[(0, 162), (331, 162), (331, 565), (0, 565)]),
+    # il muro bagno/camera e' doppio da 13 cm (scarichi a incasso di lavabo,
+    # wc e bidet), tutti gli altri sono da 10: il bagno resta 158, i 3 cm in
+    # piu' vengono tolti alla camera
+    "LETTO MATRIMONIALE": dict(peso=1.5, poly=[(0, 162), (330, 162), (330, 565), (0, 565)]),
     "BAGNO": dict(peso=1.0, poly=[
         (343, 162), (343, 565), (370, 565), (370, 539), (423, 539),
         (423, 562), (501, 562), (501, 237), (576, 237), (576, 162)]),
@@ -176,7 +177,7 @@ SETTI = [(1242, 37, 10, 85, "SETTO 10x85")]
 # vincoli.py ne blocca le coordinate con una firma.
 MURI_NUOVI = [
     ("y", (152, 162), "muro disimpegno / zona notte"),
-    ("x", (331, 343), "muro 12 bagno / camera matrimoniale"),
+    ("x", (330, 343), "muro 13 bagno / camera matrimoniale"),
     ("x", (199, 209), "muro ripostiglio"),
     ("x", (576, 586), "nicchia bagno - lato lungo"),
     ("y", (237, 247), "nicchia bagno - fondo"),

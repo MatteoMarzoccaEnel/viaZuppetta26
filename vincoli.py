@@ -34,7 +34,7 @@ import os
 # =====================================================================
 
 SP_CONTROTELAIO = 10.0   # spessore minimo del muro che ospita una scomparsa
-SP_INCASSO = 12.0        # muro con scarico a incasso (bagno / camera)
+SP_INCASSO = 13.0        # muro doppio con scarichi a incasso (bagno / camera)
 GIOCO_TASCA = 5.0        # battuta, stipite e guide oltre la luce dell'anta
 H_CONTROTELAIO = 7.0     # traverso del controtelaio sopra la luce della porta
 SPALLETTA_MIN = 10.0     # muro che deve restare fra il vano e lo spigolo

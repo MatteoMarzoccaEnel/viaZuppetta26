@@ -21,7 +21,7 @@ BASE = cp.LOCALI_RILIEVO
 # il disimpegno puo' solo stringersi (min 100 cm), il bagno resta 150-168
 ESCURSIONI = {
     "muro disimpegno / zona notte": (-43, 0),
-    "muro 12 bagno / camera matrimoniale": (-25, 8),
+    "muro 13 bagno / camera matrimoniale": (-25, 8),
     "muro ripostiglio": (-20, 40),
     "nicchia bagno - lato lungo": (-40, 40),
     "nicchia bagno - fondo": (-40, 50),
@@ -104,7 +104,7 @@ print(f"\nlastre {t0['lastre']} -> {tot['lastre']}   "
       f"listelli {t0['sliver']} -> {tot['sliver']}   "
       f"lato minimo {t0['min_lato']:.1f} -> {tot['min_lato']:.1f} cm")
 _disimp = "muro disimpegno / zona notte"
-_bagno = "muro 12 bagno / camera matrimoniale"
+_bagno = "muro 13 bagno / camera matrimoniale"
 _L_DISIMP = min(MURI[_disimp][1]) - 17.0
 _L_CAMERA = min(MURI[_bagno][1])
 print(f"disimpegno {_L_DISIMP + sp[_disimp]:.0f} cm al grezzo, "

@@ -26,10 +26,10 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="14.00" y="16.00" class="t1" text-anchor="start">BAGNO - pianta di progetto</text>
 <text x="14.00" y="28.00" class="t2" text-anchor="start">Vano finito 391 x 154 cm - 6.50 mq - perimetro 12.86 m - rivestimento interno 2 cm - piastrelle 90x90</text>
 <g transform="translate(70,125)">
-<polygon points="-12.00,-12.00 407.00,-12.00 407.00,39.00 381.00,39.00 381.00,68.00 404.00,68.00 404.00,170.00 102.00,170.00 102.00,245.00 -12.00,245.00" fill="#4a4a4a"/>
+<polygon points="-13.00,-13.00 408.00,-13.00 408.00,40.00 382.00,40.00 382.00,67.00 405.00,67.00 405.00,171.00 103.00,171.00 103.00,246.00 -13.00,246.00" fill="#4a4a4a"/>
 <rect x="369.00" y="27.00" width="26.00" height="53.00" class="" fill="#4a4a4a"/>
-<rect x="395.00" y="-12.00" width="31.00" height="182.00" class="" fill="#4a4a4a"/>
-<rect x="-12.00" y="-12.00" width="438.00" height="12.00" class="" fill="#00b050" opacity="0.85"/>
+<rect x="395.00" y="-13.00" width="31.00" height="183.00" class="" fill="#4a4a4a"/>
+<rect x="-13.00" y="-13.00" width="439.00" height="13.00" class="" fill="#00b050" opacity="0.85"/>
 <polygon points="0.00,0.00 395.00,0.00 395.00,27.00 369.00,27.00 369.00,80.00 392.00,80.00 392.00,158.00 90.00,158.00 90.00,233.00 0.00,233.00" class="riv"/>
 <polygon points="2.00,2.00 393.00,2.00 393.00,25.00 367.00,25.00 367.00,82.00 390.00,82.00 390.00,156.00 88.00,156.00 88.00,231.00 2.00,231.00" fill="#ffffff" stroke="#8a8a8a" stroke-width="0.4"/>
 <line x1="92.20" y1="2.00" x2="92.20" y2="156.00" class="tile" />
@@ -42,10 +42,10 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="393.00" y="80.00" width="33.00" height="51.00" class="" fill="#ffffff" stroke="#4a4a4a" stroke-width="0.5"/>
 <line x1="426.00" y1="80.00" x2="426.00" y2="131.00" class="glass" />
 <text x="405.00" y="105.50" class="lblw" text-anchor="middle" transform="rotate(-90 405.00 105.50)">FINESTRA 51</text>
-<rect x="-12.00" y="50.00" width="14.00" height="85.00" class="" fill="#ffffff"/>
-<rect x="-10.00" y="135.00" width="8.00" height="90.00" class="door" />
-<line x1="-6.00" y1="141.00" x2="-6.00" y2="219.00" class="door" />
-<path d="M -8.0,213 L -6.0,221 L -4.0,213" fill="none" stroke="#c0392b" stroke-width="1"/>
+<rect x="-13.00" y="50.00" width="15.00" height="85.00" class="" fill="#ffffff"/>
+<rect x="-11.00" y="135.00" width="9.00" height="90.00" class="door" />
+<line x1="-6.50" y1="141.00" x2="-6.50" y2="219.00" class="door" />
+<path d="M -8.5,213 L -6.5,221 L -4.5,213" fill="none" stroke="#c0392b" stroke-width="1"/>
 <text x="-19.00" y="92.50" class="lbls" text-anchor="middle" transform="rotate(-90 -19.00 92.50)">PORTA SCORREVOLE A SCOMPARSA 80</text>
 <rect x="29.00" y="2.00" width="120.00" height="38.00" class="fix" rx="3"/>
 <rect x="36.00" y="8.00" width="106.00" height="26.00" class="fixl" rx="4"/>
@@ -126,7 +126,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="45.00" y="237.00" class="dim" text-anchor="middle">86</text>
 <line x1="85.00" y1="156.00" x2="85.00" y2="231.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="82.00" y="193.50" class="dim" text-anchor="middle" transform="rotate(-90 82.00 193.50)">75</text>
-<text x="200.00" y="-16.00" class="lbls" text-anchor="middle">muro nuovo 12 cm  -  CAMERA MATRIMONIALE</text>
+<text x="200.00" y="-16.00" class="lbls" text-anchor="middle">muro nuovo 13 cm  -  CAMERA MATRIMONIALE</text>
 <text x="240.00" y="167.00" class="lblw" text-anchor="middle">CAMERETTA</text>
 <text x="-19.00" y="200.00" class="lbls" text-anchor="middle" transform="rotate(-90 -19.00 200.00)">DISIMPEGNO</text>
 <text x="415.00" y="40.00" class="lblw" text-anchor="middle" transform="rotate(-90 415.00 40.00)">MURO PERIMETRALE</text>

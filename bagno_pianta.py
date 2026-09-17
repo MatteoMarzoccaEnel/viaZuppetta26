@@ -2,7 +2,7 @@
 
 Tutte le misure sono in CENTIMETRI, nel sistema locale del bagno:
   X = lunghezza, 0 = filo interno della parete con la porta
-  Y = larghezza, 0 = filo interno del muro nuovo da 12 cm (lato camera matrimoniale)
+  Y = larghezza, 0 = filo interno del muro nuovo da 13 cm (lato camera matrimoniale)
 
 Per modificare il progetto basta agire sul blocco PARAMETRI qui sotto.
 Esecuzione:  python bagno_pianta.py
@@ -24,7 +24,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 SCALA = 25  # 1:SCALA alla stampa al 100%
 OUT = r"c:\WORK\GH\bagno_pianta"
 
-MURO = 12      # spessore grafico delle murature
+MURO = 13      # spessore grafico delle murature
 RIV_SP = 2     # spessore del rivestimento interno (piastrella + colla)
 
 # Vano AL GREZZO rilevato da "TAV 02 - Stato di progetto"
@@ -239,7 +239,7 @@ add(f'<polygon points="{pts(EST)}" fill="#4a4a4a"/>')
 rect(369, 27, 26, 53, extra='fill="#4a4a4a"')  # pilastro esistente
 rect(max(XG), -MURO, FINESTRA["sguincio"], 170 + MURO, extra='fill="#4a4a4a"')
 rect(-MURO, -MURO, max(XG) + FINESTRA["sguincio"] + MURO, MURO,
-     extra='fill="#00b050" opacity="0.85"')  # muro nuovo da 12
+     extra='fill="#00b050" opacity="0.85"')  # muro nuovo da 13
 
 # --- rivestimento interno 2 cm ---
 add(f'<polygon points="{pts(VANO)}" class="riv"/>')
@@ -349,7 +349,7 @@ dim_v(50, 156, 272, "106")
 dim_h(min(XF), 88, 240, "86")
 dim_v(156, max(YF), 85, "75")
 
-txt(200, -16, "muro nuovo 12 cm  -  CAMERA MATRIMONIALE", "lbls")
+txt(200, -16, "muro nuovo 13 cm  -  CAMERA MATRIMONIALE", "lbls")
 txt(240, 167, "CAMERETTA", "lblw")
 txt(-19, 200, "DISIMPEGNO", "lbls", rot=True)
 txt(415, 40, "MURO PERIMETRALE", "lblw", rot=True)
