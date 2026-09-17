@@ -27,7 +27,7 @@ H_BATT = cp.H_BATT
 H_RIV = cp.H_RIV                            # rivestimento bagno
 BALC_P = cp.H_RING
 
-OX, OY = cp.VARIANTI["A"]["o"]
+OX, OY = cp.OTTIMO["o"]
 
 COL = {
     "letto": "#c9c2b6", "divano": "#8d99a6", "cucina": "#ececec",
@@ -293,10 +293,10 @@ def facce_riv(h_tot):
 POSA = []
 for _i, _f in enumerate(cp.FORMATI):
     cp.usa_formato(_i)
-    _t = cp.VARIANTI["A"]["tot"]
+    _t = cp.OTTIMO["tot"]
     POSA.append(dict(
         nome=_f["nome"], piastrella=cp.PIASTRELLA, modulo=cp.MODULO, fuga=cp.FUGA,
-        ox=cp.VARIANTI["A"]["o"][0], oy=cp.VARIANTI["A"]["o"][1],
+        ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1],
         hriv=cp.H_RIV, corsi=cp.RIV_CORSI, riv=facce_riv(cp.H_RIV),
         texPav=incorpora(BASE_DIR + _f["tex_pav"]),
         texRiv=incorpora(BASE_DIR + _f["tex_riv"]),

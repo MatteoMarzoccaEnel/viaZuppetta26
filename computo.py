@@ -26,7 +26,7 @@ PIATTO_DOCCIA = 1.25
 
 # tutte le voci arrivano dagli script che le calcolano: cambiando formato in
 # casa_pianta.FORMATI questo computo si aggiorna da solo
-_pav = cp.VARIANTI["A"]["tot"]
+_pav = cp.OTTIMO["tot"]
 _batt = math.ceil(bs.ml / (10 * PIASTRELLA / 100))     # h 8, 10 strisce per lastra
 
 # voce: (superficie netta, lastre con riuso, lastre senza riuso)

@@ -13,6 +13,7 @@ Esecuzione:  python report.py            (tutti i formati)
 import contextlib
 import io
 import math
+import os
 import re
 import sys
 from datetime import date
@@ -155,10 +156,11 @@ def assonometria(larghezza, altezza):
     return d
 
 
-def pianta(i, larghezza, altezza):
+def pianta(larghezza, altezza):
     """La pianta di posa del formato attivo, in vettoriale."""
-    p = cp.disegna(cp.VARIANTI["A"], suffisso=f"_posa{i}")
+    p = cp.disegna(cp.OTTIMO, suffisso="_tmp")
     dis = svg2rlg(p + ".svg")
+    os.remove(p + ".svg")
     k = min(larghezza / dis.width, altezza / dis.height)
     dis.scale(k, k)
     dis.width *= k
@@ -174,7 +176,7 @@ def pianta(i, larghezza, altezza):
 def costruisci(i):
     """Elementi del report per la configurazione i-esima."""
     f = cp.usa_formato(i)
-    var = cp.VARIANTI["A"]
+    var = cp.OTTIMO
     tot, loc = var["tot"], var["loc"]
     riv = br.calcola()
     bat = bs.calcola()
@@ -370,7 +372,7 @@ def costruisci(i):
         f"bianco intera, giallo taglio oltre {cp.MEZZA:.0f} cm, arancio fra "
         f"{cp.SLIVER:.0f} e {cp.MEZZA:.0f}, rosso listello sotto {cp.SLIVER:.0f} cm.",
         S_TXT))
-    e.append(pianta(i, 180 * mm, 205 * mm))
+    e.append(pianta(180 * mm, 205 * mm))
 
     e.append(PageBreak())
     e.append(Paragraph("8. Anteprima tridimensionale", S_SEZ))
@@ -398,7 +400,7 @@ def intestazione(canv, doc):
 
 def scrivi(i):
     f = cp.FORMATI[i]
-    nome = re.sub(r"[^a-z0-9]+", "_", f["nome"].lower()).strip("_")
+    nome = cp.slug(f["nome"])
     out = fr"c:\WORK\GH\computo_{nome}.pdf"
     doc = SimpleDocTemplate(out, pagesize=A4, title=f"Computo di posa - {f['nome']}",
                             author="report.py", leftMargin=15 * mm, rightMargin=15 * mm,

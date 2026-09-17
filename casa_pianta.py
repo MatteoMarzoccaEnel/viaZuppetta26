@@ -745,26 +745,16 @@ def analizza(ox, oy):
     return tot, per_loc
 
 
-def obiettivo(ox, oy, modo="materiale"):
-    """Costo reale, calcolato sulle stesse celle che finiscono nel disegno."""
+def obiettivo(ox, oy):
+    """Costo della griglia: meno lastre acquistate, poi meno pezzi da tagliare.
+
+    I listelli restano penalizzati perche' in opera sono lenti e fragili, e
+    quelli sotto i 10 cm non si posano affatto.
+    """
     tot, per = analizza(ox, oy)
-    inutili = {n: sum(1 for c in l["celle"] if not c["intera"] and c["lato"] < 10)
-               for n, l in per.items()}
-    if modo == "materiale":
-        # meno lastre acquistate, poi meno pezzi da tagliare: i listelli restano
-        # penalizzati perche' in opera sono lenti e fragili
-        return (tot["lastre"] * 10 + tot["tagli"] + tot["sliver"] * 3
-                + sum(inutili.values()) * 10)
-    s = 0.0
-    for nome, d in LOCALI.items():
-        l = per[nome]
-        s += d["peso"] * (inutili[nome] * 30 + l["sliver"] * 8 + l["medi"] * 2
-                          + (1 - l["q_intere"]) * 20)
-    s += tot["lastre"] * 0.5
-    if modo == "zg":
-        zg = per["ZONA GIORNO"]
-        s = -zg["intere"] * 100 + inutili["ZONA GIORNO"] * 500 + zg["sliver"] * 40 + s * 0.05
-    return s
+    inutili = sum(1 for l in per.values() for c in l["celle"]
+                  if not c["intera"] and c["lato"] < 10)
+    return tot["lastre"] * 10 + tot["tagli"] + tot["sliver"] * 3 + inutili * 10
 
 
 def _candidati(idx):
@@ -779,26 +769,20 @@ def _candidati(idx):
     return sorted(set(out))
 
 
-def cerca(modo="materiale"):
+def cerca():
     best, arg = None, (0.0, 0.0)
     for o in _candidati(0):
         for p in _candidati(1):
-            s = obiettivo(o, p, modo)
+            s = obiettivo(o, p)
             if best is None or s < best:
                 best, arg = s, (o, p)
     return arg
 
 
-def _varianti():
-    v = {
-        "A": dict(o=cerca("materiale"), titolo="A - minimo consumo: meno lastre e meno tagli in tutta la casa"),
-        "B": dict(o=cerca("equilibrio"), titolo="B - equilibrata: minimizza i listelli locale per locale (zona giorno pesata x4)"),
-        "C": dict(o=cerca("zg"), titolo="C - zona giorno prioritaria: massimo numero di lastre intere nell'ambiente principale"),
-    }
-    for k, d in v.items():
-        d["nome"] = k
-        d["tot"], d["loc"] = analizza(*d["o"])
-    return v
+def _ottimo():
+    o = cerca()
+    tot, loc = analizza(*o)
+    return dict(o=o, tot=tot, loc=loc)
 
 
 def usa_formato(i):
@@ -807,7 +791,7 @@ def usa_formato(i):
     Formato e corsi di rivestimento cambiano il modulo della griglia, quindi
     origine ottimale, lastre e sfrido vanno ricalcolati: non basta ridisegnare.
     """
-    global FORMATO, PIASTRELLA, FUGA, MODULO, LASTRA, RIV_CORSI, H_RIV, VARIANTI
+    global FORMATO, PIASTRELLA, FUGA, MODULO, LASTRA, RIV_CORSI, H_RIV, OTTIMO
     FORMATO = FORMATI[i]
     PIASTRELLA = FORMATO["piastrella"]
     FUGA = FORMATO["fuga"]
@@ -815,14 +799,27 @@ def usa_formato(i):
     LASTRA = (PIASTRELLA / 100) ** 2
     RIV_CORSI = FORMATO["riv_corsi"]
     H_RIV = h_riv(FORMATO)
-    VARIANTI = _varianti()
+    OTTIMO = _ottimo()
     return FORMATO
+
+
+def slug(nome):
+    """Nome file derivato dalla configurazione: tavole e computi restano appaiati."""
+    return re.sub(r"[^a-z0-9]+", "_", nome.lower()).strip("_")
 
 
 POSA_ATTIVA = 1
 for _a in _sys_argv:
     if _a.startswith("--posa="):
         POSA_ATTIVA = int(_a.split("=", 1)[1])
+usa_formato(POSA_ATTIVA)
+
+# confronto fra i formati: un giro completo, poi si torna alla configurazione attiva
+RIEPILOGO = []
+for _i, _f in enumerate(FORMATI):
+    usa_formato(_i)
+    RIEPILOGO.append(dict(i=_i, nome=_f["nome"], modulo=MODULO, hriv=H_RIV,
+                          corsi=RIV_CORSI, o=OTTIMO["o"], tot=OTTIMO["tot"]))
 usa_formato(POSA_ATTIVA)
 
 # =====================================================================
@@ -854,39 +851,26 @@ for i, (lo, lb, x, y, w, h, tp) in enumerate(ARREDO):
 print("\nL = larghezza lungo il muro, P = profondita' dal muro, H = altezza,")
 print("sosp. = quota di attacco da terra per gli elementi sospesi (cm)")
 print()
-print("CONFRONTO CONFIGURAZIONI DI POSA (variante A, tasto B nel modello 3D)")
-print(f"{'n':>2}  {'configurazione':30}{'modulo':>8}{'intere':>8}{'listelli':>9}"
-      f"{'lato min':>10}{'lastre':>8}{'sfrido':>8}{'h riv.':>8}")
-print("-" * 91)
-for _i, _f in enumerate(FORMATI):
-    usa_formato(_i)
-    _t = VARIANTI["A"]["tot"]
-    print(f"{_i:>2}  {_f['nome']:30}{MODULO:8.2f}{_t['intere']:8d}{_t['sliver']:9d}"
-          f"{_t['min_lato']:10.1f}{_t['lastre']:8d}{_t['sfrido']*100:7.1f}%{H_RIV:8.1f}")
-usa_formato(POSA_ATTIVA)
+print("CONFRONTO FORMATI (ognuno con la sua origine di posa ottimale)")
+print(f"{'n':>2}  {'configurazione':30}{'modulo':>8}{'origine X/Y':>14}{'intere':>8}"
+      f"{'tagliate':>9}{'listelli':>9}{'lato min':>10}{'lastre':>8}{'sfrido':>8}")
+print("-" * 106)
+for _r in RIEPILOGO:
+    _t = _r["tot"]
+    print(f"{_r['i']:>2}  {_r['nome']:30}{_r['modulo']:8.2f}"
+          f"{_r['o'][0]:7.1f}/{_r['o'][1]:6.1f}{_t['intere']:8d}{_t['tagli']:9d}"
+          f"{_t['sliver']:9d}{_t['min_lato']:10.1f}{_t['lastre']:8d}{_t['sfrido']*100:7.1f}%")
 print(f"\nconfigurazione attiva negli elaborati: {POSA_ATTIVA} - {FORMATO['nome']}"
       f"   (si cambia con  python casa_pianta.py --posa=N)")
 print()
 
-hdr = (f"{'var':3} {'origine X/Y':>13} {'lastre intere':>14} {'tagliate':>9} "
-       f"{'di cui <25cm':>13} {'25-45':>6} {'>45':>5} {'lato min':>9} "
-       f"{'% sup. intera':>14} {'lastre tot':>11} {'sfrido':>7}")
-print(hdr)
-print("-" * len(hdr))
-for k, v in VARIANTI.items():
-    t = v["tot"]
-    print(f"{k:3} {v['o'][0]:5.1f}/{v['o'][1]:6.1f} {t['intere']:14d} {t['tagli']:9d} "
-          f"{t['sliver']:13d} {t['medi']:6d} {t['buoni']:5d} {t['min_lato']:8.1f} "
-          f"{t['q_intere']*100:13.1f}% {t['lastre']:11d} {t['sfrido']*100:6.1f}%")
+print(f"DETTAGLIO PER LOCALE - {FORMATO['nome']}")
+for nome in LOCALI:
+    l = OTTIMO["loc"][nome]
+    print(f"    {nome:20} intere {l['intere']:3d}  tagliate {l['tagli']:3d} "
+          f"(<25: {l['sliver']}, 25-45: {l['medi']}, >45: {l['buoni']})  "
+          f"lato min {l['min_lato']:5.1f}  sup. intera {l['q_intere']*100:5.1f}%  lastre {l['lastre']:3d}")
 print()
-for k, v in VARIANTI.items():
-    print(f"--- variante {k}")
-    for nome in LOCALI:
-        l = v["loc"][nome]
-        print(f"    {nome:20} intere {l['intere']:3d}  tagliate {l['tagli']:3d} "
-              f"(<25: {l['sliver']}, 25-45: {l['medi']}, >45: {l['buoni']})  "
-              f"lato min {l['min_lato']:5.1f}  sup. intera {l['q_intere']*100:5.1f}%  lastre {l['lastre']:3d}")
-    print()
 
 # =====================================================================
 # DISEGNO
@@ -957,8 +941,10 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 .ext { stroke: #aaa; stroke-width: 0.5; stroke-dasharray: 4 3; }
 </style></defs>""")
     rect(0, 0, W, H, extra='fill="#ffffff"')
-    txt(30, 45, f"APPARTAMENTO - posa gres {PIASTRELLA:.0f}x{PIASTRELLA:.0f}  |  variante {var['nome']}", "t1", "start")
-    txt(30, 72, var["titolo"], "t2", "start")
+    txt(30, 45, f"APPARTAMENTO - posa gres {PIASTRELLA:.0f}x{PIASTRELLA:.0f}", "t1", "start")
+    txt(30, 72, f"origine di posa ottimale {ox:.1f} / {oy:.1f} cm - minimo numero di "
+                f"lastre e di tagli; rivestimento bagno su {RIV_CORSI} corsi a filo trave",
+        "t2", "start")
     txt(30, 95, f"fuga {FUGA*10:.1f} mm - modulo {MODULO:.2f} cm - griglia unica continua su tutta la casa - "
                 f"battiscopa/rivestimento {FINITURA:.0f} cm - origine {ox:.1f}/{oy:.1f} - stampa 100% = 1:{SCALA}", "t2", "start")
 
@@ -1262,29 +1248,34 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 
     by = H - 120
     rect(30, by, W - 60, 104, extra='fill="#f5f7f9" stroke="#9aa5b1" stroke-width="1"')
-    txt(45, by + 22, "CONFRONTO VARIANTI (stessi dati del disegno)", "t3", "start")
-    col = [45, 230, 420, 560, 700, 880, 1010, 1160, 1330, 1520]
-    intest = ["variante", "origine X/Y", "lastre intere", "tagliate", "tagli &lt; 25 cm",
+    txt(45, by + 22, "CONFRONTO FORMATI (ognuno con la sua origine di posa ottimale)", "t3", "start")
+    col = [45, 300, 500, 660, 800, 980, 1110, 1260, 1420, 1580]
+    intest = ["formato", "origine X/Y", "lastre intere", "tagliate", "tagli &lt; 25 cm",
               "tagli 25-45", "tagli &gt; 45", "lato minimo", "% sup. con intere", "lastre / sfrido"]
     for c, t in zip(col, intest):
         txt(c, by + 44, t, "t2", "start")
-    for i, (k, v) in enumerate(VARIANTI.items()):
-        t = v["tot"]
+    for i, r in enumerate(RIEPILOGO):
+        t = r["tot"]
         yy = by + 64 + i * 15
-        vals = [k, f"{v['o'][0]:.1f} / {v['o'][1]:.1f}", str(t["intere"]), str(t["tagli"]),
+        vals = [r["nome"], f"{r['o'][0]:.1f} / {r['o'][1]:.1f}", str(t["intere"]), str(t["tagli"]),
                 str(t["sliver"]), str(t["medi"]), str(t["buoni"]), f"{t['min_lato']:.0f} cm",
                 f"{t['q_intere']*100:.0f}%", f"{t['lastre']} / {t['sfrido']*100:.0f}%"]
         for c, tt in zip(col, vals):
-            txt(c, yy, tt, "t3" if k == var["nome"] else "t2", "start")
+            txt(c, yy, tt, "t3" if r["nome"] == FORMATO["nome"] else "t2", "start")
 
     add("</svg>")
-    path = f"{OUT}_var_{var['nome']}{suffisso}"
+    path = f"{OUT}_{slug(FORMATO['nome'])}{suffisso}"
     with open(path + ".svg", "w", encoding="utf-8") as f:
         f.write("\n".join(S))
     return path
 
 
-paths = [disegna(VARIANTI[k]) for k in ("A", "B")]
+# una tavola per formato: la griglia cambia, quindi cambia anche il disegno
+paths = []
+for _i in range(len(FORMATI)):
+    usa_formato(_i)
+    paths.append(disegna(OTTIMO))
+usa_formato(POSA_ATTIVA)
 
 try:
     from svglib.svglib import svg2rlg
