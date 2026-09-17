@@ -314,6 +314,7 @@ DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobil
 
 HTML = r"""<!DOCTYPE html>
 <html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Appartamento - visita 3D</title>
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#111;font-family:Arial,Helvetica,sans-serif}
@@ -327,6 +328,20 @@ HTML = r"""<!DOCTYPE html>
         border-left:3px solid #ffd479}
   #posa b{display:block;font-size:13px;color:#ffd479;margin-bottom:2px}
   #posa span{color:#cfd8e0;font-size:11.5px;line-height:1.45}
+  canvas{touch-action:none}
+  /* comandi touch: nascosti su desktop, mostrati se il puntatore e' grosso */
+  #touch{display:none;position:fixed;inset:0;pointer-events:none;z-index:5;
+         font:600 14px system-ui,Segoe UI,Arial,sans-serif}
+  #joy{position:absolute;left:20px;bottom:20px;width:128px;height:128px;border-radius:50%;
+       background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.28);
+       pointer-events:auto;touch-action:none}
+  #pomo{position:absolute;left:39px;top:39px;width:50px;height:50px;border-radius:50%;
+        background:rgba(255,255,255,.42);box-shadow:0 2px 10px rgba(0,0,0,.4)}
+  #bott{position:absolute;right:16px;bottom:20px;display:grid;gap:10px;
+        grid-template-columns:56px 56px;pointer-events:auto}
+  #bott button{width:56px;height:56px;border-radius:50%;color:#fff;font:600 14px system-ui;
+        border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.5);touch-action:none}
+  #bott button:active{background:rgba(255,212,121,.35)}
   #leg .r{display:flex;align-items:center;gap:8px;margin:6px 0}
   #leg .k{flex:0 0 96px;display:flex;gap:4px}
   kbd{display:inline-block;min-width:15px;text-align:center;font:bold 11px Arial;
@@ -365,10 +380,19 @@ HTML = r"""<!DOCTYPE html>
   Trascina qui un png per cambiare la texture.</div>
 </div>
 <div id="msg"></div>
+<div id="touch">
+  <div id="joy"><div id="pomo"></div></div>
+  <div id="bott">
+    <button data-k="KeyE">porta</button><button data-k="KeyQ">quote</button>
+    <button data-k="KeyB">posa</button><button data-k="KeyH">menu</button>
+  </div>
+</div>
 <div id="start"><div><b>Appartamento - visita 3D</b><br><br>
   Clicca per entrare.<br>W/S volano nella direzione dello sguardo, A/D e frecce si muovono sul piano.<br>
   <b style="font-size:16px">E</b> apre e chiude la porta vicina,
   <b style="font-size:16px">Q</b> mostra le quote.<br>
+  Su telefono e tablet: tocca per entrare, joystick in basso a sinistra per
+  muoverti, trascina sulla scena per guardarti attorno.<br>
   Salendo oltre il soffitto questo diventa trasparente.</div></div>
 <script type="importmap">
 {"imports":{"three":"https://unpkg.com/three@0.161.0/build/three.module.js",
@@ -962,9 +986,13 @@ window.__hs = (t) => { scene.traverse(o=>{ if (o.isSprite) o.visible = !t; });
 // ---------- controlli ----------
 const controls = new PointerLockControls(camera, renderer.domElement);
 const overlay = document.getElementById('start'), msg = document.getElementById('msg');
-overlay.addEventListener('click', ()=>controls.lock());
+// su schermo tattile il pointer lock non esiste: si guarda trascinando
+const TOCCO = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+overlay.addEventListener('click', ()=>{
+  if (TOCCO) overlay.style.display = 'none'; else controls.lock();
+});
 controls.addEventListener('lock',   ()=>overlay.style.display='none');
-controls.addEventListener('unlock', ()=>overlay.style.display='flex');
+controls.addEventListener('unlock', ()=>{ if (!TOCCO) overlay.style.display='flex'; });
 scene.add(controls.getObject());
 controls.getObject().position.set(D.start[0]*S, 1.60, D.start[1]*S);
 if (D.guarda) controls.getObject().rotation.y = D.guarda;
@@ -1012,6 +1040,63 @@ addEventListener('keydown', e=>{
   if (e.code.startsWith('Arrow')) e.preventDefault();
 });
 addEventListener('keyup', e=>tasti[e.code]=false);
+
+// ---------- comandi su schermo tattile ----------
+// joystick a sinistra per spostarsi, trascinamento sulla scena per guardarsi
+// attorno: la stessa logica dei tasti, ma con valori continui da -1 a 1.
+const joy = {x:0, y:0, id:null, cx:0, cy:0};
+if (TOCCO){
+  document.getElementById('touch').style.display = 'block';
+  const base = document.getElementById('joy'), pomo = document.getElementById('pomo');
+  const R = 39;
+  base.addEventListener('touchstart', e=>{
+    const r = base.getBoundingClientRect();
+    joy.cx = r.left + r.width/2; joy.cy = r.top + r.height/2;
+    joy.id = e.changedTouches[0].identifier; e.preventDefault();
+  }, {passive:false});
+  base.addEventListener('touchmove', e=>{
+    for (const t of e.changedTouches){
+      if (t.identifier !== joy.id) continue;
+      let dx = t.clientX - joy.cx, dy = t.clientY - joy.cy;
+      const d = Math.hypot(dx, dy) || 1;
+      if (d > R){ dx *= R/d; dy *= R/d; }
+      pomo.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      joy.x = dx/R; joy.y = -dy/R;
+    }
+    e.preventDefault();
+  }, {passive:false});
+  const molla = ()=>{ joy.id=null; joy.x=joy.y=0; pomo.style.transform=''; };
+  base.addEventListener('touchend', molla);
+  base.addEventListener('touchcancel', molla);
+
+  // sguardo: yaw e pitch gestiti a mano, PointerLockControls qui non interviene
+  const og = controls.getObject();
+  og.rotation.order = 'YXZ';
+  let look = null, lx = 0, ly = 0;
+  renderer.domElement.addEventListener('touchstart', e=>{
+    const t = e.changedTouches[0];
+    look = t.identifier; lx = t.clientX; ly = t.clientY;
+  }, {passive:true});
+  renderer.domElement.addEventListener('touchmove', e=>{
+    for (const t of e.changedTouches){
+      if (t.identifier !== look) continue;
+      og.rotation.y -= (t.clientX - lx) * 0.005;
+      og.rotation.x = Math.max(-1.5, Math.min(1.5, og.rotation.x - (t.clientY - ly) * 0.005));
+      lx = t.clientX; ly = t.clientY;
+    }
+    e.preventDefault();
+  }, {passive:false});
+  renderer.domElement.addEventListener('touchend', ()=>{ look = null; });
+
+  for (const b of document.querySelectorAll('#bott button')){
+    b.addEventListener('touchstart', e=>{
+      const c = b.dataset.k;
+      dispatchEvent(new KeyboardEvent('keydown', {code:c}));
+      dispatchEvent(new KeyboardEvent('keyup', {code:c}));
+      e.preventDefault();
+    }, {passive:false});
+  }
+}
 addEventListener('resize', ()=>{
   camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
@@ -1026,15 +1111,16 @@ function loop(){
   requestAnimationFrame(loop);
   const t = performance.now(), dt = Math.min((t-t0)/1000, .1); t0 = t;
   const v = (tasti['ShiftLeft']||tasti['ShiftRight'] ? 4.2 : 1.9) * dt;
-  if (controls.isLocked){
+  if (controls.isLocked || TOCCO){
     const p = controls.getObject().position;
-    // W/S seguono lo sguardo anche in quota (volo libero); A/D e frecce restano sul piano
-    if (tasti['KeyW'] || tasti['KeyS']){
+    // avanti segue lo sguardo anche in quota (volo libero), il laterale resta sul piano
+    const av = (tasti['KeyW']?1:0) - (tasti['KeyS']?1:0) + joy.y;
+    const lat = (tasti['KeyD']?1:0) - (tasti['KeyA']?1:0) + joy.x;
+    if (Math.abs(av) > 0.02){
       camera.getWorldDirection(dirW);
-      p.addScaledVector(dirW, tasti['KeyW'] ? v : -v);
+      p.addScaledVector(dirW, v * av);
     }
-    if (tasti['KeyD']) controls.moveRight( v);
-    if (tasti['KeyA']) controls.moveRight(-v);
+    if (Math.abs(lat) > 0.02) controls.moveRight(v * lat);
     if (tasti['ArrowUp'])    controls.moveForward( v);
     if (tasti['ArrowDown'])  controls.moveForward(-v);
     if (tasti['ArrowRight']) controls.moveRight( v);
