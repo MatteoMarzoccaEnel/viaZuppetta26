@@ -302,7 +302,7 @@ for _i, _f in enumerate(cp.FORMATI):
         texRiv=incorpora(BASE_DIR + _f["tex_riv"]),
         nota=f"{_t['lastre']} lastre, {_t['intere']} intere, "
              f"{_t['sliver']} listelli, sfrido {_t['sfrido']*100:.1f}%"))
-cp.usa_formato(0)
+cp.usa_formato(cp.POSA_ATTIVA)
 
 DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobili,
             riv=riv, batt=batt, quote=quote, etichette=etichette, aree=aree,
@@ -310,7 +310,8 @@ DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobil
             balconi=BALCONI, box=cp.BOX, contro=cp.CONTROSOFFITTI,
             vicino=BALCONI_VICINO, separe=SEPARE, colring=COL_RING,
             h=H_INT, hbatt=H_BATT, hpar=BALC_P, spanta=SP_ANTA,
-            colanta=cp.PORTE_COLORE, start=[1380, 655], guarda=0)
+            colanta=cp.PORTE_COLORE, start=[1380, 655], guarda=0,
+            avvio=cp.POSA_ATTIVA)
 
 HTML = r"""<!DOCTYPE html>
 <html lang="it"><head><meta charset="utf-8">
@@ -668,9 +669,9 @@ function costruisciPosa(cfg, i){
   }
   return g;
 }
-let iPosa = 0;
+let iPosa = D.avvio;
 const gPosa = D.posa.map((cfg, i) => {
-  const g = costruisciPosa(cfg, i); g.visible = (i === 0); return g;
+  const g = costruisciPosa(cfg, i); g.visible = (i === iPosa); return g;
 });
 function mostraPosa(){
   const c = D.posa[iPosa];

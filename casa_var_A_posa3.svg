@@ -842,12 +842,12 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="314.5" y="308.0" class="lbl" text-anchor="middle" transform="rotate(-90 314.5 308.0)">LM-05 MOBILE BASSO L200 P35 H45</text>
 <rect x="344.0" y="319.0" width="38.0" height="120.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
 <text x="367.0" y="379.0" class="lbl" text-anchor="middle" transform="rotate(-90 367.0 379.0)">BA-01 LAVABO L120 P38 H85</text>
-<rect x="344.0" y="255.0" width="48.0" height="37.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
-<ellipse cx="368.0" cy="273.5" rx="18.0" ry="14.5" class="fixl"/>
-<text x="368.0" y="277.5" class="lbl" text-anchor="middle">BA-02 WC L37 P48 H25 sosp.15</text>
-<rect x="344.0" y="210.0" width="48.0" height="37.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
-<ellipse cx="368.0" cy="228.5" rx="18.0" ry="14.5" class="fixl"/>
-<text x="368.0" y="232.5" class="lbl" text-anchor="middle">BA-03 BIDET L37 P48 H25 sosp.15</text>
+<rect x="344.0" y="260.0" width="48.0" height="37.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
+<ellipse cx="368.0" cy="278.5" rx="18.0" ry="14.5" class="fixl"/>
+<text x="368.0" y="282.5" class="lbl" text-anchor="middle">BA-02 WC L37 P48 H25 sosp.15</text>
+<rect x="344.0" y="201.0" width="48.0" height="37.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
+<ellipse cx="368.0" cy="219.5" rx="18.0" ry="14.5" class="fixl"/>
+<text x="368.0" y="223.5" class="lbl" text-anchor="middle">BA-03 BIDET L37 P48 H25 sosp.15</text>
 <rect x="344.0" y="101.0" width="156.0" height="80.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
 <circle cx="422.0" cy="141.0" r="7" class="fixl"/>
 <text x="422.0" y="145.0" class="lbl" text-anchor="middle">BA-04 DOCCIA L80 P156 H4</text>

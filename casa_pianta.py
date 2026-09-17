@@ -35,8 +35,8 @@ FORMATI = [
          tex_pav="pavimento.png", tex_riv="piastrelle.png"),
     dict(nome="90x90, 3 corsi a filo trave", piastrella=90.0, fuga=0.15, riv_corsi=3,
          riv_h=H_TRAVE, tex_pav="pavimento.png", tex_riv="piastrelle.png"),
-    dict(nome="80x80, rivestimento 3 corsi", piastrella=80.0, fuga=0.15, riv_corsi=3,
-         tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
+    dict(nome="80x80, 3 corsi a filo trave", piastrella=80.0, fuga=0.15, riv_corsi=3,
+         riv_h=H_TRAVE, tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
     dict(nome="60x60, 4 corsi a filo trave", piastrella=60.0, fuga=0.15, riv_corsi=4,
          riv_h=H_TRAVE, tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
 ]
@@ -126,8 +126,9 @@ ARREDO = [
     ("LETTO MATRIMONIALE", "MOBILE BASSO 200x35", 293, 230, 35, 200, "box"),
 
     ("BAGNO", "LAVABO 120x38", 344, 199, 38, 120, "box"),
-    ("BAGNO", "WC", 344, 346, 48, 37, "wc"),
-    ("BAGNO", "BIDET", 344, 391, 48, 37, "wc"),
+    # 22 cm liberi fra lavabo, wc e bidet: interasse 59, sopra il minimo d'uso
+    ("BAGNO", "WC", 344, 341, 48, 37, "wc"),
+    ("BAGNO", "BIDET", 344, 400, 48, 37, "wc"),
     ("BAGNO", "DOCCIA 156x80", 344, 457, 156, 80, "doccia"),
     ("BAGNO", "ATTACCAPANNI 60x5", 493, 360, 5, 60, "appendi"),
     ("BAGNO", "LAVATRICE", 506, 170, 60, 60, "box"),
@@ -809,7 +810,7 @@ def usa_formato(i):
     return FORMATO
 
 
-POSA_ATTIVA = 0
+POSA_ATTIVA = 2
 for _a in _sys_argv:
     if _a.startswith("--posa="):
         POSA_ATTIVA = int(_a.split("=", 1)[1])
