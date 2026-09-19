@@ -293,10 +293,10 @@ def facce_riv(h_tot):
 
 
 def tagli_posa():
-    """Pezzi non interi con la misura del taglio: (x0, y0, x1, y1, etichetta).
+    """Misure dei pezzi non interi: (x0, y0, x1, y1, etichetta).
 
-    Si etichetta solo il lato che viene tagliato; se il pezzo e' ridotto su
-    entrambi i lati si scrivono tutte e due le misure.
+    Il segmento e' il bordo misurato, cosi' il numero si scrive parallelo a
+    quel bordo: un'etichetta per ogni lato che viene tagliato.
     """
     ox, oy = cp.OTTIMO["o"]
     out = []
@@ -304,14 +304,18 @@ def tagli_posa():
         for c in cp.celle(d, ox, oy):
             if c["intera"]:
                 continue
-            xs = [p[0] for p in c["parti"]] + [p[2] for p in c["parti"]]
-            ys = [p[1] for p in c["parti"]] + [p[3] for p in c["parti"]]
+            x0 = min(p[0] for p in c["parti"])
+            y0 = min(p[1] for p in c["parti"])
+            x1 = max(p[2] for p in c["parti"])
+            y1 = max(p[3] for p in c["parti"])
             dx, dy, m = c["dx"], c["dy"], cp.MODULO - 0.5
-            if dx < m and dy < m:
-                txt = f"{dx:.0f}x{dy:.0f}"
-            else:
-                txt = f"{dx:.0f}" if dx < m else f"{dy:.0f}"
-            out.append([min(xs), min(ys), max(xs), max(ys), txt])
+            tx, ty = dx < m, dy < m
+            if tx:
+                q = y0 + dy * (0.25 if ty else 0.5)
+                out.append([x0, q, x1, q, f"{dx:.0f}"])
+            if ty:
+                q = x0 + dx * (0.25 if tx else 0.5)
+                out.append([q, y0, q, y1, f"{dy:.0f}"])
     return out
 
 
@@ -1116,12 +1120,10 @@ function quotaPiana(txt, x0, z0, x1, z1, hTesto, dove){
   piano.rotation.x = -Math.PI/2;
   piano.add(m); (dove || gQuote).add(piano);
 }
-// misura dei pezzi tagliati, scritta sul pezzo: si accende con le fughe
+// misura dei pezzi tagliati, scritta lungo il bordo che misura
 D.posa.forEach((cfg, i) => {
-  for (const [x0,y0,x1,y1,txt] of cfg.tagli){
-    const z = (y0+y1)/2;
-    quotaPiana(txt, x0*S, z*S, x1*S, z*S, 0.075, retini[i]);
-  }
+  for (const [x0,y0,x1,y1,txt] of cfg.tagli)
+    quotaPiana(txt, x0*S, y0*S, x1*S, y1*S, 0.075, retini[i]);
 });
 for (const [x0,y0,x1,y1,lb] of D.quote){
   const h = 0.015, pts = [new THREE.Vector3(x0*S,h,y0*S), new THREE.Vector3(x1*S,h,y1*S)];
