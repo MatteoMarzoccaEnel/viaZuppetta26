@@ -292,6 +292,9 @@ def facce_riv(h_tot):
     return out
 
 
+OFF_TAGLIO = 6.0   # quanto la misura del taglio sta dentro il pezzo, dal bordo
+
+
 def tagli_posa():
     """Misure dei pezzi non interi: (x0, y0, x1, y1, etichetta).
 
@@ -310,11 +313,12 @@ def tagli_posa():
             y1 = max(p[3] for p in c["parti"])
             dx, dy, m = c["dx"], c["dy"], cp.MODULO - 0.5
             tx, ty = dx < m, dy < m
+            # il numero sta appoggiato al bordo che misura, non in mezzo al pezzo
             if tx:
-                q = y0 + dy * (0.25 if ty else 0.5)
+                q = y0 + min(OFF_TAGLIO, dy / 2)
                 out.append([x0, q, x1, q, f"{dx:.0f}"])
             if ty:
-                q = x0 + dx * (0.25 if tx else 0.5)
+                q = x0 + min(OFF_TAGLIO, dx / 2)
                 out.append([q, y0, q, y1, f"{dy:.0f}"])
     return out
 
