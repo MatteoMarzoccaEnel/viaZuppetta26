@@ -25,20 +25,59 @@ CORSI = cp.RIV_CORSI
 # consuma comunque una lastra per pezzo, ma la superficie e' quella vera
 ALTEZZA = cp.H_RIV
 
+# descrizione dei lati, nell'ordine del poligono del bagno in casa_pianta
+LATI_BAGNO = {
+    0: "parete sanitari (spalle lavabo/wc/bidet)",
+    1: "testata doccia",
+    2: "risvolto testata",
+    3: "fronte colonna scarico",
+    4: "risvolto colonna",
+    5: "testata finestra",
+    6: "parete lunga lato cameretta",
+    7: "testata nicchia",
+    8: "fianco nicchia",
+    9: "parete porta",
+}
+# pareti con la piastrella dedicata: sono quelle che si vedono dai sanitari,
+# cioe' il lato lungo del lavabo e tutta la testata con la finestra
+PROPRIO = {0, 1, 2, 3, 4, 5}
+
+
+def _finestre(orizz, c, a, b):
+    """Luce delle finestre sul tratto: come i vani a terra, non si riveste."""
+    tot = 0.0
+    for tipo, x0, y0, x1, y1, _lb in cp.APERTURE:
+        if tipo != "finestra":
+            continue
+        ao = abs(y1 - y0) < abs(x1 - x0)
+        if ao != orizz or abs((y0 if ao else x0) - c) > 11:
+            continue
+        va, vb = (min(x0, x1), max(x0, x1)) if ao else (min(y0, y1), max(y0, y1))
+        va, vb = max(va, a), min(vb, b)
+        if vb - va > 0.5:
+            tot += vb - va
+    return tot
+
+
+def _sviluppi():
+    """(gruppo, descrizione, sviluppo) per ogni lato del bagno, al netto dei vani.
+
+    Lunghezze e vani vengono dalla pianta: spostare un muro o una porta si
+    riflette qui senza ritoccare nessun numero.
+    """
+    out = []
+    for i, (orizz, c, a, b, _dentro) in enumerate(cp.lati(cp.LOCALI["BAGNO"]["poly"])):
+        vani = cp.vani_sul_filo(orizz, c, a, b)
+        L = (b - a) - sum(q - p for p, q in vani) - _finestre(orizz, c, a, b)
+        if L <= 0.5:
+            continue
+        out.append(("proprio" if i in PROPRIO else "pavimento",
+                    LATI_BAGNO.get(i, f"lato {i}"), L))
+    return out
+
+
 # (gruppo, descrizione, sviluppo in cm) - gia' al netto di porta e finestra
-PARETI = [
-    ("proprio", "parete sanitari (spalle lavabo/wc/bidet)", 395),
-    ("proprio", "testata finestra", 27),
-    ("proprio", "risvolto testata", 27),
-    ("proprio", "risvolto testata", 26),
-    ("proprio", "fronte colonna scarico", 53),
-    ("proprio", "risvolto colonna", 23),
-    ("pavimento", "parete lunga lato cameretta", 302),
-    ("pavimento", "testata nicchia", 75),
-    ("pavimento", "fianco nicchia", 90),
-    ("pavimento", "parete porta, tratto sx", 50),
-    ("pavimento", "parete porta, tratto dx", 98),
-]
+PARETI = _sviluppi()
 
 
 def calcola():

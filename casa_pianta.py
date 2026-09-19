@@ -885,18 +885,19 @@ def slug(nome):
     return re.sub(r"[^a-z0-9]+", "_", nome.lower()).strip("_")
 
 
-POSA_ATTIVA = 1
-for _a in _sys_argv:
-    if _a.startswith("--posa="):
-        POSA_ATTIVA = int(_a.split("=", 1)[1])
-usa_formato(POSA_ATTIVA)
-
-# confronto fra i formati: un giro completo, poi si torna alla configurazione attiva
+# confronto fra i formati: ognuno con la sua origine ottimale e il suo punteggio
 RIEPILOGO = []
 for _i, _f in enumerate(FORMATI):
     usa_formato(_i)
     RIEPILOGO.append(dict(i=_i, nome=_f["nome"], modulo=MODULO, hriv=H_RIV,
-                          corsi=RIV_CORSI, o=OTTIMO["o"], tot=OTTIMO["tot"]))
+                          corsi=RIV_CORSI, o=OTTIMO["o"], tot=OTTIMO["tot"],
+                          punteggio=obiettivo(*OTTIMO["o"])))
+
+# negli elaborati va il formato che minimizza obiettivo(), salvo --posa=N
+POSA_ATTIVA = min(RIEPILOGO, key=lambda r: r["punteggio"])["i"]
+for _a in _sys_argv:
+    if _a.startswith("--posa="):
+        POSA_ATTIVA = int(_a.split("=", 1)[1])
 usa_formato(POSA_ATTIVA)
 
 # =====================================================================
@@ -941,15 +942,16 @@ for _x, _y, _v, _lo in BOCCHETTE_RILIEVO:
 print()
 print("CONFRONTO FORMATI (ognuno con la sua origine di posa ottimale)")
 print(f"{'n':>2}  {'configurazione':30}{'modulo':>8}{'origine X/Y':>14}{'intere':>8}"
-      f"{'tagliate':>9}{'listelli':>9}{'lato min':>10}{'lastre':>8}{'sfrido':>8}")
-print("-" * 106)
+      f"{'tagliate':>9}{'listelli':>9}{'lato min':>10}{'lastre':>8}{'sfrido':>8}{'punti':>8}")
+print("-" * 114)
 for _r in RIEPILOGO:
     _t = _r["tot"]
     print(f"{_r['i']:>2}  {_r['nome']:30}{_r['modulo']:8.2f}"
           f"{_r['o'][0]:7.1f}/{_r['o'][1]:6.1f}{_t['intere']:8d}{_t['tagli']:9d}"
-          f"{_t['sliver']:9d}{_t['min_lato']:10.1f}{_t['lastre']:8d}{_t['sfrido']*100:7.1f}%")
+          f"{_t['sliver']:9d}{_t['min_lato']:10.1f}{_t['lastre']:8d}{_t['sfrido']*100:7.1f}%"
+          f"{_r['punteggio']:8d}")
 print(f"\nconfigurazione attiva negli elaborati: {POSA_ATTIVA} - {FORMATO['nome']}"
-      f"   (si cambia con  python casa_pianta.py --posa=N)")
+      f"   (punteggio piu' basso; si forza con  python casa_pianta.py --posa=N)")
 print()
 
 print(f"DETTAGLIO PER LOCALE - {FORMATO['nome']}")
