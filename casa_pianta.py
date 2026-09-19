@@ -37,11 +37,11 @@ H_TRAVE = H_INT - CALO_TRAVE      # intradosso delle travi in c.a.
 # Il rivestimento del bagno chiude sempre all'intradosso della trave: cambia
 # solo il numero di corsi necessari a raggiungerla.
 FORMATI = [
-    dict(piastrella=90.0, fuga=0.15,
+    dict(piastrella=90.0, fuga=0.2,
          tex_pav="pavimento.png", tex_riv="piastrelle.png"),
-    dict(piastrella=80.0, fuga=0.15,
+    dict(piastrella=80.0, fuga=0.2,
          tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
-    dict(piastrella=60.0, fuga=0.15,
+    dict(piastrella=60.0, fuga=0.2,
          tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
 ]
 for _f in FORMATI:
@@ -58,6 +58,7 @@ MODULO = PIASTRELLA + FUGA
 LASTRA = (PIASTRELLA / 100) ** 2
 
 FINITURA = 1.0   # gres a parete nel bagno, battiscopa negli altri locali
+FUGA_PROF = 0.01 # incavo della fuga rispetto al piano della lastra (0,1 mm)
 SLIVER = 25.0    # sotto: taglio "brutto"
 MEZZA = 45.0     # sopra: taglio di buona qualita'
 

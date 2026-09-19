@@ -300,6 +300,7 @@ for _i, _f in enumerate(cp.FORMATI):
     _t = cp.OTTIMO["tot"]
     POSA.append(dict(
         nome=_f["nome"], piastrella=cp.PIASTRELLA, modulo=cp.MODULO, fuga=cp.FUGA,
+        fugaProf=cp.FUGA_PROF,
         ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1],
         hriv=cp.H_RIV, corsi=cp.RIV_CORSI, riv=facce_riv(cp.H_RIV),
         texPav=incorpora(BASE_DIR + _f["tex_pav"]),
@@ -380,6 +381,7 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>O</kbd></span>ombre accese / spente</div>
   <div class="r"><span class="k"><kbd>L</kbd></span>occlusione ambientale (angoli)</div>
   <div class="r"><span class="k"><kbd>B</kbd></span>cambia formato e corsi del rivestimento</div>
+  <div class="r"><span class="k"><kbd>F</kbd></span>fughe evidenziate in nero</div>
   <div class="r"><span class="k"><kbd>H</kbd></span>mostra / nascondi legenda</div>
   <div class="r"><span class="k"><kbd>Esc</kbd></span>liberare il mouse</div>
   <hr>
@@ -392,7 +394,8 @@ HTML = r"""<!DOCTYPE html>
   <div id="joy"><div id="pomo"></div></div>
   <div id="bott">
     <button data-k="KeyE">porta</button><button data-k="KeyQ">quote</button>
-    <button data-k="KeyB">posa</button><button data-k="KeyH">menu</button>
+    <button data-k="KeyB">posa</button><button data-k="KeyF">fughe</button>
+    <button data-k="KeyH">menu</button>
   </div>
 </div>
 <div id="start"><div><b>Appartamento - visita 3D</b><br><br>
@@ -491,11 +494,15 @@ sole.shadow.normalBias = 0.05;
 scene.add(sole);
 
 // ---------- texture del gres con la fuga reale ----------
+let fugaNera = false;
 function texGres(img, cfg){
-  const N = 2048, g = Math.max(2, Math.round(N * cfg.fuga / cfg.modulo));
+  // in evidenza la fuga si disegna doppia e nera: serve a leggere la griglia,
+  // il modulo di posa non cambia
+  const N = 2048, g0 = Math.max(2, Math.round(N * cfg.fuga / cfg.modulo));
+  const g = fugaNera ? g0 * 2 : g0;
   const c = document.createElement('canvas'); c.width = c.height = N;
   const k = c.getContext('2d');
-  k.fillStyle = '#cdcdc9'; k.fillRect(0,0,N,N);
+  k.fillStyle = fugaNera ? '#000000' : '#cdcdc9'; k.fillRect(0,0,N,N);
   if (img) k.drawImage(img, g/2, g/2, N-g, N-g);
   else {
     const gr = k.createLinearGradient(0,0,N,N);
@@ -526,9 +533,9 @@ function applica(i, imgPav, imgRiv){
   m.pav.map  = texGres(imgPav, cfg);
   m.riv.map  = texGres(imgPav, cfg);            // meta' bagno e' lo stesso gres del pavimento
   m.riv2.map = texGres(imgRiv || imgPav, cfg);  // l'altra meta' e' la piastrella dedicata
-  // la fuga disegnata nella texture diventa anche un rilievo: cosi' si vede il giunto
+  // la fuga disegnata nella texture diventa anche un rilievo: l'incavo e' quello reale
   for (const k of ['pav','riv','riv2']){
-    m[k].bumpMap = m[k].map; m[k].bumpScale = 0.9; m[k].needsUpdate = true;
+    m[k].bumpMap = m[k].map; m[k].bumpScale = cfg.fugaProf * S; m[k].needsUpdate = true;
   }
 }
 function caricaSrc(src, cb){
@@ -538,7 +545,9 @@ function caricaSrc(src, cb){
   im.onerror = ()=>cb(null);
   im.src = src;
 }
+const IMG = [];      // immagini caricate, per rifare le texture a fuga nera
 D.posa.forEach((cfg, i) => caricaSrc(cfg.texPav, a => caricaSrc(cfg.texRiv, b => {
+  IMG[i] = [a, b];
   applica(i, a, b);
   if (i === 0) dimmi(a ? 'texture incorporate: pavimento + rivestimento'
                        : 'texture procedurale');
@@ -1092,6 +1101,11 @@ addEventListener('keydown', e=>{
       mostraPosa();
       dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
     }
+    if (e.code === 'KeyF'){
+      fugaNera = !fugaNera;
+      IMG.forEach((p, i) => applica(i, p[0], p[1]));
+      dimmi(fugaNera ? 'fughe evidenziate in nero' : 'fughe normali');
+    }
     if (e.code === 'KeyE'){
       const p = controls.getObject().position;
       let vicine = porte.filter(d => Math.hypot(p.x-d.x, p.z-d.z) < 2.4);
@@ -1236,14 +1250,16 @@ print(f"  battiscopa    {len(batt)} tratti (h {H_BATT:.0f} cm)")
 print(f"  balconi       {len(BALCONI)}")
 print(f"  arredo        {len(mobili)} volumi")
 print(f"  quote         {len(quote)} catene, {len(etichette)} cartellini")
-print(f"  griglia       origine {OX:.1f}/{OY:.1f}, modulo {cp.MODULO:.2f}, fuga {cp.FUGA*10:.1f} mm")
+print(f"  griglia       origine {OX:.1f}/{OY:.1f}, modulo {cp.MODULO:.2f}, "
+      f"fuga {cp.FUGA*10:.1f} mm profonda {cp.FUGA_PROF*10:.1f} mm")
 
 print("\nRISCONTRO CON LA PIANTA (valori presi da casa_pianta.py)")
 print(f"  altezza interna      {H_INT:.0f} cm")
 print(f"  battiscopa           {H_BATT:.0f} cm")
 print(f"  rivestimento bagno   {H_RIV:.1f} cm")
 print(f"  ringhiera / separe   {cp.H_RING:.0f} / {cp.H_SEPARE:.0f} cm")
-print(f"  modulo di posa       {cp.MODULO:.2f} cm (fuga {cp.FUGA*10:.1f} mm)")
+print(f"  modulo di posa       {cp.MODULO:.2f} cm (fuga {cp.FUGA*10:.1f} mm, "
+      f"incavo {cp.FUGA_PROF*10:.1f} mm)")
 print(f"  {'locale':22}{'pianta':>16}{'3D':>16}")
 for nome, d in cp.LOCALI.items():
     x0, y0, x1, y1 = d["bb"]
