@@ -2,7 +2,7 @@
 
 Tutte le misure sono in CENTIMETRI, nel sistema locale del bagno:
   X = lunghezza, 0 = filo interno della parete con la porta
-  Y = larghezza, 0 = filo interno del muro nuovo da 13 cm (lato camera matrimoniale)
+  Y = larghezza, 0 = filo interno del muro nuovo da 14 cm (lato camera matrimoniale)
 
 Per modificare il progetto basta agire sul blocco PARAMETRI qui sotto.
 Esecuzione:  python bagno_pianta.py
@@ -24,21 +24,21 @@ with contextlib.redirect_stdout(io.StringIO()):
 SCALA = 25  # 1:SCALA alla stampa al 100%
 OUT = r"c:\WORK\GH\bagno_pianta"
 
-MURO = 13      # spessore grafico delle murature
+MURO = 14      # spessore grafico delle murature
 RIV_SP = 2     # spessore del rivestimento interno (piastrella + colla)
 
-# Vano AL GREZZO rilevato da "TAV 02 - Stato di progetto"
-# (verificato: area 6,75 mq e perimetro 13,02 m come da tavola)
+# Vano AL GREZZO: larghezza 167,3 dopo il rilievo in sito (la camera singola e'
+# larga 277 e il muro verso la trave T2 non si puo' spostare)
 VANO = [
     (0, 0), (395, 0), (395, 27), (369, 27), (369, 80),
-    (392, 80), (392, 158), (90, 158), (90, 233), (0, 233),
+    (392, 80), (392, 167.3), (90, 167.3), (90, 242.3), (0, 242.3),
 ]
 
 # Porta scorrevole a scomparsa sulla parete X=0
 PORTA = dict(luce=(50, 135), tasca=(135, 225), larghezza=80, altezza=210)
 
-# Finestrella nella parete di fondo
-FINESTRA = dict(tratto=(80, 131), sguincio=31, larghezza=51, altezza=89, davanzale=135)
+# Finestrella nella parete di fondo: 60x110 con sguincio di 35 fino al balcone
+FINESTRA = dict(tratto=(93, 153), sguincio=35, larghezza=60, altezza=110, davanzale=114)
 
 # Piastrelle
 PIASTRELLA = 90.0
@@ -53,13 +53,13 @@ ARREDO = [
     ("lavabo", "MOBILE LAVABO 120x38", 29, 2, 120, 38),
     ("wc", "WC 37x48", 176, 2, 37, 48),
     ("bidet", "BIDET 37x48", 221, 2, 37, 48),
-    ("doccia", "PIATTO DOCCIA 154x80", 287, 2, 80, 154),
+    ("doccia", "PIATTO DOCCIA 163x80", 287, 2, 80, 163.3),
     ("sedia", "SGABELLO 35x35", 206, 121, 35, 35),
-    ("lavatrice", "LAVATRICE 60x60", 15, 163.5, 60, 60),
+    ("lavatrice", "LAVATRICE 60x60", 15, 172.8, 60, 60),
 ]
 
 # Box doccia a nicchia: anta = tratto coperto da chiusa, luce = passaggio da aperta
-BOX = dict(fronte_x=287, fronte_y=(2, 156), anta=(2, 122), luce=60)
+BOX = dict(fronte_x=287, fronte_y=(2, 165.3), anta=(2, 122), luce=60)
 
 # Catena di quote orizzontale (x0, x1, testo)
 QUOTE_X = [
@@ -68,10 +68,10 @@ QUOTE_X = [
 ]
 
 NOTE = [
-    "Rivestimento interno 2 cm (piastrella + colla) su tutte le pareti: misure FINITE 154 x 391 cm contro 158 x 395 al grezzo. Tutte le quote e l'arredo si riferiscono al finito.",
+    "Rivestimento interno 2 cm (piastrella + colla) su tutte le pareti: misure FINITE 163,3 x 391 cm contro 167,3 x 395 al grezzo. Tutte le quote e l'arredo si riferiscono al finito.",
     "Sanitari accentrati sul tratto libero 2-287: interasse wc-bidet 45 cm, luce laterale 27 cm. Wc e bidet sospesi, profondi 48. Passaggio libero 106 cm per tutto il vano.",
-    "Box a nicchia 154: anta scorrevole a 2 pannelli, 120 da chiusa e 60 da aperta, + fisso 34. Luce netta di accesso alla doccia 60 cm.",
-    "Piatto doccia 154x80 su misura a filo colonna di scarico; nicchia 23x74 sotto la finestra da tamponare (seduta h 45). Porta 80x210 a scomparsa: parete finita min. 12,5 cm.",
+    "Box a nicchia 163,3: anta scorrevole a 2 pannelli, 120 da chiusa e 60 da aperta, + fisso 43. Luce netta di accesso alla doccia 60 cm.",
+    "Piatto doccia 163x80 su misura a filo colonna di scarico; nicchia 23x88 sotto la finestra da tamponare (seduta h 45). Porta 80x210 a scomparsa: parete finita min. 12,5 cm.",
     "Colonna montante di scarico nell'angolo di fondo, dietro al piatto: dal wc lo scarico corre ~2 m sotto pavimento (verificare pendenza e massetto).",
 ]
 

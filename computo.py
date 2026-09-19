@@ -22,7 +22,7 @@ PIASTRELLA = cp.PIASTRELLA
 LASTRA = cp.LASTRA
 
 CALPESTABILE = cp.AREA_TOT
-PIATTO_DOCCIA = 1.25
+PIATTO_DOCCIA = 1.32
 
 # tutte le voci arrivano dagli script che le calcolano: cambiando formato in
 # casa_pianta.FORMATI questo computo si aggiorna da solo

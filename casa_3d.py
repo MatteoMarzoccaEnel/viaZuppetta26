@@ -38,9 +38,6 @@ COL = {
     "kit": "#9aa3ab", "elettro2": "#c3c9cf", "muretto": "#f0ece6",
 }
 
-VANI = {t: ((cp.DAVANZALE, cp.DAVANZALE + h) if t == "finestra" else (0, h))
-        for t, h in cp.ALT_VANO.items()}
-
 BALCONI = cp.BALCONI
 BALCONI_VICINO = cp.BALCONI_VICINO
 SEPARE = cp.SEPARE
@@ -116,7 +113,7 @@ for nome, d in cp.LOCALI.items():
             va, vb = (min(ax0, ax1), max(ax0, ax1)) if ao else (min(ay0, ay1), max(ay0, ay1))
             if vb <= a or va >= b:
                 continue
-            z0, z1 = VANI[tipo]
+            z0, z1 = cp.quote_vano(k + 1, tipo)
             va, vb = max(va, a), min(vb, b)
             sp, cc = murata(va, vb)
             # l'anta a battente e' a filo interno: in mezzeria ruoterebbe dentro la muratura
@@ -177,8 +174,8 @@ for nome, d in cp.LOCALI.items():
         faccia = c + dentro * 0.6
         if nome == "BAGNO":
             # meta' rivestimento dedicato (sanitari + testata finestra), meta' in 90x90
-            prop = (not orizz and abs(c - 343) < 1) or (orizz and c <= 100) \
-                or (not orizz and abs(c - 370) < 1) or (not orizz and abs(c - 423) < 1)
+            prop = (not orizz and abs(c - 344) < 1) or (orizz and c <= 100) \
+                or (not orizz and abs(c - 372) < 1) or (not orizz and abs(c - 423) < 1)
             g = 1 if prop else 0
             pareti_bagno.append((a, b, list(vani), list(finestre), faccia,
                                  orizz, dentro, g))
@@ -206,12 +203,12 @@ for nome, d in cp.LOCALI.items():
 # rilievo). Una pelle continua sul filo piu' esterno chiude i buchi e rende la
 # facciata piana, con i soli vani ritagliati.
 # (orizzontale, quota del filo esterno, da, a, verso l'interno, spessore)
-PELLI = [(True, 43.0, 0.0, 808.0, 1, 3.0)]
+PELLI = [(True, 43.0, 0.0, 808.3, 1, 3.0)]
 
 for orizz, c, a, b, dentro, sp in PELLI:
     cc = c - dentro * sp / 2
     vani = []
-    for tipo, x0, y0, x1, y1, lb in cp.APERTURE:
+    for n, (tipo, x0, y0, x1, y1, lb) in enumerate(cp.APERTURE, 1):
         ao = abs(y1 - y0) < abs(x1 - x0)
         if ao != orizz:
             continue
@@ -221,7 +218,7 @@ for orizz, c, a, b, dentro, sp in PELLI:
         va, vb = (min(x0, x1), max(x0, x1)) if ao else (min(y0, y1), max(y0, y1))
         if vb <= a or va >= b:
             continue
-        z0, z1 = VANI[tipo]
+        z0, z1 = cp.quote_vano(n, tipo)
         vani.append((max(va, a), min(vb, b), z0, z1))
     for sa, sb in cp.seg_meno(a, b, [(v[0], v[1]) for v in vani]):
         muri.append([sa, sb, cc, orizz, 0, H_INT, sp])
@@ -276,7 +273,7 @@ for i, (loc, label, x, y, w, h, tipo) in enumerate(cp.ARREDO):
 
 for k, (tipo, x0, y0, x1, y1, lb) in enumerate(cp.APERTURE, 1):
     lw = max(abs(x1 - x0), abs(y1 - y0))
-    z0, z1 = VANI[tipo]
+    z0, z1 = cp.quote_vano(k, tipo)
     fin = f"  {cp.PORTE_FINITURA}" if tipo in ("porta", "passaggio", "battente") else ""
     etichette.append([(x0 + x1) / 2, (y0 + y1) / 2, z1 + 22,
                       f"{k}: {lw:.0f}x{z1-z0:.0f}{fin}", "#b03020"])
@@ -917,16 +914,25 @@ function ringhiera(ax, az, bx, bz, alt){
     m.castShadow = true; scene.add(m);
   }
 }
-function soletta(x0,y0,x1,y1,rN,rO,rE,mat){
-  const s = new THREE.Mesh(new THREE.BoxGeometry((x1-x0)*S, 0.16, (y1-y0)*S), mat);
-  s.position.set((x0+x1)/2*S, -0.08, (y0+y1)/2*S);
+function soletta(x0,y0,x1,y1,rN,rO,rE,sm,mat){
+  // sm = smusso a 45 gradi sullo spigolo esterno lato x1 (balcone che sporge)
+  const sh = new THREE.Shape();
+  sh.moveTo(x0*S, y0*S); sh.lineTo((x1-sm)*S, y0*S);
+  if (sm) sh.lineTo(x1*S, (y0+sm)*S);
+  sh.lineTo(x1*S, y1*S); sh.lineTo(x0*S, y1*S); sh.closePath();
+  const g = new THREE.ExtrudeGeometry(sh, {depth:0.16, bevelEnabled:false});
+  g.rotateX(Math.PI/2);
+  const s = new THREE.Mesh(g, mat);
   s.receiveShadow = true; scene.add(s);
-  if (rN) ringhiera(x0*S, y0*S, x1*S, y0*S);
+  if (rN){
+    ringhiera(x0*S, y0*S, (x1-sm)*S, y0*S);
+    if (sm) ringhiera((x1-sm)*S, y0*S, x1*S, (y0+sm)*S);
+  }
   if (rO) ringhiera(x0*S, y0*S, x0*S, y1*S);
-  if (rE) ringhiera(x1*S, y0*S, x1*S, y1*S);
+  if (rE) ringhiera(x1*S, (y0+sm)*S, x1*S, y1*S);
 }
-for (const b of D.balconi) soletta(b[0],b[1],b[2],b[3],b[4],b[5],b[6], matCls);
-for (const b of D.vicino)  soletta(b[0],b[1],b[2],b[3],b[4],b[5],b[6], matVic);
+for (const b of D.balconi) soletta(b[0],b[1],b[2],b[3],b[4],b[5],b[6],b[7], matCls);
+for (const b of D.vicino)  soletta(b[0],b[1],b[2],b[3],b[4],b[5],b[6],b[7]||0, matVic);
 for (const [x0,y0,x1,y1,alt] of D.separe) ringhiera(x0*S, y0*S, x1*S, y1*S, alt);
 
 // ---------- controsoffitti con faretti ----------

@@ -1,20 +1,21 @@
 """Muro-schermo all'ingresso: quanto deve essere lungo per coprire la cucina.
 
 Coordinate di disegno, le stesse di casa_pianta.py dopo il raddrizzamento:
-  porta d'ingresso   Y = 697, X da 1335 a 1421
-  spalla sinistra del vano d'ingresso (muro esistente)  X = 1252, da Y=601 a Y=697
-  fronte cucina      X = 867, da Y = 108 a Y = 468  (360 cm)
-Il muro-schermo prolunga la spalla esistente verso l'alto: X=1252, da Y=601 a Y=601-L.
+  porta d'ingresso   Y = 697, X da 1343 a 1429
+  spalla sinistra del vano d'ingresso (muro esistente)  X = 1248,5, da Y=601 a Y=697
+  fronte cucina      X = 869,3, da Y = 108 a Y = 468  (360 cm)
+Il muro-schermo prolunga la spalla esistente verso l'alto: X=1248,5, da Y=601 a Y=601-L.
+E' spesso 10 cm ricavati dentro i 46 del pilastro PX, che quindi non si allarga.
 
 Genera muro_ingresso.svg/.pdf/.png con tutte le lunghezze sovrapposte.
 """
 
 import math
 
-XW, YW = 1252.0, 601.0       # allineamento e partenza del muro
-PORTA = (1335.0, 1421.0)
+XW, YW = 1248.5, 601.0       # allineamento e partenza del muro
+PORTA = (1343.0, 1429.0)
 YP = 697.0
-XK = 867.0                   # fronte cucina: il punto piu' esposto
+XK = 869.3                   # fronte cucina: il punto piu' esposto
 KY0, KY1 = 108.0, 468.0
 LUNG = KY1 - KY0
 
@@ -121,7 +122,7 @@ add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W/SCALA:.2f}cm" '
     f'font-family="Arial, Helvetica, sans-serif">')
 add(f'<rect width="{W}" height="{H}" fill="#ffffff"/>')
 txt(30, 40, "MURO-SCHERMO ALL'INGRESSO - copertura visiva del fronte cucina", 24, bold=True)
-txt(30, 66, "Prolungamento verso l'alto della spalla sinistra del vano d'ingresso (X=1252). "
+txt(30, 66, "Prolungamento verso l'alto della spalla sinistra del vano d'ingresso (X=1248,5). "
             "Visuale calcolata dal punto piu' sfavorevole del vano porta.", 15)
 txt(30, 88, f"Fronte cucina {LUNG:.0f} cm - stampa 100% = 1:{SCALA}", 15)
 

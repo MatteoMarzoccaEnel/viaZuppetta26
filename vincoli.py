@@ -34,7 +34,7 @@ import os
 # =====================================================================
 
 SP_CONTROTELAIO = 10.0   # spessore minimo del muro che ospita una scomparsa
-SP_INCASSO = 13.0        # muro doppio con scarichi a incasso (bagno / camera)
+SP_INCASSO = 14.0        # muro doppio con scarichi a incasso (bagno / camera)
 GIOCO_TASCA = 5.0        # battuta, stipite e guide oltre la luce dell'anta
 H_CONTROTELAIO = 7.0     # traverso del controtelaio sopra la luce della porta
 SPALLETTA_MIN = 10.0     # muro che deve restare fra il vano e lo spigolo
@@ -44,13 +44,13 @@ MARGINE_TASCA = 0.1      # tolleranza di confronto, in cm
 INCASSI = [("BAGNO", "LETTO MATRIMONIALE", SP_INCASSO)]
 
 # ingombro esterno dei locali nel sistema di rilievo: (x min, y min, x max, y max)
-PERIMETRO = (0.0, -59.0, 1463.0, 697.0)
+PERIMETRO = (0.0, -59.0, 1471.0, 697.0)
 
 # firme dei dati immutabili (vedi --firme)
 FIRME = {
-    "muri_esistenti": "921040e80428b7d6",
-    "pilastri": "f5bf277e9fe864b4",
-    "travi": "f97a3c5a2a6c09e8",
+    "muri_esistenti": "62e3cc555507c221",
+    "pilastri": "d26a85a8bfe1f6ef",
+    "travi": "09e49ccdb3ec4353",
 }
 
 
