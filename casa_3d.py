@@ -175,7 +175,7 @@ for nome, d in cp.LOCALI.items():
         if nome == "BAGNO":
             # meta' rivestimento dedicato (sanitari + testata finestra), meta' in 90x90
             prop = (not orizz and abs(c - 344) < 1) or (orizz and c <= 100) \
-                or (not orizz and abs(c - 372) < 1) or (not orizz and abs(c - 423) < 1)
+                or (not orizz and abs(c - 372.8) < 1) or (not orizz and abs(c - 423) < 1)
             g = 1 if prop else 0
             pareti_bagno.append((a, b, list(vani), list(finestre), faccia,
                                  orizz, dentro, g))
@@ -203,7 +203,7 @@ for nome, d in cp.LOCALI.items():
 # rilievo). Una pelle continua sul filo piu' esterno chiude i buchi e rende la
 # facciata piana, con i soli vani ritagliati.
 # (orizzontale, quota del filo esterno, da, a, verso l'interno, spessore)
-PELLI = [(True, 43.0, 0.0, 808.3, 1, 3.0)]
+PELLI = [(True, 43.0, 0.0, 810.1, 1, 3.0)]
 
 for orizz, c, a, b, dentro, sp in PELLI:
     cc = c - dentro * sp / 2

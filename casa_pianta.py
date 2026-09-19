@@ -24,11 +24,11 @@ _sys_argv = sys.argv[1:]
 SCALA = 60
 OUT = r"c:\WORK\GH\casa"
 
-# rilievo in sito: le travi calano 36 cm dal soffitto, i pilastri sono da 31,5
-# (46 solo quello dell'ingresso, PX)
+# rilievo in sito: le travi calano 36 cm dal soffitto, i pilastri sono da 32
+# (56 quello dell'ingresso, PX)
 H_INT = 297.0        # altezza interna (da tavola: H = 2,97 m)
 CALO_TRAVE = 36.0
-LARG_TRAVE = 31.5
+LARG_TRAVE = 32.0
 H_TRAVE = H_INT - CALO_TRAVE      # intradosso delle travi in c.a.
 
 # ---- configurazioni di posa a confronto: si scorrono con B nel modello 3D ----
@@ -100,31 +100,33 @@ PORTE_COLORE = "#f1ece1"
 PORTE_FINITURA = "laminato RAL 9010"
 
 # ---- locali (poligoni rettilinei nel sistema di rilievo) ----
-# La catena delle x viene dal rilievo in sito: 0 -> P7 372, P7 31,5,
-# luce 373,3, P8 31,5, luce 394,2, PX 46, poi 222,5 fino al fondo (totale 1471).
+# La catena delle x viene dal rilievo in sito (luci al laser, pilastri a metro):
+# 0 -> P7 372,8 | P7 32 | luce 373,3 | P8 32 | luce 394,2 | PX 56 | 210,7 fino al
+# fondo = 1471 totali. Gli 8 mm fra somma e misura laser stanno nel primo tratto,
+# l'unico dato a precisione di centimetro (3,72).
 LOCALI = {
     "RIPOSTIGLIO": dict(peso=0.5, poly=[(0, 17), (199, 17), (199, 152), (0, 152)]),
     # il muro bagno/camera e' doppio da 14 cm stucco compreso (scarichi a incasso
     # di lavabo, wc e bidet), tutti gli altri sono da 10
     "LETTO MATRIMONIALE": dict(peso=1.5, poly=[(0, 162), (330, 162), (330, 565), (0, 565)]),
     # il muro con la camera singola sta a filo della trave T2 sul lato soggiorno,
-    # quindi non si muove: la singola larga 277 allarga il bagno a 167,3
+    # quindi non si muove: la singola larga 277 allarga il bagno a 169,1
     "BAGNO": dict(peso=1.0, poly=[
-        (344, 162), (344, 565), (372, 565), (372, 539), (423, 539),
-        (423, 562), (511.3, 562), (511.3, 237), (586.3, 237), (586.3, 162)]),
+        (344, 162), (344, 565), (372.8, 565), (372.8, 539), (423, 539),
+        (423, 562), (513.1, 562), (513.1, 237), (588.1, 237), (588.1, 162)]),
     # il filo sud e' continuo a y 17 dal ripostiglio in poi: rientra solo in
     # corrispondenza dei due pilastri squadrati sotto le travi T3 e T2, che
     # sporgono di 20 cm (y 37), da cui le larghezze 135 e 115
     "DISIMPEGNO": dict(peso=1.0, poly=[
-        (209, 17), (372, 17), (372, 37), (403.5, 37), (403.5, 17),
-        (776.8, 17), (776.8, 37), (798.3, 37), (798.3, 152), (209, 152)]),
+        (209, 17), (372.8, 17), (372.8, 37), (404.8, 37), (404.8, 17),
+        (778.1, 17), (778.1, 37), (800.1, 37), (800.1, 152), (209, 152)]),
     "LETTO SINGOLO": dict(peso=1.5, poly=[
-        (596.3, 162), (798.3, 162), (798.3, 563), (521.3, 563),
-        (521.3, 247), (596.3, 247)]),
+        (598.1, 162), (800.1, 162), (800.1, 563), (523.1, 563),
+        (523.1, 247), (598.1, 247)]),
     "ZONA GIORNO": dict(peso=4.0, lab=(1310, 350), poly=[
-        (808.3, 17), (1202.5, 17), (1202.5, 37), (1238.5, 37), (1238.5, 122),
-        (1248.5, 122), (1248.5, -59), (1471, -59), (1471, 563), (1202.5, 563),
-        (1202.5, 697), (808.3, 697)]),
+        (810.1, 17), (1204.3, 17), (1204.3, 37), (1250.3, 37), (1250.3, 122),
+        (1260.3, 122), (1260.3, -59), (1471, -59), (1471, 563), (1204.3, 563),
+        (1204.3, 697), (810.1, 697)]),
 }
 
 # ---- aperture: (tipo, x0, y0, x1, y1, etichetta) ----
@@ -133,18 +135,18 @@ APERTURE = [
     ("porta", 204, 44.5, 204, 124.5, "80"),
     ("porta", 219, 157, 313, 157, "80"),
     ("porta", 394, 157, 479, 157, "80"),
-    ("porta", 605.3, 157, 700.3, 157, "80"),
+    ("porta", 607.1, 157, 702.1, 157, "80"),
     # vano da tavola: comincia 10 cm dopo la faccia del pilastro P8 (y 37)
-    ("passaggio", 803.3, 47, 803.3, 142, "80"),
+    ("passaggio", 805.1, 47, 805.1, 142, "80"),
     # finestrella del bagno: 60x110 rilevata in sito, sguincio 35 fino al balcone
-    ("finestra", 437, 562, 497, 562, "60x110"),
+    ("finestra", 438, 562, 498, 562, "60x110"),
     ("portafinestra", 208, 565, 318, 565, "BALCONE 110 - 2 ante"),
     ("portafinestra", 616, 563, 726, 563, "BALCONE 110 - 2 ante"),
     ("portafinestra", 1259, 564, 1369, 564, "BALCONE 110 - 2 ante"),
     ("finestra", 1058, 697, 1168, 697, "FINESTRA 110x135 - 2 ante"),
     # vano strutturale 67,8 da tavola (nominale 70): dista 3,5 cm dal muro sul
     # lato balcone, misurato al grezzo
-    ("portafinestra", 803.3, 626.5, 803.3, 693.5, "BALCONE 70 - 1 anta"),
+    ("portafinestra", 805.1, 626.5, 805.1, 693.5, "BALCONE 70 - 1 anta"),
 ]
 
 # ---- arredo: (locale, etichetta, x, y, ingombro X, ingombro Y, tipo) ----
@@ -161,33 +163,33 @@ ARREDO = [
     # 22 cm liberi fra lavabo, wc e bidet: interasse 59, sopra il minimo d'uso
     ("BAGNO", "WC", 345, 341, 48, 37, "wc"),
     ("BAGNO", "BIDET", 345, 400, 48, 37, "wc"),
-    ("BAGNO", "DOCCIA 165x80", 345, 457, 165, 80, "doccia"),
-    ("BAGNO", "ATTACCAPANNI 60x5", 503.3, 360, 5, 60, "appendi"),
-    ("BAGNO", "LAVATRICE", 516.3, 170, 60, 60, "box"),
+    ("BAGNO", "DOCCIA 167x80", 345, 457, 167.1, 80, "doccia"),
+    ("BAGNO", "ATTACCAPANNI 60x5", 505.1, 360, 5, 60, "appendi"),
+    ("BAGNO", "LAVATRICE", 518.1, 170, 60, 60, "box"),
     ("BAGNO", "SPECCHIO 100x2", 345, 209, 2, 100, "specchio"),
     # colonna lavatrice + asciugatrice: 85 + 5 di kit + 85
-    ("BAGNO", "KIT SOVRAPPOSIZIONE 60x60", 516.3, 170, 60, 60, "kit"),
-    ("BAGNO", "ASCIUGATRICE 60x60", 516.3, 170, 60, 60, "elettro2"),
+    ("BAGNO", "KIT SOVRAPPOSIZIONE 60x60", 518.1, 170, 60, 60, "kit"),
+    ("BAGNO", "ASCIUGATRICE 60x60", 518.1, 170, 60, 60, "elettro2"),
     # dietro il piatto doccia: riempiono i due rientri fino al filo della colonna
-    ("BAGNO", "MURETTO 28x26", 344, 539, 28, 26, "muretto"),
-    ("BAGNO", "MURETTO 88x23", 423, 539, 88.3, 23, "muretto"),
+    ("BAGNO", "MURETTO 29x26", 344, 539, 28.8, 26, "muretto"),
+    ("BAGNO", "MURETTO 90x23", 423, 539, 90.1, 23, "muretto"),
 
     # composizione a parete: libreria + scrivania + armadio, con due mensole sopra
-    ("LETTO SINGOLO", "LETTO CONTENITORE 204x94", 521.3, 247, 94.2, 204.2, "letto"),
-    ("LETTO SINGOLO", "LIBRERIA 40x33", 765.3, 270, 33, 40, "scaffale"),
-    ("LETTO SINGOLO", "SCRIVANIA 100x50", 748.3, 310, 50, 100, "box"),
-    ("LETTO SINGOLO", "ARMADIO 80x52", 746.3, 410, 52, 80, "box"),
-    ("LETTO SINGOLO", "MENSOLA B 100x18", 780.3, 310, 18, 100, "mensola"),
-    ("LETTO SINGOLO", "MENSOLA A 80x18", 780.3, 320, 18, 80, "mensola2"),
+    ("LETTO SINGOLO", "LETTO CONTENITORE 204x94", 523.1, 247, 94.2, 204.2, "letto"),
+    ("LETTO SINGOLO", "LIBRERIA 40x33", 767.1, 270, 33, 40, "scaffale"),
+    ("LETTO SINGOLO", "SCRIVANIA 100x50", 750.1, 310, 50, 100, "box"),
+    ("LETTO SINGOLO", "ARMADIO 80x52", 748.1, 410, 52, 80, "box"),
+    ("LETTO SINGOLO", "MENSOLA B 100x18", 782.1, 310, 18, 100, "mensola"),
+    ("LETTO SINGOLO", "MENSOLA A 80x18", 782.1, 320, 18, 80, "mensola2"),
 
     # la cassettiera riempie il tratto di corridoio fra i due pilastri, che
     # sporgono 20 cm dal filo sud
-    ("DISIMPEGNO", "CASSETTIERA 373x18", 403.5, 17, 373.3, 18, "cassetti"),
+    ("DISIMPEGNO", "CASSETTIERA 373x18", 404.8, 17, 373.3, 18, "cassetti"),
 
     # fronte cucina in un unico blocco lungo il muro giorno/notte: colonne,
     # basi e pensili stanno dentro l'ingombro 332x61, alto 231
-    ("ZONA GIORNO", "CUCINA 332x61", 808.3, 170, 61, 332, "cucina"),
-    ("ZONA GIORNO", "MOBILE TV 180x45", 1022.5, 17, 180, 45, "box"),
+    ("ZONA GIORNO", "CUCINA 332x61", 810.1, 170, 61, 332, "cucina"),
+    ("ZONA GIORNO", "MOBILE TV 180x45", 1024.3, 17, 180, 45, "box"),
 ]
 
 # setti di nuova costruzione: (x, y, larghezza, profondita', etichetta)
@@ -196,8 +198,8 @@ ARREDO = [
 # il secondo prolunga nella zona giorno il muro del corridoio e fa da spalla
 # alla cucina: la sua faccia interna e' a filo del fianco sinistro del mobile
 SETTI = [
-    (1238.5, 37, 10, 85, "SETTO 10x85"),
-    (808.3, 160, 61, 10, "SETTO 10x61"),
+    (1250.3, 37, 10, 85, "SETTO 10x85"),
+    (810.1, 160, 61, 10, "SETTO 10x61"),
 ]
 
 # ---- muri di PROGETTO (verdi in tavola): sono gli unici spostabili ----
@@ -208,7 +210,7 @@ MURI_NUOVI = [
     ("y", (152, 162), "muro disimpegno / zona notte"),
     ("x", (330, 344), "muro 14 bagno / camera matrimoniale"),
     ("x", (199, 209), "muro ripostiglio"),
-    ("x", (586.3, 596.3), "nicchia bagno - lato lungo"),
+    ("x", (588.1, 598.1), "nicchia bagno - lato lungo"),
     ("y", (237, 247), "nicchia bagno - fondo"),
 ]
 
@@ -219,12 +221,12 @@ BOX = dict(x0=345, luce=60, h=200, y=457, sfalso=1.0)
 QUOTE = [
     (200, 330, 293, 330, "93 piede letto-mobile"),
     (100, 410, 100, 505, "95 letto-armadio"),
-    (611.3, 416, 738.3, 416, "127 letto-armadio"),
+    (613.1, 416, 740.1, 416, "127 letto-armadio"),
     (500, 17, 500, 152, "135 disimpegno"),
     (345, 457, 345, 537, "80 doccia"),
     (400, 199, 400, 319, "120 lavabo"),
     (60, 17, 60, 152, "135 ripostiglio"),
-    (1221, 37, 1221, 122, "85 setto schermo"),
+    (1233, 37, 1233, 122, "85 setto schermo"),
 ]
 
 # =====================================================================
@@ -338,36 +340,36 @@ for _lo, *_r in ARREDO:
 # Il balcone lungo non e' a filo della facciata: sporge di 15 cm verso strada e
 # si raccorda al muro con uno smusso a 45 gradi accanto alla portafinestra 12.
 H_RING, H_SEPARE = 110.0, 180.0
-BALCONI = [(0, -103, 808.3, 73, 1, 1, 0, 15), (1202.5, -36, 1471, 74, 1, 0, 0, 0)]
+BALCONI = [(0, -103, 810.1, 73, 1, 1, 0, 15), (1204.3, -36, 1471, 74, 1, 0, 0, 0)]
 BALCONI_VICINO = []          # il balcone confinante non viene rappresentato
 SEPARE = [(1471, -36, 1471, 74, H_SEPARE)]
 
 # ---- struttura in c.a. esistente, ricavata dai risalti della tavola ----
-# pilastri squadrati: (x0, y0, x1, y1, etichetta). Rilievo in sito: 31,5 cm di
-# larghezza per tutti, 46 solo per PX all'ingresso.
+# pilastri squadrati: (x0, y0, x1, y1, etichetta). Rilievo in sito: 32 cm di
+# larghezza per tutti, 56 solo per PX all'ingresso.
 PILASTRI = [
-    (372, 73, 425, 99, "P1"),
+    (372.8, 73, 425.8, 99, "P1"),
     (506, 76, 560, 94, "P2"),
-    (776.8, 14, 808.3, 45, "P3"),
-    (776.8, -88, 808.3, -59, "P4"),
-    (1202.5, -88, 1234, -59, "P5"),
-    (1202.5, 44, 1234, 74, "P6"),
-    (372, 601, 403.5, 621, "P7"),      # sotto T3, sporge 20 nel disimpegno
-    (776.8, 601, 808.3, 621, "P8"),    # sotto T2, sporge 20 nel disimpegno
-    (1202.5, 601, 1248.5, 621, "PX"),  # ingresso: 46 cm, T1 a filo del lato P8
+    (778.1, 14, 810.1, 45, "P3"),
+    (778.1, -88, 810.1, -59, "P4"),
+    (1204.3, -88, 1236.3, -59, "P5"),
+    (1204.3, 44, 1236.3, 74, "P6"),
+    (372.8, 601, 404.8, 621, "P7"),    # sotto T3, sporge 20 nel disimpegno
+    (778.1, 601, 810.1, 621, "P8"),    # sotto T2, sporge 20 nel disimpegno
+    (1204.3, 601, 1260.3, 621, "PX"),  # ingresso: 56 cm, T1 a filo del lato P8
 ]
 # le tre travi sono TRASVERSALI (corrono da balcone a ingresso, non lungo la casa)
 # e appoggiano sui pilastri: T3 su P1, T2 su P3/P4, T1 su P5/P6
 TRAVI = [
-    (372, 73, 403.5, 621, "T3 bagno / disimpegno"),
-    (776.8, 14, 808.3, 621, "T2 giorno / notte (porte 6 e 12)"),
-    (1202.5, 44, 1234, 697, "T1 ingresso / zona giorno"),
+    (372.8, 73, 404.8, 621, "T3 bagno / disimpegno"),
+    (778.1, 14, 810.1, 621, "T2 giorno / notte (porte 6 e 12)"),
+    (1204.3, 44, 1236.3, 697, "T1 ingresso / zona giorno"),
 ]
 
 # controsoffitti in cartongesso che chiudono i vuoti a fianco delle travi:
 # (x0, y0, x1, y1, quota, passo dei faretti, etichetta)
 CONTROSOFFITTI = [
-    (344, 73, 372, 483, H_TRAVE, 85, "bagno, fascia lato lavabo"),
+    (344, 73, 372.8, 483, H_TRAVE, 85, "bagno, fascia lato lavabo"),
 ]
 
 # ---- canalizzato caldo/freddo ----
@@ -376,9 +378,9 @@ CONTROSOFFITTI = [
 # che scendono fin dentro il passaggio. (x0, y0, x1, y1, tratto) nel rilievo.
 H_CANALE = H_TRAVE
 CANALI_RILIEVO = [
-    (209, 17, 372, 152, "C1"),      # dal muro del ripostiglio alla trave T3
-    (403.5, 17, 776.8, 152, "C2"),  # da P7 a P8
-    (808.3, 17, 1202.5, 152, "C3"), # da P8 alla trave T1, che appoggia su PX
+    (209, 17, 372.8, 152, "C1"),    # dal muro del ripostiglio alla trave T3
+    (404.8, 17, 778.1, 152, "C2"),  # da P7 a P8
+    (810.1, 17, 1204.3, 152, "C3"), # da P8 alla trave T1, che appoggia su PX
 ]
 TRATTI_CANALE = {
     "C1": "ripostiglio - trave T3",
@@ -709,7 +711,7 @@ H_LABEL = {
     "LAVATRICE": 85, "LAVABO": 85, "SEDIA": 45, "SGABELLO": 45,
     "MOBILETTO": 150, "LETTO CONTENITORE": 50, "TAVOLO": 75, "POLTRONA": 75,
     "CONSOLLE": 80, "SCRIVANIA 100x50": 70,
-    "MURETTO 28": 120, "MURETTO 88": 40,
+    "MURETTO 29": 120, "MURETTO 90": 40,
 }
 
 

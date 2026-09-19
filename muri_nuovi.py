@@ -108,5 +108,5 @@ _bagno = "muro 14 bagno / camera matrimoniale"
 _L_DISIMP = min(MURI[_disimp][1]) - 17.0
 _L_CAMERA = min(MURI[_bagno][1])
 print(f"disimpegno {_L_DISIMP + sp[_disimp]:.0f} cm al grezzo, "
-      f"bagno largo {167.3 - sp[_bagno]:.0f} cm, "
+      f"bagno largo {169.1 - sp[_bagno]:.0f} cm, "
       f"camera larga {_L_CAMERA + sp[_bagno]:.0f} cm")
