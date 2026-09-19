@@ -344,24 +344,47 @@ const SP_BATT = 1.0;   // il battiscopa sporge: senza spessore niente spigolo ne
 // Stanno nella scena disegnata dopo il composer, una per configurazione di posa.
 const matFuga = new THREE.LineBasicMaterial({color:0x000000,
   depthTest:false, depthWrite:false});
-const retini = [];
-function retinoFughe(cfg, i){
-  const pts = [], q = 0.004, M = cfg.modulo;
+const retini = [], segFughe = [];
+function unisci(arr){      // tratti contigui sulla stessa retta diventano uno solo
+  arr.sort((p,q) => p[0]-q[0]);
+  const out = [];
+  for (const [a,b] of arr){
+    const u = out[out.length-1];
+    if (u && a <= u[1] + 0.5) u[1] = Math.max(u[1], b);
+    else out.push([a,b]);
+  }
+  return out;
+}
+function segmentiFughe(cfg){
+  const M = cfg.modulo, V = new Map(), H = new Map();
+  const agg = (m, c, a, b) => { const k = c.toFixed(2);
+    const v = m.get(k) || []; v.push([a,b]); m.set(k, v); };
   for (const [x0,y0,x1,y1] of D.pavimento){
     for (let k = Math.ceil((x0-cfg.ox)/M); cfg.ox + k*M < x1; k++){
       const x = cfg.ox + k*M;
-      if (x > x0) pts.push(new THREE.Vector3(x*S, q, y0*S), new THREE.Vector3(x*S, q, y1*S));
+      if (x > x0) agg(V, x, y0, y1);
     }
     for (let k = Math.ceil((y0-cfg.oy)/M); cfg.oy + k*M < y1; k++){
-      const z = cfg.oy + k*M;
-      if (z > y0) pts.push(new THREE.Vector3(x0*S, q, z*S), new THREE.Vector3(x1*S, q, z*S));
+      const y = cfg.oy + k*M;
+      if (y > y0) agg(H, y, x0, x1);
     }
   }
+  const out = [];
+  for (const [c,arr] of V) for (const [a,b] of unisci(arr)) out.push([+c, a, +c, b]);
+  for (const [c,arr] of H) for (const [a,b] of unisci(arr)) out.push([a, +c, b, +c]);
+  return out;
+}
+function retinoFughe(cfg, i){
+  const g = new THREE.Group(); g.visible = false; g.renderOrder = 2;
+  const pts = [], q = 0.004;
+  segFughe[i] = segmentiFughe(cfg);
+  for (const [x0,y0,x1,y1] of segFughe[i])
+    pts.push(new THREE.Vector3(x0*S, q, y0*S), new THREE.Vector3(x1*S, q, y1*S));
   const l = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), matFuga);
   l.renderOrder = 2;
-  l.visible = false;
-  retini[i] = l;
-  scenaOver.add(l);
+  g.add(l);
+  retini[i] = g;
+  scenaOver.add(g);
 }
 function mostraFughe(){
   retini.forEach((r, i) => { r.visible = fugaNera && i === iPosa; });
@@ -727,7 +750,7 @@ function cartello(txt, x, y, z, col){
 }
 const matQ = new THREE.LineBasicMaterial({color:0x000000, depthTest:false, depthWrite:false});
 // la quota giace sul pavimento, parallela al lato misurato: niente cartelli girevoli
-function quotaPiana(txt, x0, z0, x1, z1, hTesto){
+function quotaPiana(txt, x0, z0, x1, z1, hTesto, dove){
   const W = 256, H = 64;
   const t = texTesto(W, H, k => {
     k.font = 'bold 44px Arial';
@@ -745,8 +768,16 @@ function quotaPiana(txt, x0, z0, x1, z1, hTesto){
   const piano = new THREE.Object3D();
   piano.position.set((x0+x1)/2, 0.02, (z0+z1)/2);
   piano.rotation.x = -Math.PI/2;
-  piano.add(m); gQuote.add(piano);
+  piano.add(m); (dove || gQuote).add(piano);
 }
+// lunghezza di ogni tratto di fuga, sul tratto stesso: si accende con le fughe
+segFughe.forEach((segs, i) => {
+  for (const [x0,y0,x1,y1] of segs){
+    const L = Math.hypot(x1-x0, y1-y0);
+    if (L < 15) continue;
+    quotaPiana(L.toFixed(0), x0*S, y0*S, x1*S, y1*S, 0.10, retini[i]);
+  }
+});
 for (const [x0,y0,x1,y1,lb] of D.quote){
   const h = 0.015, pts = [new THREE.Vector3(x0*S,h,y0*S), new THREE.Vector3(x1*S,h,y1*S)];
   const vert = Math.abs(x1-x0) < Math.abs(y1-y0);
