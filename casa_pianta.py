@@ -398,7 +398,9 @@ TRATTI_CANALE = {
 # bocchette di mandata: (x, y, verso, locale). Quelle orizzontali attraversano
 # la parete alta della stanza sopra la porta, "giu" scarica dal piano inferiore.
 BOCCHETTA = (60.0, 20.0)     # luce della griglia: larghezza x altezza
-Z_BOCCHETTA = 252.0          # base delle griglie orizzontali (fra trave e soffitto)
+# le griglie orizzontali stanno in mezzo alla fascia fra intradosso del
+# cassonetto e soffitto: seguono la trave, non una quota fissa
+Z_BOCCHETTA = H_CANALE + (H_INT - H_CANALE - BOCCHETTA[1]) / 2
 
 
 def _mezzeria_vano(n):
