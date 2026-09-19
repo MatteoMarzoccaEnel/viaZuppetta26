@@ -1365,7 +1365,9 @@ if (TOCCO){
   base.addEventListener('touchend', molla);
   base.addEventListener('touchcancel', molla);
 
-  // sguardo: yaw e pitch gestiti a mano, PointerLockControls qui non interviene
+  // sguardo: yaw e pitch gestiti a mano, PointerLockControls qui non interviene.
+  // Il dito trascina la scena, come si scorre una pagina: la vista va nel verso
+  // opposto al movimento.
   const og = controls.getObject();
   og.rotation.order = 'YXZ';
   let look = null, lx = 0, ly = 0;
@@ -1376,8 +1378,8 @@ if (TOCCO){
   renderer.domElement.addEventListener('touchmove', e=>{
     for (const t of e.changedTouches){
       if (t.identifier !== look) continue;
-      og.rotation.y -= (t.clientX - lx) * 0.005;
-      og.rotation.x = Math.max(-1.5, Math.min(1.5, og.rotation.x - (t.clientY - ly) * 0.005));
+      og.rotation.y += (t.clientX - lx) * 0.005;
+      og.rotation.x = Math.max(-1.5, Math.min(1.5, og.rotation.x + (t.clientY - ly) * 0.005));
       lx = t.clientX; ly = t.clientY;
     }
     e.preventDefault();
