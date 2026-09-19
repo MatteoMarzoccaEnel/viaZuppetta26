@@ -48,7 +48,7 @@ PERIMETRO = (0.0, -59.0, 1463.0, 697.0)
 
 # firme dei dati immutabili (vedi --firme)
 FIRME = {
-    "muri_esistenti": "57f6766dded9a9d3",
+    "muri_esistenti": "921040e80428b7d6",
     "pilastri": "f5bf277e9fe864b4",
     "travi": "f97a3c5a2a6c09e8",
 }

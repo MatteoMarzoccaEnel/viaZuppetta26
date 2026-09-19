@@ -83,7 +83,7 @@ PORTE_FINITURA = "laminato RAL 9010"
 
 # ---- locali (poligoni rettilinei nel sistema di rilievo) ----
 LOCALI = {
-    "RIPOSTIGLIO": dict(peso=0.5, poly=[(0, 30), (199, 30), (199, 152), (0, 152)]),
+    "RIPOSTIGLIO": dict(peso=0.5, poly=[(0, 17), (199, 17), (199, 152), (0, 152)]),
     # il muro bagno/camera e' doppio da 13 cm (scarichi a incasso di lavabo,
     # wc e bidet), tutti gli altri sono da 10: il bagno resta 158, i 3 cm in
     # piu' vengono tolti alla camera
@@ -91,10 +91,11 @@ LOCALI = {
     "BAGNO": dict(peso=1.0, poly=[
         (343, 162), (343, 565), (370, 565), (370, 539), (423, 539),
         (423, 562), (501, 562), (501, 237), (576, 237), (576, 162)]),
-    # il filo sud rientra in corrispondenza dei due pilastri squadrati sotto le
-    # travi T3 e T2 (da tavola: y 37 contro y 17), e sul tratto del ripostiglio
+    # il filo sud e' continuo a y 17 dal ripostiglio in poi: rientra solo in
+    # corrispondenza dei due pilastri squadrati sotto le travi T3 e T2, che
+    # sporgono di 20 cm (y 37), da cui le larghezze 135 e 115
     "DISIMPEGNO": dict(peso=1.0, poly=[
-        (209, 30), (370, 30), (370, 37), (400, 37), (400, 17),
+        (209, 17), (370, 17), (370, 37), (400, 37), (400, 17),
         (773, 17), (773, 37), (797, 37), (797, 152), (209, 152)]),
     "LETTO SINGOLO": dict(peso=1.5, poly=[
         (586, 162), (797, 162), (797, 563), (511, 563), (511, 247), (586, 247)]),
@@ -123,7 +124,7 @@ APERTURE = [
 
 # ---- arredo: (locale, etichetta, x, y, ingombro X, ingombro Y, tipo) ----
 ARREDO = [
-    ("RIPOSTIGLIO", "SCAFFALI 130x40", 0, 30, 40, 130, "scaffale"),
+    ("RIPOSTIGLIO", "SCAFFALI 130x40", 0, 17, 40, 130, "scaffale"),
 
     ("LETTO MATRIMONIALE", "LETTO 160x200", 0, 250, 200, 160, "letto"),
     ("LETTO MATRIMONIALE", "", 0, 205, 45, 40, "box"),
@@ -195,7 +196,7 @@ QUOTE = [
     (500, 17, 500, 152, "135 disimpegno"),
     (344, 457, 344, 537, "80 doccia"),
     (399, 199, 399, 319, "120 lavabo"),
-    (60, 30, 60, 152, "122 ripostiglio"),
+    (60, 17, 60, 152, "135 ripostiglio"),
     (1225, 37, 1225, 122, "85 setto schermo"),
 ]
 
@@ -346,7 +347,7 @@ CONTROSOFFITTI = [
 # che scendono fin dentro il passaggio. (x0, y0, x1, y1, tratto) nel rilievo.
 H_CANALE = H_TRAVE
 CANALI_RILIEVO = [
-    (209, 30, 370, 152, "C1"),      # dal muro del ripostiglio alla trave T3
+    (209, 17, 370, 152, "C1"),      # dal muro del ripostiglio alla trave T3
     (400, 17, 773, 152, "C2"),      # da P7 a P8
     (807, 17, 1197, 152, "C3"),     # da P8 alla trave T1, nella zona giorno
     (1197, 37, 1228, 152, "C3"),    # ultimo tratto: il filo nord rientra di 20

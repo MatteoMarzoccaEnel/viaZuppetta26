@@ -31,22 +31,22 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <g transform="translate(155,250)">
 <rect x="1.0" y="487.0" width="25.1" height="48.1" class="" fill="#ffd08a"/>
 <rect x="1.0" y="535.1" width="25.1" height="60.2" class="" fill="#ffd08a"/>
-<rect x="1.0" y="595.3" width="25.1" height="11.7" class="" fill="#ff9b8a"/>
+<rect x="1.0" y="595.3" width="25.1" height="24.7" class="" fill="#ff9b8a"/>
 <rect x="26.1" y="487.0" width="60.2" height="48.1" class="" fill="#fff3c4"/>
 <rect x="26.1" y="535.1" width="60.2" height="60.2" class="" fill="#ffffff"/>
-<rect x="26.1" y="595.3" width="60.2" height="11.7" class="" fill="#ff9b8a"/>
+<rect x="26.1" y="595.3" width="60.2" height="24.7" class="" fill="#ff9b8a"/>
 <rect x="86.2" y="487.0" width="60.1" height="48.1" class="" fill="#fff3c4"/>
 <rect x="86.2" y="535.1" width="60.1" height="60.2" class="" fill="#ffffff"/>
-<rect x="86.2" y="595.3" width="60.1" height="11.7" class="" fill="#ff9b8a"/>
+<rect x="86.2" y="595.3" width="60.1" height="24.7" class="" fill="#ff9b8a"/>
 <rect x="146.3" y="487.0" width="51.7" height="48.1" class="" fill="#fff3c4"/>
 <rect x="146.3" y="535.1" width="51.7" height="60.2" class="" fill="#fff3c4"/>
-<rect x="146.3" y="595.3" width="51.7" height="11.7" class="" fill="#ff9b8a"/>
-<line x1="26.1" y1="487.0" x2="26.1" y2="607.0" class="joint" />
-<line x1="86.2" y1="487.0" x2="86.2" y2="607.0" class="joint" />
-<line x1="146.3" y1="487.0" x2="146.3" y2="607.0" class="joint" />
+<rect x="146.3" y="595.3" width="51.7" height="24.7" class="" fill="#ff9b8a"/>
+<line x1="26.1" y1="487.0" x2="26.1" y2="620.0" class="joint" />
+<line x1="86.2" y1="487.0" x2="86.2" y2="620.0" class="joint" />
+<line x1="146.3" y1="487.0" x2="146.3" y2="620.0" class="joint" />
 <line x1="1.0" y1="535.1" x2="198.0" y2="535.1" class="joint" />
 <line x1="1.0" y1="595.3" x2="198.0" y2="595.3" class="joint" />
-<polygon points="1.0,487.0 198.0,487.0 198.0,607.0 1.0,607.0" fill="none" stroke="#8a9aa8" stroke-width="0.8"/>
+<polygon points="1.0,487.0 198.0,487.0 198.0,620.0 1.0,620.0" fill="none" stroke="#8a9aa8" stroke-width="0.8"/>
 <rect x="1.0" y="74.0" width="25.1" height="40.1" class="" fill="#ffd08a"/>
 <rect x="1.0" y="114.1" width="25.1" height="60.2" class="" fill="#ffd08a"/>
 <rect x="1.0" y="174.2" width="25.1" height="60.1" class="" fill="#ffd08a"/>
@@ -163,15 +163,15 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <polygon points="344.0,475.0 344.0,74.0 369.0,74.0 369.0,100.0 424.0,100.0 424.0,77.0 500.0,77.0 500.0,402.0 575.0,402.0 575.0,475.0" fill="none" stroke="#8a9aa8" stroke-width="0.8"/>
 <rect x="210.0" y="487.0" width="56.6" height="48.1" class="" fill="#fff3c4"/>
 <rect x="210.0" y="535.1" width="56.6" height="60.2" class="" fill="#fff3c4"/>
-<rect x="210.0" y="595.3" width="56.6" height="11.7" class="" fill="#ff9b8a"/>
+<rect x="210.0" y="595.3" width="56.6" height="24.7" class="" fill="#ff9b8a"/>
 <rect x="266.6" y="487.0" width="60.2" height="48.1" class="" fill="#fff3c4"/>
 <rect x="266.6" y="535.1" width="60.2" height="60.2" class="" fill="#ffffff"/>
-<rect x="266.6" y="595.3" width="60.2" height="11.7" class="" fill="#ff9b8a"/>
+<rect x="266.6" y="595.3" width="60.2" height="24.7" class="" fill="#ff9b8a"/>
 <rect x="326.8" y="487.0" width="42.2" height="48.1" class="" fill="#fff3c4"/>
 <rect x="369.0" y="487.0" width="17.9" height="48.1" class="" fill="#fff3c4"/>
 <rect x="326.8" y="535.1" width="42.2" height="60.2" class="" fill="#ffffff"/>
 <rect x="369.0" y="535.1" width="17.9" height="60.2" class="" fill="#ffffff"/>
-<rect x="326.8" y="595.3" width="42.2" height="11.7" class="" fill="#ff9b8a"/>
+<rect x="326.8" y="595.3" width="42.2" height="24.7" class="" fill="#ff9b8a"/>
 <rect x="369.0" y="595.3" width="17.9" height="4.7" class="" fill="#ff9b8a"/>
 <rect x="386.9" y="487.0" width="14.1" height="48.1" class="" fill="#fff3c4"/>
 <rect x="401.0" y="487.0" width="46.1" height="48.1" class="" fill="#fff3c4"/>
@@ -200,8 +200,8 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="772.0" y="535.1" width="24.0" height="60.2" class="" fill="#fff3c4"/>
 <rect x="747.8" y="595.3" width="24.2" height="24.7" class="" fill="#ff9b8a"/>
 <rect x="772.0" y="595.3" width="24.0" height="4.7" class="" fill="#ff9b8a"/>
-<line x1="266.6" y1="487.0" x2="266.6" y2="607.0" class="joint" />
-<line x1="326.8" y1="487.0" x2="326.8" y2="607.0" class="joint" />
+<line x1="266.6" y1="487.0" x2="266.6" y2="620.0" class="joint" />
+<line x1="326.8" y1="487.0" x2="326.8" y2="620.0" class="joint" />
 <line x1="386.9" y1="487.0" x2="386.9" y2="600.0" class="joint" />
 <line x1="447.1" y1="487.0" x2="447.1" y2="620.0" class="joint" />
 <line x1="507.2" y1="487.0" x2="507.2" y2="620.0" class="joint" />
@@ -211,7 +211,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <line x1="747.8" y1="487.0" x2="747.8" y2="620.0" class="joint" />
 <line x1="210.0" y1="535.1" x2="796.0" y2="535.1" class="joint" />
 <line x1="210.0" y1="595.3" x2="796.0" y2="595.3" class="joint" />
-<polygon points="210.0,487.0 796.0,487.0 796.0,600.0 772.0,600.0 772.0,620.0 401.0,620.0 401.0,600.0 369.0,600.0 369.0,607.0 210.0,607.0" fill="none" stroke="#8a9aa8" stroke-width="0.8"/>
+<polygon points="210.0,487.0 796.0,487.0 796.0,600.0 772.0,600.0 772.0,620.0 401.0,620.0 401.0,600.0 369.0,600.0 369.0,620.0 210.0,620.0" fill="none" stroke="#8a9aa8" stroke-width="0.8"/>
 <rect x="512.0" y="76.0" width="55.4" height="38.1" class="" fill="#ffd08a"/>
 <rect x="512.0" y="114.1" width="55.4" height="60.2" class="" fill="#fff3c4"/>
 <rect x="512.0" y="174.2" width="55.4" height="60.1" class="" fill="#fff3c4"/>
@@ -834,9 +834,9 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="773.0" y="601.0" width="31.0" height="20.0" class="" fill="#5d4037" stroke="#3e2723"/>
 <text x="788.5" y="615.0" class="num" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">P8 31x20</text>
 <text x="788.5" y="615.0" class="num" text-anchor="middle">P8 31x20</text>
-<rect x="209.0" y="486.0" width="161.0" height="122.0" class="" fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" stroke-width="1.2" stroke-dasharray="3,3"/>
-<text x="289.5" y="525.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">CANALIZZATO C1  intradosso 240</text>
-<text x="289.5" y="525.0" class="lbl" text-anchor="middle">CANALIZZATO C1  intradosso 240</text>
+<rect x="209.0" y="486.0" width="161.0" height="135.0" class="" fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" stroke-width="1.2" stroke-dasharray="3,3"/>
+<text x="289.5" y="531.5" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">CANALIZZATO C1  intradosso 240</text>
+<text x="289.5" y="531.5" class="lbl" text-anchor="middle">CANALIZZATO C1  intradosso 240</text>
 <rect x="400.0" y="486.0" width="373.0" height="135.0" class="" fill="#0288d1" fill-opacity="0.10" stroke="#0288d1" stroke-width="1.2" stroke-dasharray="3,3"/>
 <text x="586.5" y="531.5" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">CANALIZZATO C2  intradosso 240</text>
 <text x="586.5" y="531.5" class="lbl" text-anchor="middle">CANALIZZATO C2  intradosso 240</text>
@@ -851,9 +851,9 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="1120.0" y="482.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
 <rect x="260.0" y="537.0" width="60.0" height="20.0" class="" fill="#0288d1" fill-opacity="0.55" stroke="#01579b"/>
 <rect x="560.0" y="537.0" width="60.0" height="20.0" class="" fill="#0288d1" fill-opacity="0.55" stroke="#01579b"/>
-<rect x="0.0" y="478.0" width="40.0" height="130.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
-<line x1="0.0" y1="543.0" x2="40.0" y2="543.0" class="fixl" />
-<text x="24.0" y="543.0" class="lbl" text-anchor="middle" transform="rotate(-90 24.0 543.0)">RP-01 SCAFFALI L130 P40 H220</text>
+<rect x="0.0" y="491.0" width="40.0" height="130.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
+<line x1="0.0" y1="556.0" x2="40.0" y2="556.0" class="fixl" />
+<text x="24.0" y="556.0" class="lbl" text-anchor="middle" transform="rotate(-90 24.0 556.0)">RP-01 SCAFFALI L130 P40 H220</text>
 <rect x="0.0" y="228.0" width="200.0" height="160.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
 <rect x="6.0" y="234.0" width="36.0" height="148.0" class="fixl" rx="3"/>
 <text x="100.0" y="312.0" class="lbl" text-anchor="middle">LM-01 LETTO L160 P200 H45</text>
@@ -994,9 +994,8 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="-84.0" y="501.0" class="dim" text-anchor="middle" transform="rotate(-90 -84.0 501.0)">28</text>
 <line x1="-78.0" y1="515.0" x2="-78.0" y2="600.0" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="-84.0" y="557.5" class="dim" text-anchor="middle" transform="rotate(-90 -84.0 557.5)">85</text>
-<line x1="-78.0" y1="600.0" x2="-78.0" y2="607.0" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
-<line x1="-78.0" y1="607.0" x2="-78.0" y2="620.0" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
-<text x="-99.0" y="613.5" class="dim" text-anchor="middle" transform="rotate(-90 -99.0 613.5)">13</text>
+<line x1="-78.0" y1="600.0" x2="-78.0" y2="620.0" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="-84.0" y="610.0" class="dim" text-anchor="middle" transform="rotate(-90 -84.0 610.0)">20</text>
 <line x1="-78.0" y1="620.0" x2="-78.0" y2="696.0" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="-84.0" y="658.0" class="dim" text-anchor="middle" transform="rotate(-90 -84.0 658.0)">76</text>
 <line x1="-75.0" y1="-58.0" x2="-56.0" y2="-58.0" class="ext" />
@@ -1010,7 +1009,6 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <line x1="-75.0" y1="487.0" x2="-56.0" y2="487.0" class="ext" />
 <line x1="-75.0" y1="515.0" x2="-56.0" y2="515.0" class="ext" />
 <line x1="-75.0" y1="600.0" x2="-56.0" y2="600.0" class="ext" />
-<line x1="-75.0" y1="607.0" x2="-56.0" y2="607.0" class="ext" />
 <line x1="-75.0" y1="620.0" x2="-56.0" y2="620.0" class="ext" />
 <line x1="-75.0" y1="696.0" x2="-56.0" y2="696.0" class="ext" />
 <line x1="-120.0" y1="-58.0" x2="-120.0" y2="696.0" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
@@ -1029,16 +1027,16 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="339.0" y="141.0" class="dimq" text-anchor="middle" transform="rotate(-90 339.0 141.0)">80 doccia</text>
 <line x1="399.0" y1="439.0" x2="399.0" y2="319.0" class="dq" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="394.0" y="379.0" class="dimq" text-anchor="middle" transform="rotate(-90 394.0 379.0)">120 lavabo</text>
-<line x1="60.0" y1="608.0" x2="60.0" y2="486.0" class="dq" marker-start="url(#tick)" marker-end="url(#tick)"/>
-<text x="55.0" y="547.0" class="dimq" text-anchor="middle" transform="rotate(-90 55.0 547.0)">122 ripostiglio</text>
+<line x1="60.0" y1="621.0" x2="60.0" y2="486.0" class="dq" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="55.0" y="553.5" class="dimq" text-anchor="middle" transform="rotate(-90 55.0 553.5)">135 ripostiglio</text>
 <line x1="1225.0" y1="601.0" x2="1225.0" y2="516.0" class="dq" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="1220.0" y="558.5" class="dimq" text-anchor="middle" transform="rotate(-90 1220.0 558.5)">85 setto schermo</text>
 <line x1="1.0" y1="498.0" x2="198.0" y2="498.0" class="dr" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="99.5" y="494.0" class="dimr" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">197</text>
 <text x="99.5" y="494.0" class="dimr" text-anchor="middle">197</text>
-<line x1="12.0" y1="487.0" x2="12.0" y2="607.0" class="dr" marker-start="url(#tick)" marker-end="url(#tick)"/>
-<text x="8.0" y="547.0" class="dimr" text-anchor="middle" transform="rotate(-90 8.0 547.0)" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">120</text>
-<text x="8.0" y="547.0" class="dimr" text-anchor="middle" transform="rotate(-90 8.0 547.0)">120</text>
+<line x1="12.0" y1="487.0" x2="12.0" y2="620.0" class="dr" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="8.0" y="553.5" class="dimr" text-anchor="middle" transform="rotate(-90 8.0 553.5)" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">133</text>
+<text x="8.0" y="553.5" class="dimr" text-anchor="middle" transform="rotate(-90 8.0 553.5)">133</text>
 <line x1="1.0" y1="85.0" x2="329.0" y2="85.0" class="dr" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="165.0" y="81.0" class="dimr" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">328</text>
 <text x="165.0" y="81.0" class="dimr" text-anchor="middle">328</text>
@@ -1089,10 +1087,10 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <path d="M 374.0,202 l 8,-3.5 l 0,7 Z" fill="#1f5673"/>
 <text x="99.5" y="513.0" class="room" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">RIPOSTIGLIO</text>
 <text x="99.5" y="513.0" class="room" text-anchor="middle">RIPOSTIGLIO</text>
-<text x="99.5" y="530.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">2.36 mq  -  197 x 120 cm</text>
-<text x="99.5" y="530.0" class="lbl" text-anchor="middle">2.36 mq  -  197 x 120 cm</text>
-<text x="99.5" y="545.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">2 intere / 10 tagliate  (min 12 cm)</text>
-<text x="99.5" y="545.0" class="lbl" text-anchor="middle">2 intere / 10 tagliate  (min 12 cm)</text>
+<text x="99.5" y="530.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">2.62 mq  -  197 x 133 cm</text>
+<text x="99.5" y="530.0" class="lbl" text-anchor="middle">2.62 mq  -  197 x 133 cm</text>
+<text x="99.5" y="545.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">2 intere / 10 tagliate  (min 25 cm)</text>
+<text x="99.5" y="545.0" class="lbl" text-anchor="middle">2 intere / 10 tagliate  (min 25 cm)</text>
 <text x="165.0" y="100.0" class="room" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">LETTO MATRIMONIALE</text>
 <text x="165.0" y="100.0" class="room" text-anchor="middle">LETTO MATRIMONIALE</text>
 <text x="165.0" y="117.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">13.15 mq  -  328 x 401 cm</text>
@@ -1107,10 +1105,10 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="459.5" y="132.0" class="lbl" text-anchor="middle">8 intere / 17 tagliate  (min 8 cm)</text>
 <text x="503.0" y="513.0" class="room" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">DISIMPEGNO</text>
 <text x="503.0" y="513.0" class="room" text-anchor="middle">DISIMPEGNO</text>
-<text x="503.0" y="530.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">7.48 mq  -  586 x 133 cm</text>
-<text x="503.0" y="530.0" class="lbl" text-anchor="middle">7.48 mq  -  586 x 133 cm</text>
-<text x="503.0" y="545.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">8 intere / 22 tagliate  (min 12 cm)</text>
-<text x="503.0" y="545.0" class="lbl" text-anchor="middle">8 intere / 22 tagliate  (min 12 cm)</text>
+<text x="503.0" y="530.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">7.68 mq  -  586 x 133 cm</text>
+<text x="503.0" y="530.0" class="lbl" text-anchor="middle">7.68 mq  -  586 x 133 cm</text>
+<text x="503.0" y="545.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">8 intere / 22 tagliate  (min 25 cm)</text>
+<text x="503.0" y="545.0" class="lbl" text-anchor="middle">8 intere / 22 tagliate  (min 25 cm)</text>
 <text x="654.0" y="102.0" class="room" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">LETTO SINGOLO</text>
 <text x="654.0" y="102.0" class="room" text-anchor="middle">LETTO SINGOLO</text>
 <text x="654.0" y="119.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">10.69 mq  -  284 x 399 cm</text>
@@ -1154,24 +1152,24 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="1420.0" y="1114.0" class="t2" text-anchor="start">% sup. con intere</text>
 <text x="1580.0" y="1114.0" class="t2" text-anchor="start">lastre / sfrido</text>
 <text x="45.0" y="1134.0" class="t2" text-anchor="start">90x90, 3 corsi a filo trave</text>
-<text x="300.0" y="1134.0" class="t2" text-anchor="start">27.4 / 29.4</text>
-<text x="500.0" y="1134.0" class="t2" text-anchor="start">51</text>
-<text x="660.0" y="1134.0" class="t2" text-anchor="start">93</text>
-<text x="800.0" y="1134.0" class="t2" text-anchor="start">5</text>
-<text x="980.0" y="1134.0" class="t2" text-anchor="start">40</text>
-<text x="1110.0" y="1134.0" class="t2" text-anchor="start">48</text>
-<text x="1260.0" y="1134.0" class="t2" text-anchor="start">7 cm</text>
-<text x="1420.0" y="1134.0" class="t2" text-anchor="start">50%</text>
-<text x="1580.0" y="1134.0" class="t2" text-anchor="start">122 / 17%</text>
+<text x="300.0" y="1134.0" class="t2" text-anchor="start">58.5 / 24.2</text>
+<text x="500.0" y="1134.0" class="t2" text-anchor="start">53</text>
+<text x="660.0" y="1134.0" class="t2" text-anchor="start">84</text>
+<text x="800.0" y="1134.0" class="t2" text-anchor="start">7</text>
+<text x="980.0" y="1134.0" class="t2" text-anchor="start">17</text>
+<text x="1110.0" y="1134.0" class="t2" text-anchor="start">60</text>
+<text x="1260.0" y="1134.0" class="t2" text-anchor="start">16 cm</text>
+<text x="1420.0" y="1134.0" class="t2" text-anchor="start">52%</text>
+<text x="1580.0" y="1134.0" class="t2" text-anchor="start">125 / 18%</text>
 <text x="45.0" y="1149.0" class="t2" text-anchor="start">80x80, 3 corsi a filo trave</text>
 <text x="300.0" y="1149.0" class="t2" text-anchor="start">19.3 / 59.0</text>
-<text x="500.0" y="1149.0" class="t2" text-anchor="start">76</text>
-<text x="660.0" y="1149.0" class="t2" text-anchor="start">93</text>
+<text x="500.0" y="1149.0" class="t2" text-anchor="start">79</text>
+<text x="660.0" y="1149.0" class="t2" text-anchor="start">90</text>
 <text x="800.0" y="1149.0" class="t2" text-anchor="start">30</text>
 <text x="980.0" y="1149.0" class="t2" text-anchor="start">5</text>
-<text x="1110.0" y="1149.0" class="t2" text-anchor="start">58</text>
+<text x="1110.0" y="1149.0" class="t2" text-anchor="start">55</text>
 <text x="1260.0" y="1149.0" class="t2" text-anchor="start">10 cm</text>
-<text x="1420.0" y="1149.0" class="t2" text-anchor="start">59%</text>
+<text x="1420.0" y="1149.0" class="t2" text-anchor="start">61%</text>
 <text x="1580.0" y="1149.0" class="t2" text-anchor="start">152 / 15%</text>
 <text x="45.0" y="1164.0" class="t3" text-anchor="start">60x60, 4 corsi a filo trave</text>
 <text x="300.0" y="1164.0" class="t3" text-anchor="start">26.1 / 54.0</text>

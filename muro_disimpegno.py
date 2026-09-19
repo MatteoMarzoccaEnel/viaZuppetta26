@@ -54,7 +54,7 @@ while s <= LARGH_DISIMPEGNO - LARGH_MIN + 0.01:
     tot, per = cp.analizza(*o)
     ob = cp.obiettivo(*o)
     RIS.append((s, o, tot, ob))
-    print(f"{s:4.0f}{LARGH_DISIMPEGNO-s:8.0f} {130-s:8.0f} {tot['intere']:8d}"
+    print(f"{s:4.0f}{LARGH_DISIMPEGNO-s:8.0f} {135-s:8.0f} {tot['intere']:8d}"
           f"{tot['sliver']:7d}{tot['min_lato']:10.1f}{tot['lastre']:8d}"
           f"{tot['sfrido']*100:7.1f}%{ob:11.1f}")
     s += PASSO
@@ -65,7 +65,7 @@ s, o, tot, ob = best
 print(f"  arretramento muro     {s:.0f} cm")
 print(f"  disimpegno            {LARGH_DISIMPEGNO-s:.0f} cm (al grezzo), "
       f"{LARGH_DISIMPEGNO-s-2:.0f} finito")
-print(f"  ripostiglio           {130-s:.0f} cm di profondita'")
+print(f"  ripostiglio           {135-s:.0f} cm di profondita'")
 print(f"  origine griglia       {o[0]:.1f} / {o[1]:.1f}")
 print(f"  lastre intere         {tot['intere']}   tagli sotto 25 cm: {tot['sliver']}")
 print(f"  lato minimo           {tot['min_lato']:.1f} cm")
