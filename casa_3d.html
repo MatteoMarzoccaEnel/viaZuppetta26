@@ -339,6 +339,27 @@ function quad(a,b,c,orizz,dentro,z0,z1,mat,cfg,dove){
 // rivestimento: le UV vanno ricostruite, non riscalate. Un gruppo per ciascuna,
 // se ne vede una alla volta e si scorrono con B.
 const SP_BATT = 1.0;   // il battiscopa sporge: senza spessore niente spigolo ne' ombra
+// reticolo delle fughe: linee vere, nere e sottili come quelle delle quote, che
+// restano leggibili anche guardando la casa dall'alto. Si accende con F.
+const matFuga = new THREE.LineBasicMaterial({color:0x000000});
+const retini = [];
+function retinoFughe(cfg){
+  const pts = [], q = 0.004, M = cfg.modulo;
+  for (const [x0,y0,x1,y1] of D.pavimento){
+    for (let k = Math.ceil((x0-cfg.ox)/M); cfg.ox + k*M < x1; k++){
+      const x = cfg.ox + k*M;
+      if (x > x0) pts.push(new THREE.Vector3(x*S, q, y0*S), new THREE.Vector3(x*S, q, y1*S));
+    }
+    for (let k = Math.ceil((y0-cfg.oy)/M); cfg.oy + k*M < y1; k++){
+      const z = cfg.oy + k*M;
+      if (z > y0) pts.push(new THREE.Vector3(x0*S, q, z*S), new THREE.Vector3(x1*S, q, z*S));
+    }
+  }
+  const l = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), matFuga);
+  l.visible = fugaNera;
+  retini.push(l);
+  return l;
+}
 function costruisciPosa(cfg, i){
   const M = matPosa[i];
   const g = new THREE.Group(); scene.add(g);
@@ -360,6 +381,7 @@ function costruisciPosa(cfg, i){
     quad(y, y1, x1, false,  1, base, z1, M.riv, cfg, g);
     superficie([[x, y, x1, y1]], z1, M.riv, false, cfg, g);
   }
+  g.add(retinoFughe(cfg));
   return g;
 }
 let iPosa = D.avvio;
@@ -781,6 +803,7 @@ addEventListener('keydown', e=>{
     if (e.code === 'KeyF'){
       fugaNera = !fugaNera;
       IMG.forEach((p, i) => applica(i, p[0], p[1]));
+      retini.forEach(r => r.visible = fugaNera);
       dimmi(fugaNera ? 'fughe evidenziate in nero' : 'fughe normali');
     }
     if (e.code === 'KeyE'){
