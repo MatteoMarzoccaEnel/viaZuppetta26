@@ -16,6 +16,7 @@ import base64
 import contextlib
 import io
 import json
+import math
 import re
 
 with contextlib.redirect_stdout(io.StringIO()):
@@ -295,6 +296,41 @@ def facce_riv(h_tot):
 OFF_TAGLIO = 6.0   # quanto la misura del taglio sta dentro il pezzo, dal bordo
 
 
+def _griglia(a, b, o, passo):
+    """Estremi del tratto a-b con in mezzo le fughe della griglia."""
+    v = [a]
+    k = math.ceil((a - o) / passo)
+    while o + k * passo < b - 0.05:
+        if o + k * passo > a + 0.05:
+            v.append(o + k * passo)
+        k += 1
+    return v + [b]
+
+
+def tagli_riv_posa():
+    """Come tagli_posa, ma sulle pareti rivestite del bagno.
+
+    (quota della faccia, orizzontale, verso, s, z, testo verticale, etichetta)
+    """
+    ox, oy = cp.OTTIMO["o"]
+    m, out = cp.MODULO - 0.5, []
+    for sa, sb, faccia, orizz, dentro, _g, z0, z1 in facce_riv(cp.H_RIV):
+        gs = _griglia(sa, sb, ox if orizz else oy, cp.MODULO)
+        gz = _griglia(z0, z1, 0.0, cp.MODULO)
+        for s0, s1 in zip(gs, gs[1:]):
+            for q0, q1 in zip(gz, gz[1:]):
+                ds, dz = s1 - s0, q1 - q0
+                if ds > m and dz > m:
+                    continue
+                if ds < m:
+                    out.append([faccia, orizz, dentro, (s0 + s1) / 2,
+                                q0 + min(OFF_TAGLIO, dz / 2), 0, f"{ds:.0f}"])
+                if dz < m:
+                    out.append([faccia, orizz, dentro, s0 + min(OFF_TAGLIO, ds / 2),
+                                (q0 + q1) / 2, 1, f"{dz:.0f}"])
+    return out
+
+
 def tagli_posa():
     """Misure dei pezzi non interi: (x0, y0, x1, y1, etichetta).
 
@@ -334,6 +370,7 @@ for _i, _f in enumerate(cp.FORMATI):
         fugaProf=cp.FUGA_PROF,
         ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1],
         hriv=cp.H_RIV, corsi=cp.RIV_CORSI, riv=facce_riv(cp.H_RIV), tagli=tagli_posa(),
+        tagliRiv=tagli_riv_posa(),
         texPav=incorpora(BASE_DIR + _f["tex_pav"]),
         texRiv=incorpora(BASE_DIR + _f["tex_riv"]),
         nota=f"{_t['lastre']} lastre, {_t['intere']} intere, "
@@ -344,6 +381,7 @@ DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobil
             riv=riv, batt=batt, quote=quote, etichette=etichette, aree=aree,
             muretti=muretti, posa=POSA,
             balconi=BALCONI, box=cp.BOX, contro=cp.CONTROSOFFITTI,
+            bagno=[list(r) for r in cp.LOCALI["BAGNO"]["rect"]],
             canali=cp.CANALI, bocchette=cp.BOCCHETTE, hcan=cp.H_CANALE,
             boc=list(cp.BOCCHETTA), zboc=cp.Z_BOCCHETTA,
             vicino=BALCONI_VICINO, separe=SEPARE, colring=COL_RING,
@@ -698,7 +736,7 @@ const SP_BATT = 1.0;   // il battiscopa sporge: senza spessore niente spigolo ne
 // Stanno nella scena disegnata dopo il composer, una per configurazione di posa.
 const matFuga = new THREE.LineBasicMaterial({color:0x000000,
   depthTest:false, depthWrite:false});
-const retini = [], segFughe = [];
+const retini = [], etichRiv = [], segFughe = [];
 function unisci(arr){      // tratti contigui sulla stessa retta diventano uno solo
   arr.sort((p,q) => p[0]-q[0]);
   const out = [];
@@ -739,6 +777,14 @@ function retinoFughe(cfg, i){
   g.add(l);
   retini[i] = g;
   scenaOver.add(g);
+  // le misure del rivestimento non attraversano i muri: si leggono dal bagno
+  const r = new THREE.Group(); r.visible = false; r.renderOrder = 2;
+  etichRiv[i] = r;
+  scenaOver.add(r);
+}
+function inBagno(p){
+  const x = p.x/S, z = p.z/S;
+  return D.bagno.some(([a,b,c,d]) => x > a-2 && x < c+2 && z > b-2 && z < d+2);
 }
 function mostraFughe(){
   retini.forEach((r, i) => { r.visible = fugaNera && i === iPosa; });
@@ -1125,9 +1171,28 @@ function quotaPiana(txt, x0, z0, x1, z1, hTesto, dove){
   piano.add(m); (dove || gQuote).add(piano);
 }
 // misura dei pezzi tagliati, scritta lungo il bordo che misura
+function etichettaParete(txt, c, orizz, dentro, s, z, vert, dove){
+  const W = 256, H = 64;
+  const t = texTesto(W, H, k => {
+    k.font = 'bold 44px Arial';
+    k.fillStyle = '#000000'; k.textAlign = 'center'; k.textBaseline = 'middle';
+    k.fillText(txt, W/2, H/2);
+  });
+  const h = 0.075;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(h*W/H, h),
+    new THREE.MeshBasicMaterial({map:t, transparent:true, depthTest:false,
+                                 depthWrite:false, side:THREE.DoubleSide}));
+  if (vert) m.rotation.z = Math.PI/2;
+  const g = new THREE.Object3D(), e = dentro > 0 ? 1 : -1;
+  if (orizz){ g.position.set(s*S, z*S, (c + e*0.4)*S); g.rotation.y = e > 0 ? 0 : Math.PI; }
+  else      { g.position.set((c + e*0.4)*S, z*S, s*S); g.rotation.y = e > 0 ? Math.PI/2 : -Math.PI/2; }
+  g.add(m); dove.add(g);
+}
 D.posa.forEach((cfg, i) => {
   for (const [x0,y0,x1,y1,txt] of cfg.tagli)
     quotaPiana(txt, x0*S, y0*S, x1*S, y1*S, 0.075, retini[i]);
+  for (const [c,o,dn,s,z,vert,txt] of cfg.tagliRiv)
+    etichettaParete(txt, c, o, dn, s, z, vert, etichRiv[i]);
 });
 for (const [x0,y0,x1,y1,lb] of D.quote){
   const h = 0.015, pts = [new THREE.Vector3(x0*S,h,y0*S), new THREE.Vector3(x1*S,h,y1*S)];
@@ -1300,7 +1365,8 @@ function loop(){
   }
   // soffitto trasparente quando lo si supera
   const sopra = controls.getObject().position.y > D.h*S;
-  matSoff.opacity += ((sopra ? 0.06 : 1) - matSoff.opacity) * Math.min(1, dt*8);
+  const dentroBagno = inBagno(controls.getObject().position);
+  etichRiv.forEach((r, i) => { r.visible = fugaNera && i === iPosa && dentroBagno; });  matSoff.opacity += ((sopra ? 0.06 : 1) - matSoff.opacity) * Math.min(1, dt*8);
   soffitto.visible = matSoff.opacity > 0.07;
   soffitto.castShadow = !sopra;
   // animazione delle porte
