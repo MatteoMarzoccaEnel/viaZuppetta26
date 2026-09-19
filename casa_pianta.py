@@ -370,6 +370,9 @@ TRAVI = [
 # (x0, y0, x1, y1, quota, passo dei faretti, etichetta)
 CONTROSOFFITTI = [
     (344, 73, 372.8, 483, H_TRAVE, 85, "bagno, fascia lato lavabo"),
+    # fessura di 14 cm fra la faccia est di T1 e il muro-schermo dell'ingresso,
+    # per la lunghezza del setto (rilievo y 37-122)
+    (1236.3, 516, 1250.3, 601, H_TRAVE, 85, "ingresso, fascia fra T1 e muro-schermo"),
 ]
 
 # ---- canalizzato caldo/freddo ----
