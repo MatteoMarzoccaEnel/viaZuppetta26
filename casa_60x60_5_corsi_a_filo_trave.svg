@@ -725,15 +725,15 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="1386.0" y="689.0" class="lbl" text-anchor="middle">INGRESSO 86</text>
 <circle cx="1386.0" cy="697.0" r="15" fill="#c0392b" stroke="#ffffff" stroke-width="2"/>
 <text x="1386.0" y="702.0" class="num" text-anchor="middle">1</text>
-<rect x="196.0" y="500.0" width="16.0" height="80.0" class="" fill="#ffffff"/>
-<line x1="204.0" y1="580.0" x2="204.0" y2="500.0" class="ap" />
-<rect x="201.5" y="502.0" width="5.0" height="76.0" class="door" />
-<line x1="204.0" y1="500.0" x2="178.0" y2="540.0" class="" stroke="#c0392b" stroke-width="1.2"/>
-<line x1="178.0" y1="540.0" x2="200.0" y2="580.0" class="" stroke="#c0392b" stroke-width="1.2"/>
-<text x="173.0" y="540.0" class="lbl" text-anchor="middle" transform="rotate(-90 173.0 540.0)">2 ante a libro</text>
-<text x="204.0" y="532.0" class="lbl" text-anchor="middle" transform="rotate(-90 204.0 532.0)">80</text>
-<circle cx="204.0" cy="540.0" r="15" fill="#c0392b" stroke="#ffffff" stroke-width="2"/>
-<text x="204.0" y="545.0" class="num" text-anchor="middle">2</text>
+<rect x="196.0" y="513.5" width="16.0" height="80.0" class="" fill="#ffffff"/>
+<line x1="204.0" y1="593.5" x2="204.0" y2="513.5" class="ap" />
+<rect x="201.5" y="515.5" width="5.0" height="76.0" class="door" />
+<line x1="204.0" y1="513.5" x2="178.0" y2="553.5" class="" stroke="#c0392b" stroke-width="1.2"/>
+<line x1="178.0" y1="553.5" x2="200.0" y2="593.5" class="" stroke="#c0392b" stroke-width="1.2"/>
+<text x="173.0" y="553.5" class="lbl" text-anchor="middle" transform="rotate(-90 173.0 553.5)">2 ante a libro</text>
+<text x="204.0" y="545.5" class="lbl" text-anchor="middle" transform="rotate(-90 204.0 545.5)">80</text>
+<circle cx="204.0" cy="553.5" r="15" fill="#c0392b" stroke="#ffffff" stroke-width="2"/>
+<text x="204.0" y="558.5" class="num" text-anchor="middle">2</text>
 <rect x="219.0" y="473.0" width="94.0" height="16.0" class="" fill="#ffffff"/>
 <line x1="219.0" y1="481.0" x2="313.0" y2="481.0" class="ap" />
 <rect x="219.0" y="474.0" width="7.0" height="14.0" class="" fill="#4a4a4a"/>

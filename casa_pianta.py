@@ -130,7 +130,7 @@ LOCALI = {
 # ---- aperture: (tipo, x0, y0, x1, y1, etichetta) ----
 APERTURE = [
     ("battente", 1343, -59, 1429, -59, "INGRESSO 86"),
-    ("porta", 204, 58, 204, 138, "80"),
+    ("porta", 204, 44.5, 204, 124.5, "80"),
     ("porta", 219, 157, 313, 157, "80"),
     ("porta", 394, 157, 479, 157, "80"),
     ("porta", 605.3, 157, 700.3, 157, "80"),
@@ -623,7 +623,11 @@ def seg_meno(a, b, vani):
 
 
 def vani_sul_filo(orizz, c, a, b):
-    """Vani che arrivano a terra sul tratto a-b della retta c."""
+    """Vani che arrivano a terra sul tratto a-b della retta c.
+
+    Per porte e passaggi conta la luce dell'anta, non il vano murario: quando il
+    vano e' piu' largo, le spallette restano muro e vogliono il loro battiscopa.
+    """
     out = []
     for tipo, x0, y0, x1, y1, lb in APERTURE:
         if tipo not in VANI_TERRA:
@@ -632,6 +636,9 @@ def vani_sul_filo(orizz, c, a, b):
         if ao != orizz or abs((y0 if ao else x0) - c) > 11:
             continue
         va, vb = (min(x0, x1), max(x0, x1)) if ao else (min(y0, y1), max(y0, y1))
+        if tipo in ("porta", "passaggio") and vb - va > ANTA + 1:
+            m = (vb - va - ANTA) / 2
+            va, vb = va + m, vb - m
         va, vb = max(va, a), min(vb, b)
         if vb - va > 0.5:
             out.append((va, vb))
