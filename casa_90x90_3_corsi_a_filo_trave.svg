@@ -614,9 +614,9 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="1250.3" y="516.0" width="10.0" height="85.0" class="" fill="#4a4a4a"/>
 <text x="1255.3" y="507.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">SETTO 10x85</text>
 <text x="1255.3" y="507.0" class="lbl" text-anchor="middle">SETTO 10x85</text>
-<rect x="810.1" y="468.0" width="61.0" height="10.0" class="" fill="#4a4a4a"/>
-<text x="840.6" y="459.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">SETTO 10x61</text>
-<text x="840.6" y="459.0" class="lbl" text-anchor="middle">SETTO 10x61</text>
+<rect x="810.1" y="476.0" width="61.0" height="10.0" class="" fill="#4a4a4a"/>
+<text x="840.6" y="467.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">SETTO 10x61</text>
+<text x="840.6" y="467.0" class="lbl" text-anchor="middle">SETTO 10x61</text>
 <rect x="372.8" y="73.0" width="32.0" height="548.0" class="" fill="#8e44ad" fill-opacity="0.18" stroke="#8e44ad" stroke-width="1.2" stroke-dasharray="7,4"/>
 <text x="388.8" y="655.0" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">T3 bagno / disimpegno  h 261</text>
 <text x="388.8" y="655.0" class="lbl" text-anchor="middle">T3 bagno / disimpegno  h 261</text>
@@ -729,8 +729,8 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <line x1="591.5" y1="603.0" x2="591.5" y2="621.0" class="fixl" />
 <line x1="684.8" y1="603.0" x2="684.8" y2="621.0" class="fixl" />
 <text x="591.5" y="616.0" class="lbl" text-anchor="middle">DI-01 CASSETTIERA L373 P18 H150</text>
-<rect x="810.1" y="136.0" width="61.0" height="332.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
-<text x="844.6" y="302.0" class="lbl" text-anchor="middle" transform="rotate(-90 844.6 302.0)">ZG-01 CUCINA L332 P61 H231</text>
+<rect x="810.1" y="144.0" width="61.0" height="332.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
+<text x="844.6" y="310.0" class="lbl" text-anchor="middle" transform="rotate(-90 844.6 310.0)">ZG-01 CUCINA L332 P61 H231</text>
 <rect x="1024.3" y="576.0" width="180.0" height="45.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
 <text x="1114.3" y="602.5" class="lbl" text-anchor="middle">ZG-02 MOBILE TV L180 P45 H45</text>
 <line x1="1.0" y1="-78.0" x2="198.0" y2="-78.0" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>

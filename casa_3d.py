@@ -662,11 +662,13 @@ function quad(a,b,c,orizz,dentro,z0,z1,mat,cfg,dove){
 // rivestimento: le UV vanno ricostruite, non riscalate. Un gruppo per ciascuna,
 // se ne vede una alla volta e si scorrono con B.
 const SP_BATT = 1.0;   // il battiscopa sporge: senza spessore niente spigolo ne' ombra
-// reticolo delle fughe: linee vere, nere e sottili come quelle delle quote, che
-// restano leggibili anche guardando la casa dall'alto. Si accende con F.
-const matFuga = new THREE.LineBasicMaterial({color:0x000000});
+// reticolo delle fughe: linee vere, nere e sempre in primo piano come le quote,
+// cosi' si leggono anche attraverso arredi e muri guardando la casa dall'alto.
+// Stanno nella scena disegnata dopo il composer, una per configurazione di posa.
+const matFuga = new THREE.LineBasicMaterial({color:0x000000,
+  depthTest:false, depthWrite:false});
 const retini = [];
-function retinoFughe(cfg){
+function retinoFughe(cfg, i){
   const pts = [], q = 0.004, M = cfg.modulo;
   for (const [x0,y0,x1,y1] of D.pavimento){
     for (let k = Math.ceil((x0-cfg.ox)/M); cfg.ox + k*M < x1; k++){
@@ -679,9 +681,13 @@ function retinoFughe(cfg){
     }
   }
   const l = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), matFuga);
-  l.visible = fugaNera;
-  retini.push(l);
-  return l;
+  l.renderOrder = 2;
+  l.visible = false;
+  retini[i] = l;
+  scenaOver.add(l);
+}
+function mostraFughe(){
+  retini.forEach((r, i) => { r.visible = fugaNera && i === iPosa; });
 }
 function costruisciPosa(cfg, i){
   const M = matPosa[i];
@@ -704,7 +710,7 @@ function costruisciPosa(cfg, i){
     quad(y, y1, x1, false,  1, base, z1, M.riv, cfg, g);
     superficie([[x, y, x1, y1]], z1, M.riv, false, cfg, g);
   }
-  g.add(retinoFughe(cfg));
+  retinoFughe(cfg, i);
   return g;
 }
 let iPosa = D.avvio;
@@ -1121,12 +1127,13 @@ addEventListener('keydown', e=>{
       iPosa = (iPosa + 1) % gPosa.length;
       gPosa[iPosa].visible = true;
       mostraPosa();
+      mostraFughe();
       dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
     }
     if (e.code === 'KeyF'){
       fugaNera = !fugaNera;
       IMG.forEach((p, i) => applica(i, p[0], p[1]));
-      retini.forEach(r => r.visible = fugaNera);
+      mostraFughe();
       dimmi(fugaNera ? 'fughe evidenziate in nero' : 'fughe normali');
     }
     if (e.code === 'KeyE'){

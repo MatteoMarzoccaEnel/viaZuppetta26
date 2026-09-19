@@ -189,7 +189,7 @@ ARREDO = [
 
     # fronte cucina in un unico blocco lungo il muro giorno/notte: colonne,
     # basi e pensili stanno dentro l'ingombro 332x61, alto 231
-    ("ZONA GIORNO", "CUCINA 332x61", 810.1, 170, 61, 332, "cucina"),
+    ("ZONA GIORNO", "CUCINA 332x61", 810.1, 162, 61, 332, "cucina"),
     ("ZONA GIORNO", "MOBILE TV 180x45", 1024.3, 17, 180, 45, "box"),
 ]
 
@@ -200,7 +200,7 @@ ARREDO = [
 # alla cucina: la sua faccia interna e' a filo del fianco sinistro del mobile
 SETTI = [
     (1250.3, 37, 10, 85, "SETTO 10x85"),
-    (810.1, 160, 61, 10, "SETTO 10x61"),
+    (810.1, 152, 61, 10, "SETTO 10x61"),
 ]
 
 # ---- muri di PROGETTO (verdi in tavola): sono gli unici spostabili ----
