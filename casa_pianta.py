@@ -378,8 +378,7 @@ H_CANALE = H_TRAVE
 CANALI_RILIEVO = [
     (209, 17, 372, 152, "C1"),      # dal muro del ripostiglio alla trave T3
     (403.5, 17, 776.8, 152, "C2"),  # da P7 a P8
-    (808.3, 17, 1202.5, 152, "C3"), # da P8 alla trave T1, nella zona giorno
-    (1202.5, 37, 1248.5, 152, "C3"),  # ultimo tratto: il filo nord rientra di 20
+    (808.3, 17, 1202.5, 152, "C3"), # da P8 alla trave T1, che appoggia su PX
 ]
 TRATTI_CANALE = {
     "C1": "ripostiglio - trave T3",
@@ -391,14 +390,25 @@ TRATTI_CANALE = {
 # la parete alta della stanza sopra la porta, "giu" scarica dal piano inferiore.
 BOCCHETTA = (60.0, 20.0)     # luce della griglia: larghezza x altezza
 Z_BOCCHETTA = 252.0          # base delle griglie orizzontali (fra trave e soffitto)
+
+
+def _mezzeria_vano(n):
+    """Mezzeria della luce dell'apertura n-esima, lungo il muro che la ospita."""
+    _t, x0, y0, x1, y1, _lb = APERTURE[n - 1]
+    return (x0 + x1) / 2 if abs(y1 - y0) < abs(x1 - x0) else (y0 + y1) / 2
+
+
+# mezzeria del cassonetto: le griglie a scendere stanno in asse al corridoio
+_Y_CAN = (CANALI_RILIEVO[0][1] + CANALI_RILIEVO[0][3]) / 2
+
 BOCCHETTE_RILIEVO = [
-    (266, 162, "s", "LETTO MATRIMONIALE"),
-    (435, 162, "s", "BAGNO"),
-    (642, 162, "s", "LETTO SINGOLO"),
+    (_mezzeria_vano(3), 162, "s", "LETTO MATRIMONIALE"),
+    (_mezzeria_vano(4), 162, "s", "BAGNO"),
+    (_mezzeria_vano(5), 162, "s", "LETTO SINGOLO"),
     (1000, 152, "s", "ZONA GIORNO"),
     (1150, 152, "s", "ZONA GIORNO"),
-    (290, 91, "giu", "DISIMPEGNO"),
-    (590, 91, "giu", "DISIMPEGNO"),
+    (290, _Y_CAN, "giu", "DISIMPEGNO"),
+    (590, _Y_CAN, "giu", "DISIMPEGNO"),
 ]
 CANALI = [_rett(*c) for c in CANALI_RILIEVO]
 BOCCHETTE = [R(x, y) + (v, lo) for x, y, v, lo in BOCCHETTE_RILIEVO]
