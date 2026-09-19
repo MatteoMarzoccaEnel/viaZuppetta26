@@ -939,11 +939,22 @@ for (const [x0,y0,x1,y1,alt] of D.separe) ringhiera(x0*S, y0*S, x1*S, y1*S, alt)
 // chiudono i vuoti a fianco delle travi, che altrimenti restano pozzi profondi
 const matFaretto = new THREE.MeshStandardMaterial({color:0xfffaf0,
   emissive:0xfff0d0, emissiveIntensity:1.4, roughness:0.4});
-for (const [x0,y0,x1,y1,z,passo,lb] of D.contro){
+for (const [x0,y0,x1,y1,z,passo,lb,chiusure] of D.contro){
   const W = (x1-x0)*S, P = (y1-y0)*S;
   const p = new THREE.Mesh(new THREE.BoxGeometry(W, 0.025, P), matMuro);
   p.position.set((x0+x1)/2*S, z*S - 0.0125, (y0+y1)/2*S);
   p.castShadow = p.receiveShadow = true; scene.add(p);
+  // testate sui lati che non si appoggiano a un muro
+  const sp = 0.025, alt = (D.h - z)*S;
+  for (const lato of (chiusure || [])){
+    const oriz = (lato === 'y0' || lato === 'y1');
+    const g = new THREE.BoxGeometry(oriz ? W : sp, alt, oriz ? sp : P);
+    const m = new THREE.Mesh(g, matMuro);
+    const cx = lato === 'x0' ? x0*S + sp/2 : lato === 'x1' ? x1*S - sp/2 : (x0+x1)/2*S;
+    const cz = lato === 'y0' ? y0*S + sp/2 : lato === 'y1' ? y1*S - sp/2 : (y0+y1)/2*S;
+    m.position.set(cx, z*S + alt/2, cz);
+    m.castShadow = m.receiveShadow = true; scene.add(m);
+  }
   // faretti equidistanti lungo il lato lungo
   const lungo = Math.max(x1-x0, y1-y0), oriz = (x1-x0) >= (y1-y0);
   const n = Math.max(2, Math.round(lungo/passo));

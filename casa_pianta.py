@@ -367,12 +367,16 @@ TRAVI = [
 ]
 
 # controsoffitti in cartongesso che chiudono i vuoti a fianco delle travi:
-# (x0, y0, x1, y1, quota, passo dei faretti, etichetta)
+# (x0, y0, x1, y1, quota, passo dei faretti, etichetta, lati da chiudere)
+# i lati da chiudere sono quelli che non si appoggiano a un muro: senza la
+# testata verticale il cavedio resterebbe aperto in vista
 CONTROSOFFITTI = [
-    (344, 73, 372.8, 483, H_TRAVE, 85, "bagno, fascia lato lavabo"),
+    (344, 73, 372.8, 483, H_TRAVE, 85, "bagno, fascia lato lavabo", ()),
     # fessura di 14 cm fra la faccia est di T1 e il muro-schermo dell'ingresso,
-    # per la lunghezza del setto (rilievo y 37-122)
-    (1236.3, 516, 1250.3, 601, H_TRAVE, 85, "ingresso, fascia fra T1 e muro-schermo"),
+    # per la lunghezza del setto (rilievo y 37-122): l'estremo verso il
+    # soggiorno e' libero e va tamponato
+    (1236.3, 516, 1250.3, 601, H_TRAVE, 85,
+     "ingresso, fascia fra T1 e muro-schermo", ("y0",)),
 ]
 
 # ---- canalizzato caldo/freddo ----
