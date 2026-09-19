@@ -27,13 +27,13 @@ PIATTO_DOCCIA = 1.34
 # tutte le voci arrivano dagli script che le calcolano: cambiando formato in
 # casa_pianta.FORMATI questo computo si aggiorna da solo
 _pav = cp.OTTIMO["tot"]
-_batt = math.ceil(bs.ml / (10 * PIASTRELLA / 100))     # h 8, 10 strisce per lastra
+_batt = math.ceil(bs.ml / (10 * cp.LATO_MAX / 100))    # h 8, 10 strisce per lastra
 
 # voce: (superficie netta, lastre con riuso, lastre senza riuso)
 GRES = {
     "Pavimento (netto del piatto doccia)":
         (cp.AREA_TOT - PIATTO_DOCCIA, _pav["lastre"], _pav["intere"] + _pav["tagli"]),
-    f"Rivestimento bagno in {PIASTRELLA:.0f}x{PIASTRELLA:.0f} ({br.CORSI} corsi)":
+    f"Rivestimento bagno in {cp.NOME_RIV} ({br.CORSI} corsi)":
         br.tot["pavimento"],
     f"Battiscopa h 8 ({bs.ml:.1f} ml)": (_batt * LASTRA, _batt, _batt),
 }
@@ -63,7 +63,7 @@ def blocco(titolo, voci, preventivo):
 
 
 print(f"superficie calpestabile {CALPESTABILE:.2f} mq al grezzo")
-a = blocco("GRES 90x90 (pavimento + battiscopa + meta' rivestimento bagno)", GRES, PREVENTIVO["gres 90x90"])
+a = blocco(f"GRES {cp.NOME_FORMATO} (pavimento + battiscopa + meta' rivestimento bagno)", GRES, PREVENTIVO["gres 90x90"])
 b = blocco("PIASTRELLA DEDICATA (spalle lavabo + testata finestra)", DEDICATA, PREVENTIVO["dedicata"])
 
 print(f"\nRIEPILOGO")

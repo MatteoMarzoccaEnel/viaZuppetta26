@@ -34,28 +34,49 @@ H_TRAVE = H_INT - CALO_TRAVE      # intradosso delle travi in c.a.
 # ---- configurazioni di posa a confronto: si scorrono con B nel modello 3D ----
 # Il formato entra nel modulo della griglia, quindi ogni configurazione ha una
 # sua origine ottimale e un suo conteggio di lastre: non sono varianti grafiche.
+# Pavimento e rivestimento del bagno si posano con lo stesso prodotto ma possono
+# avere orientamento diverso: con la 60x120 le combinazioni sono quattro.
 # Il rivestimento del bagno chiude sempre all'intradosso della trave: cambia
 # solo il numero di corsi necessari a raggiungerla.
+TEXTURE_DIR = "texture"      # una sottocartella per formato, con dentro le texture
 FORMATI = [
-    dict(piastrella=90.0, fuga=0.2,
-         tex_pav="pavimento.png", tex_riv="piastrelle.png"),
-    dict(piastrella=80.0, fuga=0.2,
-         tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
-    dict(piastrella=60.0, fuga=0.2,
-         tex_pav="pavimento80x80.jpg", tex_riv="piastrella80x80.jpg"),
+    dict(lato=(90.0, 90.0), fuga=0.2),
+    dict(lato=(80.0, 80.0), fuga=0.2),
+    dict(lato=(60.0, 60.0), fuga=0.2),
+    dict(lato=(60.0, 120.0), lato_riv=(60.0, 120.0), fuga=0.2),
+    dict(lato=(60.0, 120.0), lato_riv=(120.0, 60.0), fuga=0.2),
+    dict(lato=(120.0, 60.0), lato_riv=(60.0, 120.0), fuga=0.2),
+    dict(lato=(120.0, 60.0), lato_riv=(120.0, 60.0), fuga=0.2),
 ]
 for _f in FORMATI:
+    _f.setdefault("lato_riv", _f["lato"])
+    _lx, _ly = _f["lato"]
+    _rx, _ry = _f["lato_riv"]
+    # la piastrella e' la stessa nei due orientamenti: una cartella sola di texture
+    _f["cartella"] = f"{min(_lx, _ly):.0f}x{max(_lx, _ly):.0f}"
     # ultimo corso tagliato: si posa il minimo indispensabile per arrivare in quota
-    _f["riv_corsi"] = math.ceil((H_TRAVE + _f["fuga"]) / (_f["piastrella"] + _f["fuga"]))
+    _f["riv_corsi"] = math.ceil((H_TRAVE + _f["fuga"]) / (_ry + _f["fuga"]))
     _f["riv_h"] = H_TRAVE
-    _p = int(_f["piastrella"])
-    _f["nome"] = f"{_p}x{_p}, {_f['riv_corsi']} corsi a filo trave"
+    _n = f"{_lx:.0f}x{_ly:.0f}"
+    if _f["lato_riv"] != _f["lato"]:
+        _n += f" pav {_rx:.0f}x{_ry:.0f} par"
+    _f["nome"] = f"{_n}, {_f['riv_corsi']} corsi a filo trave"
 # valori della configurazione attiva, rimpiazzati da usa_formato()
 FORMATO = FORMATI[0]
-PIASTRELLA = FORMATO["piastrella"]
+PIASTRELLA_X, PIASTRELLA_Y = FORMATO["lato"]
+RIV_X, RIV_Y = FORMATO["lato_riv"]
+PIASTRELLA = PIASTRELLA_X      # lato in orizzontale: usato dove il formato e' quadro
+LATO_MAX = max(PIASTRELLA_X, PIASTRELLA_Y)
+NOME_FORMATO = f"{PIASTRELLA_X:.0f}x{PIASTRELLA_Y:.0f}"
+NOME_RIV = f"{RIV_X:.0f}x{RIV_Y:.0f}"
 FUGA = FORMATO["fuga"]
-MODULO = PIASTRELLA + FUGA
-LASTRA = (PIASTRELLA / 100) ** 2
+MODULO_X = PIASTRELLA_X + FUGA
+MODULO_Y = PIASTRELLA_Y + FUGA
+MODULO_RIV_X = RIV_X + FUGA
+MODULO_RIV_Y = RIV_Y + FUGA
+MODULO = MODULO_X
+LASTRA = PIASTRELLA_X * PIASTRELLA_Y / 10000
+LASTRA_RIV = RIV_X * RIV_Y / 10000
 
 FINITURA = 1.0   # gres a parete nel bagno, battiscopa negli altri locali
 FUGA_PROF = 0.01 # incavo della fuga rispetto al piano della lastra (0,1 mm)
@@ -69,7 +90,7 @@ def h_riv(f):
     """Altezza del rivestimento: corsi interi, oppure la quota imposta da riv_h."""
     if f.get("riv_h"):
         return f["riv_h"]
-    return f["riv_corsi"] * f["piastrella"] + (f["riv_corsi"] - 1) * f["fuga"]
+    return f["riv_corsi"] * f["lato_riv"][1] + (f["riv_corsi"] - 1) * f["fuga"]
 
 
 H_RIV = h_riv(FORMATO)
@@ -791,10 +812,10 @@ def celle(d, ox, oy):
     """Ogni cella della griglia che tocca il locale, con le sue parti effettive."""
     x0, y0, x1, y1 = d["bb"]
     out = []
-    for i in range(math.floor((x0 - ox) / MODULO), math.ceil((x1 - ox) / MODULO) + 1):
-        for j in range(math.floor((y0 - oy) / MODULO), math.ceil((y1 - oy) / MODULO) + 1):
-            a0, a1 = ox + i * MODULO, ox + (i + 1) * MODULO
-            b0, b1 = oy + j * MODULO, oy + (j + 1) * MODULO
+    for i in range(math.floor((x0 - ox) / MODULO_X), math.ceil((x1 - ox) / MODULO_X) + 1):
+        for j in range(math.floor((y0 - oy) / MODULO_Y), math.ceil((y1 - oy) / MODULO_Y) + 1):
+            a0, a1 = ox + i * MODULO_X, ox + (i + 1) * MODULO_X
+            b0, b1 = oy + j * MODULO_Y, oy + (j + 1) * MODULO_Y
             parti = []
             for rx0, ry0, rx1, ry1 in d["rect"]:
                 cx0, cx1 = max(a0, rx0), min(a1, rx1)
@@ -807,7 +828,7 @@ def celle(d, ox, oy):
             dx = max(p[2] for p in parti) - min(p[0] for p in parti)
             dy = max(p[3] for p in parti) - min(p[1] for p in parti)
             out.append(dict(parti=parti, sup=sup, dx=dx, dy=dy,
-                            intera=sup > MODULO * MODULO - 1.0,
+                            intera=sup > MODULO_X * MODULO_Y - 1.0,
                             lato=min(dx, dy)))
     return out
 
@@ -824,10 +845,10 @@ def analizza(ox, oy):
         buoni = [c for c in cut if c["lato"] >= MEZZA]
         # una lastra intera per ogni pezzo con entrambi i lati > meta' modulo,
         # due pezzi piccoli si ricavano dalla stessa lastra
-        grandi = sum(1 for c in cut if c["dx"] > MODULO / 2 and c["dy"] > MODULO / 2)
+        grandi = sum(1 for c in cut if c["dx"] > MODULO_X / 2 and c["dy"] > MODULO_Y / 2)
         piccoli = len(cut) - grandi
         lastre = len(ints) + grandi + math.ceil(piccoli / 2)
-        mlato = min([c["lato"] for c in cut], default=PIASTRELLA)
+        mlato = min([c["lato"] for c in cut], default=min(PIASTRELLA_X, PIASTRELLA_Y))
         per_loc[nome] = dict(celle=cs, intere=len(ints), tagli=len(cut),
                              sliver=len(sliver), medi=len(medi), buoni=len(buoni),
                              lastre=lastre, min_lato=mlato,
@@ -859,12 +880,13 @@ def obiettivo(ox, oy):
 def _candidati(idx):
     """Offset critici: la funzione obiettivo cambia solo quando una fuga
     attraversa un bordo, quindi basta provare quei valori e i punti medi."""
-    vals = sorted({round(p[idx] % MODULO, 3)
+    M = MODULO_X if idx == 0 else MODULO_Y
+    vals = sorted({round(p[idx] % M, 3)
                    for d in LOCALI.values() for p in d["fin"]})
     out = list(vals)
     for a, b in zip(vals, vals[1:]):
         out.append((a + b) / 2)
-    out.append(((vals[-1] + vals[0] + MODULO) / 2) % MODULO)
+    out.append(((vals[-1] + vals[0] + M) / 2) % M)
     return sorted(set(out))
 
 
@@ -890,12 +912,24 @@ def usa_formato(i):
     Formato e corsi di rivestimento cambiano il modulo della griglia, quindi
     origine ottimale, lastre e sfrido vanno ricalcolati: non basta ridisegnare.
     """
-    global FORMATO, PIASTRELLA, FUGA, MODULO, LASTRA, RIV_CORSI, H_RIV, OTTIMO
+    global FORMATO, PIASTRELLA, PIASTRELLA_X, PIASTRELLA_Y, LATO_MAX, NOME_FORMATO
+    global RIV_X, RIV_Y, NOME_RIV, MODULO_RIV_X, MODULO_RIV_Y, LASTRA_RIV
+    global FUGA, MODULO, MODULO_X, MODULO_Y, LASTRA, RIV_CORSI, H_RIV, OTTIMO
     FORMATO = FORMATI[i]
-    PIASTRELLA = FORMATO["piastrella"]
+    PIASTRELLA_X, PIASTRELLA_Y = FORMATO["lato"]
+    RIV_X, RIV_Y = FORMATO["lato_riv"]
+    PIASTRELLA = PIASTRELLA_X
+    LATO_MAX = max(PIASTRELLA_X, PIASTRELLA_Y)
+    NOME_FORMATO = f"{PIASTRELLA_X:.0f}x{PIASTRELLA_Y:.0f}"
+    NOME_RIV = f"{RIV_X:.0f}x{RIV_Y:.0f}"
     FUGA = FORMATO["fuga"]
-    MODULO = PIASTRELLA + FUGA
-    LASTRA = (PIASTRELLA / 100) ** 2
+    MODULO_X = PIASTRELLA_X + FUGA
+    MODULO_Y = PIASTRELLA_Y + FUGA
+    MODULO_RIV_X = RIV_X + FUGA
+    MODULO_RIV_Y = RIV_Y + FUGA
+    MODULO = MODULO_X
+    LASTRA = PIASTRELLA_X * PIASTRELLA_Y / 10000
+    LASTRA_RIV = RIV_X * RIV_Y / 10000
     RIV_CORSI = FORMATO["riv_corsi"]
     H_RIV = h_riv(FORMATO)
     OTTIMO = _ottimo()
@@ -911,8 +945,8 @@ def slug(nome):
 RIEPILOGO = []
 for _i, _f in enumerate(FORMATI):
     usa_formato(_i)
-    RIEPILOGO.append(dict(i=_i, nome=_f["nome"], modulo=MODULO, hriv=H_RIV,
-                          corsi=RIV_CORSI, o=OTTIMO["o"], tot=OTTIMO["tot"],
+    RIEPILOGO.append(dict(i=_i, nome=_f["nome"], modulo=f"{MODULO_X:.1f}x{MODULO_Y:.1f}",
+                          hriv=H_RIV, corsi=RIV_CORSI, o=OTTIMO["o"], tot=OTTIMO["tot"],
                           punteggio=obiettivo(*OTTIMO["o"])))
 
 # negli elaborati va il formato che minimizza obiettivo(), salvo --posa=N
@@ -963,12 +997,12 @@ for _x, _y, _v, _lo in BOCCHETTE_RILIEVO:
     print(f"    {_lo:22}{'a scendere' if _v == 'giu' else 'orizzontale':14} x {_x:.0f}")
 print()
 print("CONFRONTO FORMATI (ognuno con la sua origine di posa ottimale)")
-print(f"{'n':>2}  {'configurazione':30}{'modulo':>8}{'origine X/Y':>14}{'intere':>8}"
+print(f"{'n':>2}  {'configurazione':44}{'modulo':>12}{'origine X/Y':>14}{'intere':>8}"
       f"{'tagliate':>9}{'listelli':>9}{'lato min':>10}{'lastre':>8}{'sfrido':>8}{'punti':>8}")
-print("-" * 114)
+print("-" * 132)
 for _r in RIEPILOGO:
     _t = _r["tot"]
-    print(f"{_r['i']:>2}  {_r['nome']:30}{_r['modulo']:8.2f}"
+    print(f"{_r['i']:>2}  {_r['nome']:44}{_r['modulo']:>12}"
           f"{_r['o'][0]:7.1f}/{_r['o'][1]:6.1f}{_t['intere']:8d}{_t['tagli']:9d}"
           f"{_t['sliver']:9d}{_t['min_lato']:10.1f}{_t['lastre']:8d}{_t['sfrido']*100:7.1f}%"
           f"{_r['punteggio']:8d}")
@@ -1053,11 +1087,11 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 .ext { stroke: #aaa; stroke-width: 0.5; stroke-dasharray: 4 3; }
 </style></defs>""")
     rect(0, 0, W, H, extra='fill="#ffffff"')
-    txt(30, 45, f"APPARTAMENTO - posa gres {PIASTRELLA:.0f}x{PIASTRELLA:.0f}", "t1", "start")
+    txt(30, 45, f"APPARTAMENTO - posa gres {NOME_FORMATO}", "t1", "start")
     txt(30, 72, f"origine di posa ottimale {ox:.1f} / {oy:.1f} cm - minimo numero di "
                 f"lastre e di tagli; rivestimento bagno su {RIV_CORSI} corsi a filo trave",
         "t2", "start")
-    txt(30, 95, f"fuga {FUGA*10:.1f} mm - modulo {MODULO:.2f} cm - griglia unica continua su tutta la casa - "
+    txt(30, 95, f"fuga {FUGA*10:.1f} mm - modulo {MODULO_X:.2f} x {MODULO_Y:.2f} cm - griglia unica continua su tutta la casa - "
                 f"battiscopa/rivestimento {FINITURA:.0f} cm - origine {ox:.1f}/{oy:.1f} - stampa 100% = 1:{SCALA}", "t2", "start")
 
     add(f'<g transform="translate({TX},{TY})">')
@@ -1074,15 +1108,15 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
                 rect(p[0], p[1], p[2] - p[0], p[3] - p[1], extra=f'fill="{col}"')
         # fughe
         x0, y0, x1, y1 = d["bb"]
-        k = math.ceil((x0 - ox) / MODULO)
-        while ox + k * MODULO < x1:
-            for a, b in intervalli(d["fin"], "x", ox + k * MODULO):
-                line(ox + k * MODULO, a, ox + k * MODULO, b, "joint")
+        k = math.ceil((x0 - ox) / MODULO_X)
+        while ox + k * MODULO_X < x1:
+            for a, b in intervalli(d["fin"], "x", ox + k * MODULO_X):
+                line(ox + k * MODULO_X, a, ox + k * MODULO_X, b, "joint")
             k += 1
-        k = math.ceil((y0 - oy) / MODULO)
-        while oy + k * MODULO < y1:
-            for a, b in intervalli(d["fin"], "y", oy + k * MODULO):
-                line(a, oy + k * MODULO, b, oy + k * MODULO, "joint")
+        k = math.ceil((y0 - oy) / MODULO_Y)
+        while oy + k * MODULO_Y < y1:
+            for a, b in intervalli(d["fin"], "y", oy + k * MODULO_Y):
+                line(a, oy + k * MODULO_Y, b, oy + k * MODULO_Y, "joint")
             k += 1
         pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in d["fin"])
         add(f'<polygon points="{pts}" fill="none" stroke="#8a9aa8" stroke-width="0.8"/>')
@@ -1338,14 +1372,14 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
     if piene:
         c = min(piene, key=lambda c: (c["parti"][0][0] - mira[0]) ** 2 + (c["parti"][0][1] - mira[1]) ** 2)
         a0, b0, a1, b1 = c["parti"][0]
-        rect(a0, b0, PIASTRELLA, PIASTRELLA, extra='fill="#ffe9a8" stroke="#b06a00" stroke-width="1.6"')
-        line(a0, b0 - 9, a0 + PIASTRELLA, b0 - 9, "dq", 'marker-start="url(#tick)" marker-end="url(#tick)"')
-        txt(a0 + PIASTRELLA / 2, b0 - 13, f"{PIASTRELLA:.0f}", "dimq", alone=True)
-        line(a0 - 9, b0, a0 - 9, b0 + PIASTRELLA, "dq", 'marker-start="url(#tick)" marker-end="url(#tick)"')
-        txt(a0 - 13, b0 + PIASTRELLA / 2, f"{PIASTRELLA:.0f}", "dimq", rot=True, alone=True)
-        line(a0 + PIASTRELLA, b1 - 14, a1, b1 - 14, "dq", 'marker-start="url(#tick)" marker-end="url(#tick)"')
-        txt(a1 + 30, b1 - 10, f"fuga {FUGA*10:.1f} mm - modulo {MODULO:.2f}", "dimq", alone=True)
-        txt(a0 + PIASTRELLA / 2, b0 + PIASTRELLA / 2 + 5, "LASTRA TIPO", "dimq", alone=True)
+        rect(a0, b0, PIASTRELLA_X, PIASTRELLA_Y, extra='fill="#ffe9a8" stroke="#b06a00" stroke-width="1.6"')
+        line(a0, b0 - 9, a0 + PIASTRELLA_X, b0 - 9, "dq", 'marker-start="url(#tick)" marker-end="url(#tick)"')
+        txt(a0 + PIASTRELLA_X / 2, b0 - 13, f"{PIASTRELLA_X:.0f}", "dimq", alone=True)
+        line(a0 - 9, b0, a0 - 9, b0 + PIASTRELLA_Y, "dq", 'marker-start="url(#tick)" marker-end="url(#tick)"')
+        txt(a0 - 13, b0 + PIASTRELLA_Y / 2, f"{PIASTRELLA_Y:.0f}", "dimq", rot=True, alone=True)
+        line(a0 + PIASTRELLA_X, b1 - 14, a1, b1 - 14, "dq", 'marker-start="url(#tick)" marker-end="url(#tick)"')
+        txt(a1 + 30, b1 - 10, f"fuga {FUGA*10:.1f} mm - modulo {MODULO_X:.2f} x {MODULO_Y:.2f}", "dimq", alone=True)
+        txt(a0 + PIASTRELLA_X / 2, b0 + PIASTRELLA_Y / 2 + 5, "LASTRA TIPO", "dimq", alone=True)
 
     # box doccia
     bx, bl, by, bs = BOX["x0"], BOX["luce"], BOX["y"], BOX["sfalso"]
@@ -1382,7 +1416,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
     ly = H - 170
     txt(30, ly - 8, "LEGENDA LASTRE", "t3", "start")
     for i, (col, lab) in enumerate([
-            (COL_INT, f"intera {PIASTRELLA:.0f}x{PIASTRELLA:.0f}"),
+            (COL_INT, f"intera {NOME_FORMATO}"),
             (COL_BUONO, f"tagliata, lato &gt;= {MEZZA:.0f} cm (taglio buono)"),
             (COL_MEDIO, f"tagliata, lato {SLIVER:.0f}-{MEZZA:.0f} cm"),
             (COL_SLIVER, f"tagliata, lato &lt; {SLIVER:.0f} cm (listello: da evitare)")]):

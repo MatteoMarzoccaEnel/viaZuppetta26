@@ -27,7 +27,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="0.0" y="0.0" width="1800.0" height="1190.0" class="" fill="#ffffff"/>
 <text x="30.0" y="45.0" class="t1" text-anchor="start">APPARTAMENTO - posa gres 80x80</text>
 <text x="30.0" y="72.0" class="t2" text-anchor="start">origine di posa ottimale 37.7 / 74.0 cm - minimo numero di lastre e di tagli; rivestimento bagno su 4 corsi a filo trave</text>
-<text x="30.0" y="95.0" class="t2" text-anchor="start">fuga 2.0 mm - modulo 80.20 cm - griglia unica continua su tutta la casa - battiscopa/rivestimento 1 cm - origine 37.7/74.0 - stampa 100% = 1:60</text>
+<text x="30.0" y="95.0" class="t2" text-anchor="start">fuga 2.0 mm - modulo 80.20 x 80.20 cm - griglia unica continua su tutta la casa - battiscopa/rivestimento 1 cm - origine 37.7/74.0 - stampa 100% = 1:60</text>
 <g transform="translate(155,250)">
 <rect x="1.0" y="487.0" width="36.7" height="68.2" class="" fill="#ffd08a"/>
 <rect x="1.0" y="555.2" width="36.7" height="64.8" class="" fill="#ffd08a"/>
@@ -902,8 +902,8 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="1147.5" y="354.6" class="dimq" text-anchor="middle" transform="rotate(-90 1147.5 354.6)" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">80</text>
 <text x="1147.5" y="354.6" class="dimq" text-anchor="middle" transform="rotate(-90 1147.5 354.6)">80</text>
 <line x1="1240.5" y1="380.8" x2="1203.3" y2="380.8" class="dq" marker-start="url(#tick)" marker-end="url(#tick)"/>
-<text x="1233.3" y="384.8" class="dimq" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">fuga 2.0 mm - modulo 80.20</text>
-<text x="1233.3" y="384.8" class="dimq" text-anchor="middle">fuga 2.0 mm - modulo 80.20</text>
+<text x="1233.3" y="384.8" class="dimq" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">fuga 2.0 mm - modulo 80.20 x 80.20</text>
+<text x="1233.3" y="384.8" class="dimq" text-anchor="middle">fuga 2.0 mm - modulo 80.20 x 80.20</text>
 <text x="1200.5" y="359.6" class="dimq" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">LASTRA TIPO</text>
 <text x="1200.5" y="359.6" class="dimq" text-anchor="middle">LASTRA TIPO</text>
 <line x1="345.0" y1="181.0" x2="405.0" y2="181.0" class="" stroke="#1f5673" stroke-width="3.2"/>
@@ -1008,4 +1008,44 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="1260.0" y="1164.0" class="t2" text-anchor="start">2 cm</text>
 <text x="1420.0" y="1164.0" class="t2" text-anchor="start">67%</text>
 <text x="1580.0" y="1164.0" class="t2" text-anchor="start">259 / 11%</text>
+<text x="45.0" y="1179.0" class="t2" text-anchor="start">60x120, 3 corsi a filo trave</text>
+<text x="300.0" y="1179.0" class="t2" text-anchor="start">28.5 / 62.2</text>
+<text x="500.0" y="1179.0" class="t2" text-anchor="start">60</text>
+<text x="660.0" y="1179.0" class="t2" text-anchor="start">95</text>
+<text x="800.0" y="1179.0" class="t2" text-anchor="start">4</text>
+<text x="980.0" y="1179.0" class="t2" text-anchor="start">16</text>
+<text x="1110.0" y="1179.0" class="t2" text-anchor="start">75</text>
+<text x="1260.0" y="1179.0" class="t2" text-anchor="start">2 cm</text>
+<text x="1420.0" y="1179.0" class="t2" text-anchor="start">52%</text>
+<text x="1580.0" y="1179.0" class="t2" text-anchor="start">136 / 15%</text>
+<text x="45.0" y="1194.0" class="t2" text-anchor="start">60x120 pav 120x60 par, 5 corsi a filo trave</text>
+<text x="300.0" y="1194.0" class="t2" text-anchor="start">28.5 / 62.2</text>
+<text x="500.0" y="1194.0" class="t2" text-anchor="start">60</text>
+<text x="660.0" y="1194.0" class="t2" text-anchor="start">95</text>
+<text x="800.0" y="1194.0" class="t2" text-anchor="start">4</text>
+<text x="980.0" y="1194.0" class="t2" text-anchor="start">16</text>
+<text x="1110.0" y="1194.0" class="t2" text-anchor="start">75</text>
+<text x="1260.0" y="1194.0" class="t2" text-anchor="start">2 cm</text>
+<text x="1420.0" y="1194.0" class="t2" text-anchor="start">52%</text>
+<text x="1580.0" y="1194.0" class="t2" text-anchor="start">136 / 15%</text>
+<text x="45.0" y="1209.0" class="t2" text-anchor="start">120x60 pav 60x120 par, 3 corsi a filo trave</text>
+<text x="300.0" y="1209.0" class="t2" text-anchor="start">88.6 / 53.6</text>
+<text x="500.0" y="1209.0" class="t2" text-anchor="start">55</text>
+<text x="660.0" y="1209.0" class="t2" text-anchor="start">94</text>
+<text x="800.0" y="1209.0" class="t2" text-anchor="start">12</text>
+<text x="980.0" y="1209.0" class="t2" text-anchor="start">16</text>
+<text x="1110.0" y="1209.0" class="t2" text-anchor="start">66</text>
+<text x="1260.0" y="1209.0" class="t2" text-anchor="start">13 cm</text>
+<text x="1420.0" y="1209.0" class="t2" text-anchor="start">47%</text>
+<text x="1580.0" y="1209.0" class="t2" text-anchor="start">134 / 14%</text>
+<text x="45.0" y="1224.0" class="t2" text-anchor="start">120x60, 5 corsi a filo trave</text>
+<text x="300.0" y="1224.0" class="t2" text-anchor="start">88.6 / 53.6</text>
+<text x="500.0" y="1224.0" class="t2" text-anchor="start">55</text>
+<text x="660.0" y="1224.0" class="t2" text-anchor="start">94</text>
+<text x="800.0" y="1224.0" class="t2" text-anchor="start">12</text>
+<text x="980.0" y="1224.0" class="t2" text-anchor="start">16</text>
+<text x="1110.0" y="1224.0" class="t2" text-anchor="start">66</text>
+<text x="1260.0" y="1224.0" class="t2" text-anchor="start">13 cm</text>
+<text x="1420.0" y="1224.0" class="t2" text-anchor="start">47%</text>
+<text x="1580.0" y="1224.0" class="t2" text-anchor="start">134 / 14%</text>
 </svg>

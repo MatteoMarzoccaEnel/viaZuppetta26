@@ -17,8 +17,8 @@ import io
 with contextlib.redirect_stdout(io.StringIO()):
     import casa_pianta as cp
 
-PIASTRELLA, FUGA = cp.PIASTRELLA, cp.FUGA
-MODULO = PIASTRELLA + FUGA
+PIASTRELLA, FUGA = cp.PIASTRELLA_X, cp.FUGA
+MODULO = cp.MODULO_X
 LASTRA = cp.LASTRA
 CORSI = cp.RIV_CORSI
 # l'ultimo corso puo' essere tagliato in altezza (rivestimento a filo trave):
@@ -82,7 +82,7 @@ PARETI = _sviluppi()
 
 def calcola():
     """Conteggio per gruppo, con il formato attivo in casa_pianta."""
-    P, F, C, H = cp.PIASTRELLA, cp.FUGA, cp.RIV_CORSI, cp.H_RIV
+    P, F, C, H = cp.RIV_X, cp.FUGA, cp.RIV_CORSI, cp.H_RIV
     M = P + F
     out = {}
     for g in ("proprio", "pavimento"):
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     print(f"altezza rivestita {ALTEZZA:.1f} cm ({CORSI} corsi da {PIASTRELLA:.0f}, "
           f"fuga {FUGA*10:.1f} mm){_tagliato}\n")
     for g, et in (("proprio", "PIASTRELLA DEDICATA (spalle lavabo + testata finestra)"),
-                  ("pavimento", f"STESSO GRES {PIASTRELLA:.0f}x{PIASTRELLA:.0f} DEL PAVIMENTO")):
+                  ("pavimento", f"STESSO GRES {cp.NOME_RIV} DEL PAVIMENTO")):
         d = DETT[g]
         print(f"{et}")
         print(f"  sviluppo          {d['sviluppo']/100:.2f} m")

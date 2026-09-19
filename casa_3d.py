@@ -17,6 +17,7 @@ import contextlib
 import io
 import json
 import math
+import os
 import re
 
 with contextlib.redirect_stdout(io.StringIO()):
@@ -313,19 +314,19 @@ def tagli_riv_posa():
     (quota della faccia, orizzontale, verso, s, z, testo verticale, etichetta)
     """
     ox, oy = cp.OTTIMO["o"]
-    m, out = cp.MODULO - 0.5, []
+    m, out = min(cp.MODULO_RIV_X, cp.MODULO_RIV_Y) - 0.5, []
     for sa, sb, faccia, orizz, dentro, _g, z0, z1 in facce_riv(cp.H_RIV):
-        gs = _griglia(sa, sb, ox if orizz else oy, cp.MODULO)
-        gz = _griglia(z0, z1, 0.0, cp.MODULO)
+        gs = _griglia(sa, sb, ox if orizz else oy, cp.MODULO_RIV_X)
+        gz = _griglia(z0, z1, 0.0, cp.MODULO_RIV_Y)
         for s0, s1 in zip(gs, gs[1:]):
             for q0, q1 in zip(gz, gz[1:]):
                 ds, dz = s1 - s0, q1 - q0
-                if ds > m and dz > m:
+                if ds > cp.MODULO_RIV_X - 0.5 and dz > cp.MODULO_RIV_Y - 0.5:
                     continue
-                if ds < m:
+                if ds < cp.MODULO_RIV_X - 0.5:
                     out.append([faccia, orizz, dentro, (s0 + s1) / 2,
                                 q0 + min(OFF_TAGLIO, dz / 2), 0, f"{ds:.0f}"])
-                if dz < m:
+                if dz < cp.MODULO_RIV_Y - 0.5:
                     out.append([faccia, orizz, dentro, s0 + min(OFF_TAGLIO, ds / 2),
                                 (q0 + q1) / 2, 1, f"{dz:.0f}"])
     return out
@@ -359,6 +360,30 @@ def tagli_posa():
     return out
 
 
+_TEX = {}
+EST_TEX = (".png", ".jpg", ".jpeg", ".webp", ".bmp")
+
+
+def texture_cartella(nome):
+    """Le immagini presenti nella cartella del formato, come data URI.
+
+    Il catalogo e' il contenuto della cartella: basta aggiungere un file per
+    avere una texture in piu' da provare con C.
+    """
+    if nome in _TEX:
+        return _TEX[nome]
+    d = os.path.join(BASE_DIR, cp.TEXTURE_DIR, nome)
+    out = []
+    if os.path.isdir(d):
+        for f in sorted(os.listdir(d)):
+            if f.lower().endswith(EST_TEX):
+                u = incorpora(os.path.join(d, f), quadra=False)
+                if u:
+                    out.append([os.path.splitext(f)[0], u])
+    _TEX[nome] = out
+    return out
+
+
 # una configurazione di posa per ogni formato: origine della griglia, modulo e
 # rivestimento cambiano insieme, quindi ognuna ha le sue facce e le sue statistiche
 POSA = []
@@ -366,20 +391,23 @@ for _i, _f in enumerate(cp.FORMATI):
     cp.usa_formato(_i)
     _t = cp.OTTIMO["tot"]
     POSA.append(dict(
-        nome=_f["nome"], piastrella=cp.PIASTRELLA, modulo=cp.MODULO, fuga=cp.FUGA,
-        fugaProf=cp.FUGA_PROF,
+        nome=_f["nome"], formato=cp.NOME_FORMATO, formatoRiv=cp.NOME_RIV,
+        cartella=_f["cartella"],
+        modx=cp.MODULO_X, mody=cp.MODULO_Y,
+        modrx=cp.MODULO_RIV_X, modry=cp.MODULO_RIV_Y,
+        fuga=cp.FUGA, fugaProf=cp.FUGA_PROF,
         ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1],
         hriv=cp.H_RIV, corsi=cp.RIV_CORSI, riv=facce_riv(cp.H_RIV), tagli=tagli_posa(),
         tagliRiv=tagli_riv_posa(),
-        texPav=incorpora(BASE_DIR + _f["tex_pav"]),
-        texRiv=incorpora(BASE_DIR + _f["tex_riv"]),
+        pdf=f"computo_{cp.slug(_f['nome'])}.pdf",
         nota=f"{_t['lastre']} lastre, {_t['intere']} intere, "
              f"{_t['sliver']} listelli, sfrido {_t['sfrido']*100:.1f}%"))
 cp.usa_formato(cp.POSA_ATTIVA)
+TEXTURE = {c: texture_cartella(c) for c in {f["cartella"] for f in cp.FORMATI}}
 
 DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobili,
             riv=riv, batt=batt, quote=quote, etichette=etichette, aree=aree,
-            muretti=muretti, posa=POSA,
+            muretti=muretti, posa=POSA, tex=TEXTURE,
             balconi=BALCONI, box=cp.BOX, contro=cp.CONTROSOFFITTI,
             bagno=[list(r) for r in cp.LOCALI["BAGNO"]["rect"]],
             canali=cp.CANALI, bocchette=cp.BOCCHETTE, hcan=cp.H_CANALE,
@@ -450,7 +478,9 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>O</kbd></span>ombre accese / spente</div>
   <div class="r"><span class="k"><kbd>L</kbd></span>occlusione ambientale (angoli)</div>
   <div class="r"><span class="k"><kbd>B</kbd></span>cambia formato e corsi del rivestimento</div>
+  <div class="r"><span class="k"><kbd>C</kbd></span>cambia texture (catalogo della cartella del formato)</div>
   <div class="r"><span class="k"><kbd>F</kbd></span>fughe evidenziate in nero</div>
+  <div class="r"><span class="k"><kbd>P</kbd></span>scarica il computo in pdf del formato attivo</div>
   <div class="r"><span class="k"><kbd>H</kbd></span>mostra / nascondi legenda</div>
   <div class="r"><span class="k"><kbd>Esc</kbd></span>liberare il mouse</div>
   <hr>
@@ -463,8 +493,8 @@ HTML = r"""<!DOCTYPE html>
   <div id="joy"><div id="pomo"></div></div>
   <div id="bott">
     <button data-k="KeyE">porta</button><button data-k="KeyQ">quote</button>
-    <button data-k="KeyB">posa</button><button data-k="KeyF">fughe</button>
-    <button data-k="KeyH">menu</button>
+    <button data-k="KeyB">posa</button><button data-k="KeyC">texture</button>
+    <button data-k="KeyF">fughe</button><button data-k="KeyH">menu</button>
   </div>
 </div>
 <div id="start"><div><b>Appartamento - visita 3D</b><br><br>
@@ -563,24 +593,26 @@ sole.shadow.normalBias = 0.05;
 scene.add(sole);
 
 // ---------- texture del gres con la fuga reale ----------
+// Il canvas ha le proporzioni della piastrella: l'immagine viene deformata per
+// coprirla tutta e la fuga resta dello stesso spessore sui due lati.
 let fugaNera = false;
 function texGres(img, cfg){
-  // in evidenza la fuga si disegna doppia e nera: serve a leggere la griglia,
-  // il modulo di posa non cambia
-  const N = 2048, g0 = Math.max(2, Math.round(N * cfg.fuga / cfg.modulo));
-  const g = fugaNera ? g0 * 2 : g0;
-  const c = document.createElement('canvas'); c.width = c.height = N;
+  const A = cfg.modx, B = cfg.mody, N = 2048;
+  const W = A >= B ? N : Math.round(N*A/B), H = A >= B ? Math.round(N*B/A) : N;
+  const d = fugaNera ? 2 : 1;
+  const gx = Math.max(2, Math.round(W*cfg.fuga/A))*d, gy = Math.max(2, Math.round(H*cfg.fuga/B))*d;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
   const k = c.getContext('2d');
-  k.fillStyle = fugaNera ? '#000000' : '#cdcdc9'; k.fillRect(0,0,N,N);
-  if (img) k.drawImage(img, g/2, g/2, N-g, N-g);
+  k.fillStyle = fugaNera ? '#000000' : '#cdcdc9'; k.fillRect(0,0,W,H);
+  if (img) k.drawImage(img, gx/2, gy/2, W-gx, H-gy);
   else {
-    const gr = k.createLinearGradient(0,0,N,N);
+    const gr = k.createLinearGradient(0,0,W,H);
     gr.addColorStop(0,'#f7f7f5'); gr.addColorStop(.5,'#eceae7'); gr.addColorStop(1,'#f5f4f2');
-    k.fillStyle = gr; k.fillRect(g/2,g/2,N-g,N-g);
+    k.fillStyle = gr; k.fillRect(gx/2,gy/2,W-gx,H-gy);
     k.strokeStyle='rgba(165,165,165,.35)'; k.lineWidth=3;
     for(let i=0;i<26;i++){k.beginPath();
-      k.moveTo(Math.random()*N,0);
-      k.bezierCurveTo(Math.random()*N,N/3,Math.random()*N,2*N/3,Math.random()*N,N);
+      k.moveTo(Math.random()*W,0);
+      k.bezierCurveTo(Math.random()*W,H/3,Math.random()*W,2*H/3,Math.random()*W,H);
       k.stroke();}
   }
   const t = new THREE.CanvasTexture(c);
@@ -597,30 +629,42 @@ const matPosa = D.posa.map(() => ({
 }));
 
 // le immagini sono incorporate come data URI: sono quindi same-origin e WebGL le accetta
-function applica(i, imgPav, imgRiv){
-  const m = matPosa[i], cfg = D.posa[i];
-  m.pav.map  = texGres(imgPav, cfg);
-  m.riv.map  = texGres(imgPav, cfg);            // meta' bagno e' lo stesso gres del pavimento
-  m.riv2.map = texGres(imgRiv || imgPav, cfg);  // l'altra meta' e' la piastrella dedicata
-  // la fuga disegnata nella texture diventa anche un rilievo: l'incavo e' quello reale
-  for (const k of ['pav','riv','riv2']){
-    m[k].bumpMap = m[k].map; m[k].bumpScale = cfg.fugaProf * S; m[k].needsUpdate = true;
-  }
-}
-function caricaSrc(src, cb){
-  if (!src){ cb(null); return; }
+// La texture e' indipendente dal formato: C scorre il catalogo della cartella
+// del formato attivo, la piastrella dedicata del bagno e' quella successiva.
+let iTex = 0;
+const IMG = new Map(), DROP = [];
+function carica(uri, cb){
+  if (!uri){ cb(null); return; }
+  if (IMG.has(uri)){ cb(IMG.get(uri)); return; }
   const im = new Image();
-  im.onload = ()=>cb(im);
+  im.onload = ()=>{ IMG.set(uri, im); cb(im); };
   im.onerror = ()=>cb(null);
-  im.src = src;
+  im.src = uri;
 }
-const IMG = [];      // immagini caricate, per rifare le texture a fuga nera
-D.posa.forEach((cfg, i) => caricaSrc(cfg.texPav, a => caricaSrc(cfg.texRiv, b => {
-  IMG[i] = [a, b];
-  applica(i, a, b);
-  if (i === 0) dimmi(a ? 'texture incorporate: pavimento + rivestimento'
-                       : 'texture procedurale');
-})));
+function catalogo(i){ return D.tex[D.posa[i].cartella] || []; }
+function nomeTex(i){
+  const l = catalogo(i);
+  if (DROP[i]) return 'immagine trascinata';
+  return l.length ? (iTex % l.length + 1) + '/' + l.length + '  ' + l[iTex % l.length][0]
+                  : 'texture procedurale';
+}
+function applicaTex(i){
+  const cfg = D.posa[i], l = catalogo(i), n = l.length;
+  const cfgR = Object.assign({}, cfg, {modx: cfg.modrx, mody: cfg.modry});
+  const a = n ? l[iTex % n][1] : null, b = n > 1 ? l[(iTex+1) % n][1] : a;
+  carica(a, ia => carica(b, ib => {
+    const m = matPosa[i];
+    const pav = DROP[i] || ia;
+    m.pav.map  = texGres(pav, cfg);
+    m.riv.map  = texGres(pav, cfgR);           // meta' bagno e' lo stesso gres del pavimento
+    m.riv2.map = texGres(DROP[i] ? pav : ib, cfgR);  // l'altra meta' e' la piastrella dedicata
+    // la fuga disegnata nella texture diventa anche un rilievo: l'incavo e' quello reale
+    for (const k of ['pav','riv','riv2']){
+      m[k].bumpMap = m[k].map; m[k].bumpScale = cfg.fugaProf * S; m[k].needsUpdate = true;
+    }
+  }));
+}
+D.posa.forEach((cfg, i) => applicaTex(i));
 // aprendo l'html da file:// il browser puo' bloccare il png: si puo' trascinarlo qui
 addEventListener('dragover', e=>e.preventDefault());
 addEventListener('drop', e=>{
@@ -628,7 +672,7 @@ addEventListener('drop', e=>{
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
   if (!f) return;
   const im = new Image();
-  im.onload = ()=>{ applica(iPosa, im, null);
+  im.onload = ()=>{ DROP[iPosa] = im; applicaTex(iPosa);
                     dimmi('texture caricata su ' + D.posa[iPosa].nome + ': ' + f.name); };
   im.src = URL.createObjectURL(f);
 });
@@ -640,7 +684,7 @@ function superficie(rects, y, mat, giu, P, dove){
   for (const [x0,y0,x1,y1] of rects){
     for (const [x,z] of [[x0,y0],[x1,y0],[x1,y1],[x0,y1]]){
       pos.push(x*S, y*S, z*S); nor.push(0, giu?-1:1, 0);
-      uv.push((x-P.ox)/P.modulo, (z-P.oy)/P.modulo);
+      uv.push((x-P.ox)/P.modx, (z-P.oy)/P.mody);
     }
     if (giu) idx.push(n,n+1,n+2, n,n+2,n+3); else idx.push(n,n+2,n+1, n,n+3,n+2);
     n += 4;
@@ -714,7 +758,7 @@ function quad(a,b,c,orizz,dentro,z0,z1,mat,cfg,dove){
     pos.push(P[i][0]*S, Z[i]*S, P[i][1]*S);
     nor.push(orizz?0:e, 0, orizz?e:0);
     const s = orizz ? P[i][0]-cfg.ox : P[i][1]-cfg.oy;
-    uv.push(s/cfg.modulo, Z[i]/cfg.modulo);
+    uv.push(s/cfg.modx, Z[i]/cfg.mody);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
@@ -748,16 +792,16 @@ function unisci(arr){      // tratti contigui sulla stessa retta diventano uno s
   return out;
 }
 function segmentiFughe(cfg){
-  const M = cfg.modulo, V = new Map(), H = new Map();
+  const MX = cfg.modx, MY = cfg.mody, V = new Map(), H = new Map();
   const agg = (m, c, a, b) => { const k = c.toFixed(2);
     const v = m.get(k) || []; v.push([a,b]); m.set(k, v); };
   for (const [x0,y0,x1,y1] of D.pavimento){
-    for (let k = Math.ceil((x0-cfg.ox)/M); cfg.ox + k*M < x1; k++){
-      const x = cfg.ox + k*M;
+    for (let k = Math.ceil((x0-cfg.ox)/MX); cfg.ox + k*MX < x1; k++){
+      const x = cfg.ox + k*MX;
       if (x > x0) agg(V, x, y0, y1);
     }
-    for (let k = Math.ceil((y0-cfg.oy)/M); cfg.oy + k*M < y1; k++){
-      const y = cfg.oy + k*M;
+    for (let k = Math.ceil((y0-cfg.oy)/MY); cfg.oy + k*MY < y1; k++){
+      const y = cfg.oy + k*MY;
       if (y > y0) agg(H, y, x0, x1);
     }
   }
@@ -791,10 +835,11 @@ function mostraFughe(){
 }
 function costruisciPosa(cfg, i){
   const M = matPosa[i];
+  const cfgR = Object.assign({}, cfg, {modx: cfg.modrx, mody: cfg.modry});
   const g = new THREE.Group(); scene.add(g);
   superficie(D.pavimento, 0, M.pav, false, cfg, g);
   for (const [a,b,c,o,dn,gr,z0,z1] of cfg.riv)
-    quad(a,b,c,o,dn,z0,z1, gr ? M.riv2 : M.riv, cfg, g);
+    quad(a,b,c,o,dn,z0,z1, gr ? M.riv2 : M.riv, cfgR, g);
   for (const [a,b,c,o,dn] of D.batt){
     const c2 = c + (dn>0?1:-1)*SP_BATT;
     quad(a, b, c2, o, dn, 0, D.hbatt, M.riv, cfg, g);
@@ -804,11 +849,11 @@ function costruisciPosa(cfg, i){
   // i muretti del bagno sono rivestiti: facce e piano con le UV del rivestimento
   for (const [x,y,w,h,base,alt] of D.muretti){
     const x1 = x+w, y1 = y+h, z1 = base+alt;
-    quad(x, x1, y,  true, -1, base, z1, M.riv, cfg, g);
-    quad(x, x1, y1, true,  1, base, z1, M.riv, cfg, g);
-    quad(y, y1, x,  false, -1, base, z1, M.riv, cfg, g);
-    quad(y, y1, x1, false,  1, base, z1, M.riv, cfg, g);
-    superficie([[x, y, x1, y1]], z1, M.riv, false, cfg, g);
+    quad(x, x1, y,  true, -1, base, z1, M.riv, cfgR, g);
+    quad(x, x1, y1, true,  1, base, z1, M.riv, cfgR, g);
+    quad(y, y1, x,  false, -1, base, z1, M.riv, cfgR, g);
+    quad(y, y1, x1, false,  1, base, z1, M.riv, cfgR, g);
+    superficie([[x, y, x1, y1]], z1, M.riv, false, cfgR, g);
   }
   retinoFughe(cfg, i);
   return g;
@@ -820,8 +865,9 @@ const gPosa = D.posa.map((cfg, i) => {
 function mostraPosa(){
   const c = D.posa[iPosa];
   document.getElementById('posa').innerHTML =
-    '<b>' + c.nome + '</b><span>' + c.nota + '<br>modulo ' + c.modulo.toFixed(2)
-    + ' cm &middot; rivestimento h ' + c.hriv.toFixed(0) + ' cm</span>';
+    '<b>' + c.nome + '</b><span>' + c.nota + '<br>modulo ' + c.modx.toFixed(2)
+    + ' x ' + c.mody.toFixed(2) + ' cm &middot; rivestimento h ' + c.hriv.toFixed(0)
+    + ' cm<br>texture ' + nomeTex(iPosa) + '</span>';
 }
 mostraPosa();
 
@@ -1250,13 +1296,29 @@ addEventListener('keydown', e=>{
       gPosa[iPosa].visible = false;
       iPosa = (iPosa + 1) % gPosa.length;
       gPosa[iPosa].visible = true;
+      applicaTex(iPosa);
       mostraPosa();
       mostraFughe();
       dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
     }
+    if (e.code === 'KeyC'){
+      const n = catalogo(iPosa).length;
+      if (!n) dimmi('nessuna texture in ' + D.posa[iPosa].cartella);
+      else {
+        DROP[iPosa] = null;
+        iTex = (iTex + 1) % n;
+        applicaTex(iPosa); mostraPosa();
+        dimmi('texture ' + nomeTex(iPosa));
+      }
+    }
+    if (e.code === 'KeyP'){
+      const a = document.createElement('a');
+      a.href = D.posa[iPosa].pdf; a.download = D.posa[iPosa].pdf; a.click();
+      dimmi('computo ' + D.posa[iPosa].pdf);
+    }
     if (e.code === 'KeyF'){
       fugaNera = !fugaNera;
-      IMG.forEach((p, i) => applica(i, p[0], p[1]));
+      applicaTex(iPosa);
       mostraFughe();
       dimmi(fugaNera ? 'fughe evidenziate in nero' : 'fughe normali');
     }

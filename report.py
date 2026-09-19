@@ -180,7 +180,8 @@ def costruisci(i):
     tot, loc = var["tot"], var["loc"]
     riv = br.calcola()
     bat = bs.calcola()
-    P, L = cp.PIASTRELLA, cp.LASTRA
+    A, B, L = cp.PIASTRELLA_X, cp.PIASTRELLA_Y, cp.LASTRA
+    P = A
     e = []
 
     # ---- intestazione ----
@@ -192,15 +193,16 @@ def costruisci(i):
 
     # ---- specifiche materiale ----
     e.append(Paragraph("1. Specifiche del materiale", S_SEZ))
-    riemp = (2 * P * 10) / (P * 10 * P * 10) * (cp.FUGA * 10) * PROF_FUGA * DENS_FUGA
+    riemp = (A * 10 + B * 10) / (A * 10 * B * 10) * (cp.FUGA * 10) * PROF_FUGA * DENS_FUGA
     e.append(tabella([
         ["grandezza", "valore", "note"],
-        ["formato nominale", f"{P:.0f} x {P:.0f} cm", "gres porcellanato rettificato"],
+        ["formato nominale", f"{A:.0f} x {B:.0f} cm", "gres porcellanato rettificato"],
         ["spessore", f"{SPESSORE:.0f} mm", "confermato in capitolato"],
         ["superficie lastra", f"{n(L)} mq", "al netto della fuga"],
         ["peso", f"{n(PESO_MQ, 1)} kg/mq", f"{n(L * PESO_MQ, 1)} kg a lastra"],
         ["fuga di posa", f"{n(cp.FUGA * 10, 1)} mm", "giunto minimo per rettificato"],
-        ["modulo di posa", f"{n(cp.MODULO)} cm", "formato + fuga: passo della griglia"],
+        ["modulo di posa", f"{n(cp.MODULO_X)} x {n(cp.MODULO_Y)} cm",
+         "formato + fuga: passo della griglia"],
         ["riempitivo fuga", f"{n(riemp, 3)} kg/mq",
          f"(A+B)/(A\u00b7B) \u00b7 {n(cp.FUGA * 10, 1)} \u00b7 "
          f"{PROF_FUGA:.0f} \u00b7 {n(DENS_FUGA, 1)}"],
@@ -368,7 +370,7 @@ def costruisci(i):
     e.append(Paragraph("7. Pianta di posa", S_SEZ))
     e.append(Paragraph(
         f"Griglia con origine {n(var['o'][0], 1)} / {n(var['o'][1], 1)} cm e modulo "
-        f"{n(cp.MODULO)} cm. Il colore di ogni lastra indica come viene tagliata: "
+        f"{n(cp.MODULO_X)} x {n(cp.MODULO_Y)} cm. Il colore di ogni lastra indica come viene tagliata: "
         f"bianco intera, giallo taglio oltre {cp.MEZZA:.0f} cm, arancio fra "
         f"{cp.SLIVER:.0f} e {cp.MEZZA:.0f}, rosso listello sotto {cp.SLIVER:.0f} cm.",
         S_TXT))

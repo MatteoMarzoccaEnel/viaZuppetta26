@@ -13,7 +13,7 @@ import math
 with contextlib.redirect_stdout(io.StringIO()):
     import casa_pianta as cp
 
-PIASTRELLA = cp.PIASTRELLA
+PIASTRELLA = cp.PIASTRELLA   # le strisce si ricavano dal lato lungo della lastra
 LASTRA = cp.LASTRA
 MAGGIORAZIONE = 0.10     # spezzoni d'angolo e ricongiunzioni
 
@@ -47,7 +47,7 @@ def calcola():
                           tratti=len(tratti))
     tot = sum(d["netto"] for d in per_loc.values())
     ml = tot / 100 * (1 + MAGGIORAZIONE)
-    ml_lastra = STRISCE * cp.PIASTRELLA / 100
+    ml_lastra = STRISCE * cp.LATO_MAX / 100
     return dict(per_loc=per_loc, netto=tot / 100, ml=ml, ml_lastra=ml_lastra,
                 lastre=math.ceil(ml / ml_lastra),
                 senza_arredo=(tot - sum(ARREDO_FISSO.values())) / 100)
@@ -69,6 +69,6 @@ if __name__ == "__main__":
     print(f"{'altezza':>8}{'strisce/lastra':>16}{'ml per lastra':>15}{'lastre':>8}{'mq':>8}")
     print("-" * 55)
     for h, strisce in ((8.0, 10), (10.0, 8), (10.0, 9), (7.0, 12)):
-        ml_l = strisce * PIASTRELLA / 100
+        ml_l = strisce * cp.LATO_MAX / 100
         n = math.ceil(ml / ml_l)
         print(f"{h:6.0f} cm{strisce:16d}{ml_l:14.1f} m{n:8d}{n*LASTRA:8.2f}")
