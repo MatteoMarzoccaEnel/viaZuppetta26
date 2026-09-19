@@ -292,6 +292,29 @@ def facce_riv(h_tot):
     return out
 
 
+def tagli_posa():
+    """Pezzi non interi con la misura del taglio: (x0, y0, x1, y1, etichetta).
+
+    Si etichetta solo il lato che viene tagliato; se il pezzo e' ridotto su
+    entrambi i lati si scrivono tutte e due le misure.
+    """
+    ox, oy = cp.OTTIMO["o"]
+    out = []
+    for d in cp.LOCALI.values():
+        for c in cp.celle(d, ox, oy):
+            if c["intera"]:
+                continue
+            xs = [p[0] for p in c["parti"]] + [p[2] for p in c["parti"]]
+            ys = [p[1] for p in c["parti"]] + [p[3] for p in c["parti"]]
+            dx, dy, m = c["dx"], c["dy"], cp.MODULO - 0.5
+            if dx < m and dy < m:
+                txt = f"{dx:.0f}x{dy:.0f}"
+            else:
+                txt = f"{dx:.0f}" if dx < m else f"{dy:.0f}"
+            out.append([min(xs), min(ys), max(xs), max(ys), txt])
+    return out
+
+
 # una configurazione di posa per ogni formato: origine della griglia, modulo e
 # rivestimento cambiano insieme, quindi ognuna ha le sue facce e le sue statistiche
 POSA = []
@@ -302,7 +325,7 @@ for _i, _f in enumerate(cp.FORMATI):
         nome=_f["nome"], piastrella=cp.PIASTRELLA, modulo=cp.MODULO, fuga=cp.FUGA,
         fugaProf=cp.FUGA_PROF,
         ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1],
-        hriv=cp.H_RIV, corsi=cp.RIV_CORSI, riv=facce_riv(cp.H_RIV),
+        hriv=cp.H_RIV, corsi=cp.RIV_CORSI, riv=facce_riv(cp.H_RIV), tagli=tagli_posa(),
         texPav=incorpora(BASE_DIR + _f["tex_pav"]),
         texRiv=incorpora(BASE_DIR + _f["tex_riv"]),
         nota=f"{_t['lastre']} lastre, {_t['intere']} intere, "
@@ -1093,12 +1116,11 @@ function quotaPiana(txt, x0, z0, x1, z1, hTesto, dove){
   piano.rotation.x = -Math.PI/2;
   piano.add(m); (dove || gQuote).add(piano);
 }
-// lunghezza di ogni tratto di fuga, sul tratto stesso: si accende con le fughe
-segFughe.forEach((segs, i) => {
-  for (const [x0,y0,x1,y1] of segs){
-    const L = Math.hypot(x1-x0, y1-y0);
-    if (L < 15) continue;
-    quotaPiana(L.toFixed(0), x0*S, y0*S, x1*S, y1*S, 0.10, retini[i]);
+// misura dei pezzi tagliati, scritta sul pezzo: si accende con le fughe
+D.posa.forEach((cfg, i) => {
+  for (const [x0,y0,x1,y1,txt] of cfg.tagli){
+    const z = (y0+y1)/2;
+    quotaPiana(txt, x0*S, z*S, x1*S, z*S, 0.075, retini[i]);
   }
 });
 for (const [x0,y0,x1,y1,lb] of D.quote){
