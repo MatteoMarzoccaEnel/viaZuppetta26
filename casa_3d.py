@@ -478,7 +478,8 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>O</kbd></span>ombre accese / spente</div>
   <div class="r"><span class="k"><kbd>L</kbd></span>occlusione ambientale (angoli)</div>
   <div class="r"><span class="k"><kbd>B</kbd></span>cambia formato e corsi del rivestimento</div>
-  <div class="r"><span class="k"><kbd>C</kbd></span>cambia texture (catalogo della cartella del formato)</div>
+  <div class="r"><span class="k"><kbd>C</kbd></span>cambia texture del pavimento (catalogo della cartella del formato)</div>
+  <div class="r"><span class="k"><kbd>R</kbd></span>cambia la piastrella dedicata del bagno (sanitari e testata)</div>
   <div class="r"><span class="k"><kbd>F</kbd></span>fughe evidenziate in nero</div>
   <div class="r"><span class="k"><kbd>P</kbd></span>scarica il computo in pdf del formato attivo</div>
   <div class="r"><span class="k"><kbd>H</kbd></span>mostra / nascondi legenda</div>
@@ -494,6 +495,7 @@ HTML = r"""<!DOCTYPE html>
   <div id="bott">
     <button data-k="KeyE">porta</button><button data-k="KeyQ">quote</button>
     <button data-k="KeyB">posa</button><button data-k="KeyC">texture</button>
+    <button data-k="KeyR">dedicata</button>
     <button data-k="KeyF">fughe</button><button data-k="KeyH">menu</button>
   </div>
 </div>
@@ -629,9 +631,10 @@ const matPosa = D.posa.map(() => ({
 }));
 
 // le immagini sono incorporate come data URI: sono quindi same-origin e WebGL le accetta
-// La texture e' indipendente dal formato: C scorre il catalogo della cartella
-// del formato attivo, la piastrella dedicata del bagno e' quella successiva.
-let iTex = 0;
+// La texture e' indipendente dal formato e le due del bagno sono indipendenti fra
+// loro: C scorre quella del pavimento (e della meta' bagno in gres uguale),
+// R quella della piastrella dedicata di parete sanitari e testata finestra.
+let iTex = 0, iTexRiv = 1;
 const IMG = new Map(), DROP = [];
 function carica(uri, cb){
   if (!uri){ cb(null); return; }
@@ -642,16 +645,19 @@ function carica(uri, cb){
   im.src = uri;
 }
 function catalogo(i){ return D.tex[D.posa[i].cartella] || []; }
-function nomeTex(i){
+function etichettaTex(i, k){
   const l = catalogo(i);
+  return l.length ? (k % l.length + 1) + '/' + l.length + ' ' + l[k % l.length][0]
+                  : 'procedurale';
+}
+function nomeTex(i){
   if (DROP[i]) return 'immagine trascinata';
-  return l.length ? (iTex % l.length + 1) + '/' + l.length + '  ' + l[iTex % l.length][0]
-                  : 'texture procedurale';
+  return 'pav ' + etichettaTex(i, iTex) + ' &middot; dedicata ' + etichettaTex(i, iTexRiv);
 }
 function applicaTex(i){
   const cfg = D.posa[i], l = catalogo(i), n = l.length;
   const cfgR = Object.assign({}, cfg, {modx: cfg.modrx, mody: cfg.modry});
-  const a = n ? l[iTex % n][1] : null, b = n > 1 ? l[(iTex+1) % n][1] : a;
+  const a = n ? l[iTex % n][1] : null, b = n ? l[iTexRiv % n][1] : null;
   carica(a, ia => carica(b, ib => {
     const m = matPosa[i];
     const pav = DROP[i] || ia;
@@ -1301,14 +1307,15 @@ addEventListener('keydown', e=>{
       mostraFughe();
       dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
     }
-    if (e.code === 'KeyC'){
+    if (e.code === 'KeyC' || e.code === 'KeyR'){
       const n = catalogo(iPosa).length;
       if (!n) dimmi('nessuna texture in ' + D.posa[iPosa].cartella);
       else {
         DROP[iPosa] = null;
-        iTex = (iTex + 1) % n;
+        if (e.code === 'KeyC') iTex = (iTex + 1) % n; else iTexRiv = (iTexRiv + 1) % n;
         applicaTex(iPosa); mostraPosa();
-        dimmi('texture ' + nomeTex(iPosa));
+        dimmi((e.code === 'KeyC' ? 'pavimento: ' : 'piastrella dedicata: ')
+              + etichettaTex(iPosa, e.code === 'KeyC' ? iTex : iTexRiv));
       }
     }
     if (e.code === 'KeyP'){
