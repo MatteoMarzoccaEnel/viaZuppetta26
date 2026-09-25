@@ -142,14 +142,14 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="511.00" y="200.00" class="t2" text-anchor="start">  taglio fondo nicchia: 60 cm</text>
 <text x="511.00" y="208.00" class="t2" text-anchor="start">  lastre (+15%): 10</text>
 <text x="511.00" y="216.00" class="t2" text-anchor="start"></text>
-<text x="511.00" y="224.00" class="t3" text-anchor="start">RIVESTIMENTO h 261 cm</text>
-<text x="511.00" y="232.00" class="t2" text-anchor="start">  13.08 m x 2.61 m - vuoti</text>
-<text x="511.00" y="240.00" class="t2" text-anchor="start">  = 31.80 mq</text>
-<text x="511.00" y="248.00" class="t2" text-anchor="start">  3 corsi da 120, l'ultimo tagliato</text>
+<text x="511.00" y="224.00" class="t3" text-anchor="start">RIVESTIMENTO h 240 cm</text>
+<text x="511.00" y="232.00" class="t2" text-anchor="start">  13.08 m x 2.40 m - vuoti</text>
+<text x="511.00" y="240.00" class="t2" text-anchor="start">  = 29.08 mq</text>
+<text x="511.00" y="248.00" class="t2" text-anchor="start">  2 corsi da 120 interi</text>
 <text x="511.00" y="256.00" class="t2" text-anchor="start">  spessore in opera: 2 cm</text>
-<text x="511.00" y="264.00" class="t2" text-anchor="start">  lastre (+15%): 46</text>
+<text x="511.00" y="264.00" class="t2" text-anchor="start">  lastre (+15%): 42</text>
 <text x="511.00" y="272.00" class="t2" text-anchor="start"></text>
-<text x="511.00" y="280.00" class="t3" text-anchor="start">TOTALE 56 lastre = 45.4 mq</text>
+<text x="511.00" y="280.00" class="t3" text-anchor="start">TOTALE 52 lastre = 42.1 mq</text>
 <text x="14.00" y="382.00" class="t2" text-anchor="start">Rivestimento interno 2 cm (piastrella + colla) su tutte le pareti: misure FINITE 165,1 x 391 cm contro 169,1 x 395 al grezzo. Tutte le quote e l'arredo si riferiscono al finito.</text>
 <text x="14.00" y="393.00" class="t2" text-anchor="start">Sanitari accentrati sul tratto libero 2-287: interasse wc-bidet 45 cm, luce laterale 27 cm. Wc e bidet sospesi, profondi 48. Passaggio libero 106 cm per tutto il vano.</text>
 <text x="14.00" y="404.00" class="t2" text-anchor="start">Box a nicchia 165,1: anta scorrevole a 2 pannelli, 120 da chiusa e 60 da aperta, + fisso 45. Luce netta di accesso alla doccia 60 cm.</text>

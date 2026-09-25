@@ -36,9 +36,12 @@ H_TRAVE = H_INT - CALO_TRAVE      # intradosso delle travi in c.a.
 # sua origine ottimale e un suo conteggio di lastre: non sono varianti grafiche.
 # Pavimento e rivestimento del bagno si posano con lo stesso prodotto ma possono
 # avere orientamento diverso: con la 60x120 le combinazioni sono quattro.
-# Il rivestimento del bagno chiude sempre all'intradosso della trave: cambia
-# solo il numero di corsi necessari a raggiungerla.
+# Il rivestimento del bagno chiude all'intradosso della trave, tranne con le
+# piastrelle alte 60 o 120 a parete, che si fermano a 240 a corsi interi.
 TEXTURE_DIR = "texture"      # una sottocartella per formato, con dentro le texture
+# altezze di piastrella a parete che chiudono il rivestimento a 240 a corsi interi
+RIV_CORSI_INTERI = (60.0, 120.0)
+RIV_H_INTERI = 240.0
 FORMATI = [
     dict(lato=(90.0, 90.0), fuga=0.2),
     dict(lato=(80.0, 80.0), fuga=0.2),
@@ -57,13 +60,20 @@ for _f in FORMATI:
     _rx, _ry = _f["lato_riv"]
     # la piastrella e' la stessa nei due orientamenti: una cartella sola di texture
     _f["cartella"] = f"{min(_lx, _ly):.0f}x{max(_lx, _ly):.0f}"
-    # ultimo corso tagliato: si posa il minimo indispensabile per arrivare in quota
-    _f["riv_corsi"] = math.ceil((H_TRAVE + _f["fuga"]) / (_ry + _f["fuga"]))
-    _f["riv_h"] = H_TRAVE
+    if _ry in RIV_CORSI_INTERI:
+        # 60 e 120 dividono i 240: corsi interi, niente taglio in quota
+        _f["riv_corsi"] = round(RIV_H_INTERI / _ry)
+        _quota = f"a {RIV_H_INTERI:.0f}"
+    else:
+        # ultimo corso tagliato: si posa il minimo indispensabile per arrivare in quota
+        _f["riv_corsi"] = math.ceil((H_TRAVE + _f["fuga"]) / (_ry + _f["fuga"]))
+        _f["riv_h"] = H_TRAVE
+        _quota = "a filo trave"
+    _f["quota_riv"] = _quota
     _n = f"{_lx:.0f}x{_ly:.0f}"
     if _f["lato_riv"] != _f["lato"]:
         _n += f" pav {_rx:.0f}x{_ry:.0f} par"
-    _f["nome"] = f"{_n}, {_f['riv_corsi']} corsi a filo trave"
+    _f["nome"] = f"{_n}, {_f['riv_corsi']} corsi {_quota}"
     if _f.get("ingresso"):
         _f["nome"] += ", intera all'ingresso"
 # valori della configurazione attiva, rimpiazzati da usa_formato()
@@ -1138,7 +1148,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
     rect(0, 0, W, H, extra='fill="#ffffff"')
     txt(30, 45, f"APPARTAMENTO - posa gres {NOME_FORMATO}", "t1", "start")
     txt(30, 72, f"origine di posa ottimale {ox:.1f} / {oy:.1f} cm - minimo numero di "
-                f"lastre e di tagli; rivestimento bagno su {RIV_CORSI} corsi a filo trave",
+                f"lastre e di tagli; rivestimento bagno su {RIV_CORSI} corsi {FORMATO['quota_riv']}",
         "t2", "start")
     txt(30, 95, f"fuga {FUGA*10:.1f} mm - modulo {MODULO_X:.2f} x {MODULO_Y:.2f} cm - griglia unica continua su tutta la casa - "
                 f"battiscopa/rivestimento {FINITURA:.0f} cm - origine {ox:.1f}/{oy:.1f} - stampa 100% = 1:{SCALA}", "t2", "start")

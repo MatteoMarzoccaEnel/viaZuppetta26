@@ -27,8 +27,9 @@ computo non possono divergere.
 ## Configurazioni di posa
 
 I formati messi a confronto sono dichiarati in `casa_pianta.FORMATI`: 90x90,
-80x80 e 60x60, tutti con il rivestimento del bagno chiuso a filo dell'intradosso
-trave (240 cm), posando solo i corsi necessari ad arrivarci. Cambiare formato
+80x80 e 60x60, 60x120 nei due versi e 120x120. Il rivestimento del bagno chiude
+a filo dell'intradosso trave (261 cm) con l'ultimo corso tagliato, tranne con le
+piastrelle alte 60 o 120 a parete, che si fermano a 240 a corsi interi. Cambiare formato
 rifà l'ottimizzazione della griglia, non solo il disegno: l'origine di posa è
 cercata per formato minimizzando lastre e tagli. Il 120x120 ha il vincolo
 `ingresso=True`: la griglia è cercata solo fra quelle con una lastra intera a
