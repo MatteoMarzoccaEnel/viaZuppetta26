@@ -35,7 +35,7 @@ VANO = [
 ]
 
 # Porta scorrevole a scomparsa sulla parete X=0
-PORTA = dict(luce=(50, 135), tasca=(135, 225), larghezza=80, altezza=210)
+PORTA = dict(luce=(52, 137), tasca=(137, 227), larghezza=80, altezza=210)
 
 # Finestrella nella parete di fondo: 60x110 con sguincio di 35 fino al balcone
 FINESTRA = dict(tratto=(94, 154), sguincio=35, larghezza=60, altezza=110, davanzale=114)
@@ -50,7 +50,7 @@ SFRIDO = 0.15
 
 # Arredo: (chiave, etichetta, x, y, ingombro lungo X, ingombro lungo Y)
 ARREDO = [
-    ("lavabo", "MOBILE LAVABO 120x38", 29, 2, 120, 38),
+    ("lavabo", "MOBILE LAVABO 120x50", 29, 2, 120, 50),
     ("wc", "WC 37x48", 176, 2, 37, 48),
     ("bidet", "BIDET 37x48", 221, 2, 37, 48),
     ("doccia", "PIATTO DOCCIA 165x80", 287, 2, 80, 165.1),
@@ -344,7 +344,7 @@ line(-4, min(YF), -38, min(YF), "ext")
 line(-4, 156, -38, 156, "ext")
 dim_v(min(YF), 156, -36, "154 finito")
 dim_v(min(YG), 158, -54, "158 grezzo")
-dim_v(40, 121, 118, "81 sgabello-lavabo")
+dim_v(52, 121, 118, "69 sgabello-lavabo")
 dim_v(50, 156, 272, "106")
 dim_h(min(XF), 88, 240, "86")
 dim_v(156, max(YF), 85, "75")

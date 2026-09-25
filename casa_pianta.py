@@ -171,7 +171,8 @@ APERTURE = [
     ("battente", 1343, -59, 1429, -59, "INGRESSO 86"),
     ("porta", 204, 44.5, 204, 124.5, "80"),
     ("porta", 219, 157, 313, 157, "80"),
-    ("porta", 394, 157, 479, 157, "80"),
+    # porta del bagno a filo del fronte lavabo
+    ("porta", 395, 157, 480, 157, "80"),
     ("porta", 607.1, 157, 702.1, 157, "80"),
     # vano da tavola: comincia 10 cm dopo la faccia del pilastro P8 (y 37)
     ("passaggio", 805.1, 47, 805.1, 142, "80"),
@@ -196,7 +197,7 @@ ARREDO = [
     ("LETTO MATRIMONIALE", "ARMADIO 200x60", 5, 505, 200, 60, "box"),
     ("LETTO MATRIMONIALE", "MOBILE BASSO 200x35", 293, 230, 35, 200, "box"),
 
-    ("BAGNO", "LAVABO 120x38", 345, 199, 38, 120, "box"),
+    ("BAGNO", "LAVABO 120x50", 345, 199, 50, 120, "box"),
     # 22 cm liberi fra lavabo, wc e bidet: interasse 59, sopra il minimo d'uso
     ("BAGNO", "WC", 345, 341, 48, 37, "wc"),
     ("BAGNO", "BIDET", 345, 400, 48, 37, "wc"),

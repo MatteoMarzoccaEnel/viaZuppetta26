@@ -556,18 +556,18 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="266.0" y="473.0" class="lbl" text-anchor="middle">80</text>
 <circle cx="266.0" cy="481.0" r="15" fill="#c0392b" stroke="#ffffff" stroke-width="2"/>
 <text x="266.0" y="486.0" class="num" text-anchor="middle">3</text>
-<rect x="394.0" y="473.0" width="85.0" height="16.0" class="" fill="#ffffff"/>
-<line x1="394.0" y1="481.0" x2="479.0" y2="481.0" class="ap" />
-<rect x="394.0" y="474.0" width="2.5" height="14.0" class="" fill="#4a4a4a"/>
-<rect x="476.5" y="474.0" width="2.5" height="14.0" class="" fill="#4a4a4a"/>
-<rect x="396.5" y="478.5" width="80.0" height="5.0" class="door" />
-<rect x="479.0" y="475.0" width="85.0" height="12.0" class="" fill="none" stroke="#c0392b" stroke-width="0.8" stroke-dasharray="5 3"/>
-<line x1="436.5" y1="464.0" x2="558.0" y2="464.0" class="" stroke="#c0392b" stroke-width="1.2"/>
-<path d="M 558.0,464 l -8,-3.5 l 0,7 Z" fill="#c0392b"/>
-<text x="521.5" y="459.0" class="lbl" text-anchor="middle">tasca 85</text>
-<text x="436.5" y="473.0" class="lbl" text-anchor="middle">80</text>
-<circle cx="436.5" cy="481.0" r="15" fill="#c0392b" stroke="#ffffff" stroke-width="2"/>
-<text x="436.5" y="486.0" class="num" text-anchor="middle">4</text>
+<rect x="395.0" y="473.0" width="85.0" height="16.0" class="" fill="#ffffff"/>
+<line x1="395.0" y1="481.0" x2="480.0" y2="481.0" class="ap" />
+<rect x="395.0" y="474.0" width="2.5" height="14.0" class="" fill="#4a4a4a"/>
+<rect x="477.5" y="474.0" width="2.5" height="14.0" class="" fill="#4a4a4a"/>
+<rect x="397.5" y="478.5" width="80.0" height="5.0" class="door" />
+<rect x="480.0" y="475.0" width="85.0" height="12.0" class="" fill="none" stroke="#c0392b" stroke-width="0.8" stroke-dasharray="5 3"/>
+<line x1="437.5" y1="464.0" x2="559.0" y2="464.0" class="" stroke="#c0392b" stroke-width="1.2"/>
+<path d="M 559.0,464 l -8,-3.5 l 0,7 Z" fill="#c0392b"/>
+<text x="522.5" y="459.0" class="lbl" text-anchor="middle">tasca 85</text>
+<text x="437.5" y="473.0" class="lbl" text-anchor="middle">80</text>
+<circle cx="437.5" cy="481.0" r="15" fill="#c0392b" stroke="#ffffff" stroke-width="2"/>
+<text x="437.5" y="486.0" class="num" text-anchor="middle">4</text>
 <rect x="607.1" y="473.0" width="95.0" height="16.0" class="" fill="#ffffff"/>
 <line x1="607.1" y1="481.0" x2="702.1" y2="481.0" class="ap" />
 <rect x="607.1" y="474.0" width="7.5" height="14.0" class="" fill="#4a4a4a"/>
@@ -663,7 +663,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="1007.2" y="531.5" class="lbl" text-anchor="middle" stroke="#ffffff" stroke-width="4" stroke-linejoin="round">CANALIZZATO C3  intradosso 261</text>
 <text x="1007.2" y="531.5" class="lbl" text-anchor="middle">CANALIZZATO C3  intradosso 261</text>
 <rect x="236.0" y="472.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
-<rect x="406.5" y="472.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
+<rect x="407.5" y="472.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
 <rect x="624.6" y="472.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
 <rect x="970.0" y="482.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
 <rect x="1120.0" y="482.0" width="60.0" height="8.0" class="" fill="#0288d1" fill-opacity="0.75" stroke="#01579b"/>
@@ -681,8 +681,8 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="105.0" y="107.0" class="lbl" text-anchor="middle">LM-04 ARMADIO L200 P60 H240</text>
 <rect x="293.0" y="208.0" width="35.0" height="200.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
 <text x="314.5" y="308.0" class="lbl" text-anchor="middle" transform="rotate(-90 314.5 308.0)">LM-05 MOBILE BASSO L200 P35 H45</text>
-<rect x="345.0" y="319.0" width="38.0" height="120.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
-<text x="368.0" y="379.0" class="lbl" text-anchor="middle" transform="rotate(-90 368.0 379.0)">BA-01 LAVABO L120 P38 H85</text>
+<rect x="345.0" y="319.0" width="50.0" height="120.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
+<text x="374.0" y="379.0" class="lbl" text-anchor="middle" transform="rotate(-90 374.0 379.0)">BA-01 LAVABO L120 P50 H85</text>
 <rect x="345.0" y="260.0" width="48.0" height="37.0" class="fix" rx="3" fill="#ffffff" fill-opacity="0.65"/>
 <ellipse cx="369.0" cy="278.5" rx="18.0" ry="14.5" class="fixl"/>
 <text x="369.0" y="282.5" class="lbl" text-anchor="middle">BA-02 WC L37 P48 H25 sosp.15</text>

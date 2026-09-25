@@ -42,15 +42,15 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <rect x="393.00" y="94.00" width="37.00" height="60.00" class="" fill="#ffffff" stroke="#4a4a4a" stroke-width="0.5"/>
 <line x1="430.00" y1="94.00" x2="430.00" y2="154.00" class="glass" />
 <text x="405.00" y="124.00" class="lblw" text-anchor="middle" transform="rotate(-90 405.00 124.00)">FINESTRA 60</text>
-<rect x="-14.00" y="50.00" width="16.00" height="85.00" class="" fill="#ffffff"/>
-<rect x="-12.00" y="135.00" width="10.00" height="90.00" class="door" />
-<line x1="-7.00" y1="141.00" x2="-7.00" y2="219.00" class="door" />
-<path d="M -9.0,213 L -7.0,221 L -5.0,213" fill="none" stroke="#c0392b" stroke-width="1"/>
-<text x="-19.00" y="92.50" class="lbls" text-anchor="middle" transform="rotate(-90 -19.00 92.50)">PORTA SCORREVOLE A SCOMPARSA 80</text>
-<rect x="29.00" y="2.00" width="120.00" height="38.00" class="fix" rx="3"/>
-<rect x="36.00" y="8.00" width="106.00" height="26.00" class="fixl" rx="4"/>
-<circle cx="89.0" cy="15.0" r="3" class="fixl"/>
-<text x="89.00" y="23.00" class="lbl" text-anchor="middle">MOBILE LAVABO 120x38</text>
+<rect x="-14.00" y="52.00" width="16.00" height="85.00" class="" fill="#ffffff"/>
+<rect x="-12.00" y="137.00" width="10.00" height="90.00" class="door" />
+<line x1="-7.00" y1="143.00" x2="-7.00" y2="221.00" class="door" />
+<path d="M -9.0,215 L -7.0,223 L -5.0,215" fill="none" stroke="#c0392b" stroke-width="1"/>
+<text x="-19.00" y="94.50" class="lbls" text-anchor="middle" transform="rotate(-90 -19.00 94.50)">PORTA SCORREVOLE A SCOMPARSA 80</text>
+<rect x="29.00" y="2.00" width="120.00" height="50.00" class="fix" rx="3"/>
+<rect x="36.00" y="8.00" width="106.00" height="38.00" class="fixl" rx="4"/>
+<circle cx="89.0" cy="21.0" r="3" class="fixl"/>
+<text x="89.00" y="29.00" class="lbl" text-anchor="middle">MOBILE LAVABO 120x50</text>
 <rect x="176.00" y="2.00" width="37.00" height="48.00" class="fix" rx="3"/>
 <rect x="176.00" y="2.00" width="37.00" height="14.00" class="fixl" />
 <ellipse cx="194.5" cy="37" rx="14" ry="17" class="fixl"/>
@@ -118,8 +118,8 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="-39.00" y="79.00" class="dim" text-anchor="middle" transform="rotate(-90 -39.00 79.00)">154 finito</text>
 <line x1="-54.00" y1="0.00" x2="-54.00" y2="158.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="-57.00" y="79.00" class="dim" text-anchor="middle" transform="rotate(-90 -57.00 79.00)">158 grezzo</text>
-<line x1="118.00" y1="40.00" x2="118.00" y2="121.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
-<text x="115.00" y="80.50" class="dim" text-anchor="middle" transform="rotate(-90 115.00 80.50)">81 sgabello-lavabo</text>
+<line x1="118.00" y1="52.00" x2="118.00" y2="121.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
+<text x="115.00" y="86.50" class="dim" text-anchor="middle" transform="rotate(-90 115.00 86.50)">69 sgabello-lavabo</text>
 <line x1="272.00" y1="50.00" x2="272.00" y2="156.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
 <text x="269.00" y="103.00" class="dim" text-anchor="middle" transform="rotate(-90 269.00 103.00)">106</text>
 <line x1="2.00" y1="240.00" x2="88.00" y2="240.00" class="dl" marker-start="url(#tick)" marker-end="url(#tick)"/>
