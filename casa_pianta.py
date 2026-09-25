@@ -47,6 +47,9 @@ FORMATI = [
     dict(lato=(60.0, 120.0), lato_riv=(120.0, 60.0), fuga=0.2),
     dict(lato=(120.0, 60.0), lato_riv=(60.0, 120.0), fuga=0.2),
     dict(lato=(120.0, 60.0), lato_riv=(120.0, 60.0), fuga=0.2),
+    # ingresso=True: la griglia si cerca solo fra quelle con una lastra intera
+    # a filo soglia del portoncino, che ne copre tutta la luce
+    dict(lato=(120.0, 120.0), fuga=0.2, ingresso=True),
 ]
 for _f in FORMATI:
     _f.setdefault("lato_riv", _f["lato"])
@@ -61,6 +64,8 @@ for _f in FORMATI:
     if _f["lato_riv"] != _f["lato"]:
         _n += f" pav {_rx:.0f}x{_ry:.0f} par"
     _f["nome"] = f"{_n}, {_f['riv_corsi']} corsi a filo trave"
+    if _f.get("ingresso"):
+        _f["nome"] += ", intera all'ingresso"
 # valori della configurazione attiva, rimpiazzati da usa_formato()
 FORMATO = FORMATI[0]
 PIASTRELLA_X, PIASTRELLA_Y = FORMATO["lato"]
@@ -877,12 +882,51 @@ def obiettivo(ox, oy):
     return tot["lastre"] * 10 + tot["tagli"] + tot["sliver"] * 3 + inutili * 10
 
 
+def _soglia_ingresso():
+    """Portoncino: (x0, x1, y del filo pavimento, verso di ingresso, locale)."""
+    _t, x0, y0, x1, y1, _lb = next(a for a in APERTURE if a[5].startswith("INGRESSO"))
+    xc = (x0 + x1) / 2
+    for nome, d in LOCALI.items():
+        for s in (1, -1):
+            if any(r[0] < xc < r[2] and r[1] < y0 + s * 2 < r[3] for r in d["rect"]):
+                return min(x0, x1), max(x0, x1), y0 + s * FINITURA, s, nome
+    raise ValueError("portoncino fuori da ogni locale")
+
+
+SOGLIA = _soglia_ingresso()
+
+
+def lastra_ingresso(ox, oy):
+    """Vero se a filo soglia c'e' una lastra intera che copre tutta la luce."""
+    x0, x1, yf, s, nome = SOGLIA
+    if abs(((yf - oy) / MODULO_Y) - round((yf - oy) / MODULO_Y)) * MODULO_Y > 0.01:
+        return False
+    a0 = ox + math.floor((x0 - ox + 0.01) / MODULO_X) * MODULO_X
+    if a0 + MODULO_X < x1 - 0.01:
+        return False
+    b0, b1 = sorted((yf, yf + s * MODULO_Y))
+    sup = sum(max(0, min(a0 + MODULO_X, r[2]) - max(a0, r[0])) *
+              max(0, min(b1, r[3]) - max(b0, r[1])) for r in LOCALI[nome]["rect"])
+    return sup > MODULO_X * MODULO_Y - 1.0
+
+
+def _scarto_ingresso(ox):
+    """Distanza della lastra di soglia dal centro della porta: a parita' si centra."""
+    x0, x1 = SOGLIA[0], SOGLIA[1]
+    d = ((x0 + x1) / 2 - MODULO_X / 2 - ox) % MODULO_X
+    return min(d, MODULO_X - d)
+
+
 def _candidati(idx):
     """Offset critici: la funzione obiettivo cambia solo quando una fuga
     attraversa un bordo, quindi basta provare quei valori e i punti medi."""
     M = MODULO_X if idx == 0 else MODULO_Y
-    vals = sorted({round(p[idx] % M, 3)
-                   for d in LOCALI.values() for p in d["fin"]})
+    vals = {round(p[idx] % M, 3) for d in LOCALI.values() for p in d["fin"]}
+    if FORMATO.get("ingresso"):
+        x0, x1, yf = SOGLIA[:3]
+        vals |= ({round(x0 % M, 3), round((x1 - M) % M, 3),
+                  round(((x0 + x1) / 2 - M / 2) % M, 3)} if idx == 0 else {round(yf % M, 3)})
+    vals = sorted(vals)
     out = list(vals)
     for a, b in zip(vals, vals[1:]):
         out.append((a + b) / 2)
@@ -892,11 +936,16 @@ def _candidati(idx):
 
 def cerca():
     best, arg = None, (0.0, 0.0)
+    vincolo = FORMATO.get("ingresso")
     for o in _candidati(0):
         for p in _candidati(1):
-            s = obiettivo(o, p)
+            if vincolo and not lastra_ingresso(o, p):
+                continue
+            s = (obiettivo(o, p), _scarto_ingresso(o) if vincolo else 0)
             if best is None or s < best:
                 best, arg = s, (o, p)
+    if best is None:
+        raise ValueError(f"{FORMATO['nome']}: nessuna griglia con lastra intera all'ingresso")
     return arg
 
 

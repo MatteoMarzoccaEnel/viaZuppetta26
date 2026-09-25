@@ -1,0 +1,8 @@
+Texture per il formato 120x120.
+
+Mettere qui i file png / jpg / jpeg / webp / bmp della lastra: casa_3d.py li
+incorpora tutti nel modello e il tasto C li scorre uno per uno. L'immagine viene
+deformata per coprire l'intera piastrella, quindi conviene fotografare o
+ritagliare la sola lastra, senza fughe.
+
+Se la cartella e' vuota il modello usa una texture procedurale di ripiego.

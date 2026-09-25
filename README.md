@@ -30,7 +30,9 @@ I formati messi a confronto sono dichiarati in `casa_pianta.FORMATI`: 90x90,
 80x80 e 60x60, tutti con il rivestimento del bagno chiuso a filo dell'intradosso
 trave (240 cm), posando solo i corsi necessari ad arrivarci. Cambiare formato
 rifà l'ottimizzazione della griglia, non solo il disegno: l'origine di posa è
-cercata per formato minimizzando lastre e tagli.
+cercata per formato minimizzando lastre e tagli. Il 120x120 ha il vincolo
+`ingresso=True`: la griglia è cercata solo fra quelle con una lastra intera a
+filo soglia del portoncino, che ne copre tutta la luce.
 
 ```
 python casa_pianta.py --posa=1     # elaborati con il formato indicato
