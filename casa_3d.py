@@ -405,9 +405,19 @@ for _i, _f in enumerate(cp.FORMATI):
 cp.usa_formato(cp.POSA_ATTIVA)
 TEXTURE = {c: texture_cartella(c) for c in {f["cartella"] for f in cp.FORMATI}}
 
+# configurazioni preferite, richiamate in sequenza col tasto P: posa per formato
+# di pavimento e rivestimento, texture per nome file (senza estensione)
+PREFERITI = [
+    dict(nome="p1", lato=(120.0, 60.0), lato_riv=(120.0, 60.0),
+         pav="01-onice-avorio-lux", ded="02-onice-verde"),
+]
+for _p in PREFERITI:
+    _p["posa"] = next(i for i, f in enumerate(cp.FORMATI)
+                      if f["lato"] == _p["lato"] and f["lato_riv"] == _p["lato_riv"])
+
 DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobili,
             riv=riv, batt=batt, quote=quote, etichette=etichette, aree=aree,
-            muretti=muretti, posa=POSA, tex=TEXTURE,
+            muretti=muretti, posa=POSA, tex=TEXTURE, preferiti=PREFERITI,
             balconi=BALCONI, box=cp.BOX, contro=cp.CONTROSOFFITTI,
             bagno=[list(r) for r in cp.LOCALI["BAGNO"]["rect"]],
             canali=cp.CANALI, bocchette=cp.BOCCHETTE, hcan=cp.H_CANALE,
@@ -481,7 +491,8 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>C</kbd></span>cambia texture del pavimento (catalogo della cartella del formato)</div>
   <div class="r"><span class="k"><kbd>R</kbd></span>cambia la piastrella dedicata del bagno (sanitari e testata)</div>
   <div class="r"><span class="k"><kbd>F</kbd></span>fughe evidenziate in nero</div>
-  <div class="r"><span class="k"><kbd>P</kbd></span>scarica il computo in pdf del formato attivo</div>
+  <div class="r"><span class="k"><kbd>P</kbd></span>salta alla configurazione preferita (p1, p2...)</div>
+  <div class="r"><span class="k"><kbd>K</kbd></span>scarica il computo in pdf del formato attivo</div>
   <div class="r"><span class="k"><kbd>H</kbd></span>mostra / nascondi legenda</div>
   <div class="r"><span class="k"><kbd>Esc</kbd></span>liberare il mouse</div>
   <hr>
@@ -495,7 +506,7 @@ HTML = r"""<!DOCTYPE html>
   <div id="bott">
     <button data-k="KeyE">porta</button><button data-k="KeyQ">quote</button>
     <button data-k="KeyB">posa</button><button data-k="KeyC">texture</button>
-    <button data-k="KeyR">dedicata</button>
+    <button data-k="KeyR">dedicata</button><button data-k="KeyP">preferito</button>
     <button data-k="KeyF">fughe</button><button data-k="KeyH">menu</button>
   </div>
 </div>
@@ -876,6 +887,15 @@ function mostraPosa(){
     + ' cm<br>texture ' + nomeTex(iPosa) + '</span>';
 }
 mostraPosa();
+let iPref = 0;
+function vaiPosa(k){
+  gPosa[iPosa].visible = false;
+  iPosa = k;
+  gPosa[iPosa].visible = true;
+  applicaTex(iPosa);
+  mostraPosa();
+  mostraFughe();
+}
 
 // ---------- infissi ----------
 function badge(n, x, y, z){
@@ -1299,13 +1319,16 @@ addEventListener('keydown', e=>{
       dimmi(ao.enabled ? 'occlusione ambientale attiva' : 'occlusione ambientale spenta');
     }
     if (e.code === 'KeyB'){
-      gPosa[iPosa].visible = false;
-      iPosa = (iPosa + 1) % gPosa.length;
-      gPosa[iPosa].visible = true;
-      applicaTex(iPosa);
-      mostraPosa();
-      mostraFughe();
+      vaiPosa((iPosa + 1) % gPosa.length);
       dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
+    }
+    if (e.code === 'KeyP' && D.preferiti.length){
+      const p = D.preferiti[iPref], l = catalogo(p.posa);
+      iPref = (iPref + 1) % D.preferiti.length;
+      const k = nome => Math.max(0, l.findIndex(t => t[0] === nome));
+      iTex = k(p.pav); iTexRiv = k(p.ded); DROP[p.posa] = null;
+      vaiPosa(p.posa);
+      dimmi(p.nome + ': ' + D.posa[iPosa].nome);
     }
     if (e.code === 'KeyC' || e.code === 'KeyR'){
       const n = catalogo(iPosa).length;
@@ -1318,7 +1341,7 @@ addEventListener('keydown', e=>{
               + etichettaTex(iPosa, e.code === 'KeyC' ? iTex : iTexRiv));
       }
     }
-    if (e.code === 'KeyP'){
+    if (e.code === 'KeyK'){
       const a = document.createElement('a');
       a.href = D.posa[iPosa].pdf; a.download = D.posa[iPosa].pdf; a.click();
       dimmi('computo ' + D.posa[iPosa].pdf);
