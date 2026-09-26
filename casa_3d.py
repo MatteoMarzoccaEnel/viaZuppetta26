@@ -715,6 +715,14 @@ HTML = r"""<!DOCTYPE html>
   #bott button{width:56px;height:56px;border-radius:50%;color:#fff;font:600 14px system-ui;
         border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.5);touch-action:none}
   #bott button:active{background:rgba(255,212,121,.35)}
+  /* schermi tattili: legenda e tabelle compatte e scorrevoli col dito */
+  body.tocco #leg, body.tocco #tab{pointer-events:auto;overflow:auto;-webkit-overflow-scrolling:touch}
+  body.tocco #leg{max-height:calc(100vh - 28px);font-size:12px;padding:10px 12px;min-width:0;max-width:78vw}
+  body.tocco #tab{max-height:45vh;max-width:calc(100vw - 230px);bottom:auto;top:14px;flex-wrap:wrap}
+  body.tocco #tab .t{font-size:10.5px}
+  body.tocco #hud{display:none}
+  @media (max-width:700px){ #bott{grid-template-columns:48px 48px 48px;gap:8px}
+    #bott button{width:48px;height:48px;font-size:12px} }
   #leg .r{display:flex;align-items:center;gap:8px;margin:6px 0}
   #leg .k{flex:0 0 96px;display:flex;gap:4px}
   kbd{display:inline-block;min-width:15px;text-align:center;font:bold 11px Arial;
@@ -769,7 +777,8 @@ HTML = r"""<!DOCTYPE html>
     <button data-k="KeyM">par B</button>
     <button data-k="KeyT">tex pav</button><button data-k="KeyY">tex A</button>
     <button data-k="KeyU">tex B</button>
-    <button data-k="KeyP">prefe- rito</button><button data-k="KeyH">menu</button>
+    <button data-k="KeyP">prefe- rito</button><button data-k="codice">codice</button>
+    <button data-k="KeyH">menu</button>
   </div>
 </div>
 <div id="start"><div><b>Appartamento - visita 3D</b><br><br>
@@ -777,7 +786,8 @@ HTML = r"""<!DOCTYPE html>
   <b style="font-size:16px">E</b> apre e chiude la porta vicina,
   <b style="font-size:16px">Q</b> mostra le quote.<br>
   Su telefono e tablet: tocca per entrare, joystick in basso a sinistra per
-  muoverti, trascina sulla scena per guardarti attorno.<br>
+  muoverti, trascina sulla scena per guardarti attorno. Sui tasti posa e texture
+  un tocco lungo torna indietro; "menu" apre legenda e tabelle, "codice" chiede pavimento-A-B.<br>
   Salendo oltre il soffitto questo diventa trasparente.</div></div>
 <script type="importmap">
 {"imports":{"three":"https://unpkg.com/three@0.161.0/build/three.module.js",
@@ -1781,13 +1791,26 @@ if (TOCCO){
   renderer.domElement.addEventListener('touchend', ()=>{ look = null; });
 
   for (const b of document.querySelectorAll('#bott button')){
-    b.addEventListener('touchstart', e=>{
-      const c = b.dataset.k;
-      dispatchEvent(new KeyboardEvent('keydown', {code:c}));
-      dispatchEvent(new KeyboardEvent('keyup', {code:c}));
+    // tocco breve = avanti, tocco lungo = indietro (come Shift sulla tastiera)
+    let t0 = 0;
+    b.addEventListener('touchstart', e=>{ t0 = performance.now(); e.preventDefault(); }, {passive:false});
+    b.addEventListener('touchend', e=>{
       e.preventDefault();
+      const c = b.dataset.k;
+      if (c === 'codice'){
+        const v = prompt('pavimento-A-B con i numeri di tabella, es. 3-1-2');
+        if (v){ codice = v.trim(); applicaCodice(); }
+        return;
+      }
+      const indietro = performance.now() - t0 > 450;
+      dispatchEvent(new KeyboardEvent('keydown', {code:c, shiftKey:indietro}));
+      dispatchEvent(new KeyboardEvent('keyup', {code:c}));
     }, {passive:false});
   }
+  // all'avvio legenda e tabelle coprirebbero lo schermo: si aprono con "menu"
+  document.body.classList.add('tocco');
+  document.getElementById('leg').style.display = 'none';
+  document.getElementById('tab').style.display = 'none';
 }
 addEventListener('resize', ()=>{
   camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
