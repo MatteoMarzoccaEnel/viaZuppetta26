@@ -517,23 +517,21 @@ for _p, _r in zip(POSA, _classifica([p["stat"] for p in POSA])):
     _p["rank"] = _r
 
 # pareti: stesso catalogo di formati; A e B hanno ciascuna la sua origine orizzontale.
-# quota None = regola generale (240 a corsi interi per 60/120, altrimenti filo trave);
-# sf = corsi sfalsati di quella frazione di lastra. Le varianti sono tutte sul 60x120.
+# altezza: 240 a corsi interi per 60/120, altrimenti filo trave;
+# sf = corsi sfalsati di quella frazione di lastra. Le varianti sono tutte sul 60x120,
+# sempre a 240: con altezze multiple di 60 il filo trave lascerebbe una fascia di 21 cm.
 FORMATI_RIV = [dict(lato=l) for l in
                [(90.0, 90.0), (80.0, 80.0), (60.0, 60.0), (60.0, 120.0), (120.0, 60.0), (120.0, 120.0)]]
 FORMATI_RIV += [
-    dict(lato=(60.0, 120.0), quota="trave"),
-    dict(lato=(120.0, 60.0), quota="trave"),
     dict(lato=(60.0, 120.0), sf=1 / 2),
     dict(lato=(120.0, 60.0), sf=1 / 2),
     dict(lato=(120.0, 60.0), sf=1 / 3),
-    dict(lato=(120.0, 60.0), quota="trave", sf=1 / 2),
 ]
 
 
-def idx_riv(lato, quota=None, sf=0.0):
+def idx_riv(lato, sf=0.0):
     return next(i for i, f in enumerate(FORMATI_RIV) if tuple(f["lato"]) == tuple(lato)
-                and f.get("quota") == quota and f.get("sf", 0.0) == sf)
+                and f.get("sf", 0.0) == sf)
 
 
 FUGA_RIV = cp.FORMATI[0]["fuga"]
@@ -541,7 +539,7 @@ PARETI = []
 for _fr in FORMATI_RIV:
     _rx, _ry = _fr["lato"]
     _sf = _fr.get("sf", 0.0)
-    if _ry in cp.RIV_CORSI_INTERI and _fr.get("quota") != "trave":
+    if _ry in cp.RIV_CORSI_INTERI:
         _corsi = round(cp.RIV_H_INTERI / _ry)
         _h, _quota = _corsi * _ry + (_corsi - 1) * FUGA_RIV, f"a {cp.RIV_H_INTERI:.0f}"
     else:
