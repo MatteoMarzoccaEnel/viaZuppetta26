@@ -81,16 +81,25 @@ PARETI = _sviluppi()
 
 
 def _nascosta():
-    """mq di parete coperti dalle alzatine (nicchia e gradino): non si rivestono."""
+    """mq di parete coperti dalle alzatine (nicchia e gradino), meno le superfici
+    delle alzatine stesse, che si rivestono con la piastrella dedicata."""
     out = {"proprio": 0.0, "pavimento": 0.0}
     alz = [(x, y, w, h, cp.altezza(lb, tp)[0]) for lo, lb, x, y, w, h, tp in cp.ARREDO
            if lo == "BAGNO" and tp == "muretto"]
-    for i, (orizz, c, a, b, _dentro) in enumerate(cp.lati(cp.LOCALI["BAGNO"]["poly"])):
+    lati = cp.lati(cp.LOCALI["BAGNO"]["poly"])
+    for i, (orizz, c, a, b, _dentro) in enumerate(lati):
         for x, y, w, h, alt in alz:
             lo, hi, p0, p1 = (y, y + h, x, x + w) if orizz else (x, x + w, y, y + h)
             if min(abs(lo - c), abs(hi - c)) < 1.5:
                 out["proprio" if i in PROPRIO else "pavimento"] += \
                     max(0.0, min(b, p1) - max(a, p0)) * min(alt, cp.H_RIV) / 10000
+    for x, y, w, h, alt in alz:
+        out["proprio"] -= w * h / 10000           # sommita'
+        for orizz, c, s0, s1 in ((True, y, x, x + w), (True, y + h, x, x + w),
+                                 (False, x, y, y + h), (False, x + w, y, y + h)):
+            if not any(o == orizz and abs(cc - c) < 1.5 and min(b, s1) - max(a, s0) > 1
+                       for o, cc, a, b, _d in lati):
+                out["proprio"] -= (s1 - s0) * alt / 10000   # lato verso la stanza
     return out
 
 

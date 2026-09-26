@@ -282,8 +282,8 @@ for k, (tipo, x0, y0, x1, y1, lb) in enumerate(cp.APERTURE, 1):
                       f"{k}: {lw:.0f}x{z1-z0:.0f}{fin}", "#b03020"])
 
 def _alzatine(orizz, c):
-    """Muretti addossati al filo c: (da, a, quota di sommita'). Non sono rivestiti e
-    nascondono la parete che hanno dietro fino alla loro sommita'."""
+    """Muretti addossati al filo c: (da, a, quota di sommita'). Nascondono la parete
+    che hanno dietro fino alla loro sommita'."""
     out = []
     for x, y, w, h, base, alt in muretti:
         if orizz and min(abs(y - c), abs(y + h - c)) < 1.5:
@@ -319,6 +319,33 @@ def facce_riv(h_tot):
     return out
 
 
+def facce_alzatine():
+    """Alzatine del bagno (nicchia e gradino sotto la finestra), rivestite come le
+    pareti B: i lati verso la stanza come facce, la sommita' come piano [x0, y0, x1, y1, z]."""
+    lati = cp.lati(cp.LOCALI["BAGNO"]["poly"])
+
+    def a_muro(orizz, c, s0, s1):
+        return any(o == orizz and abs(cc - c) < 1.5 and min(b, s1) - max(a, s0) > 1
+                   for o, cc, a, b, _d in lati)
+
+    fronti, piani = [], []
+    for x, y, w, h, base, alt in muretti:
+        for orizz, c, s0, s1, dentro in ((True, y, x, x + w, -1), (True, y + h, x, x + w, 1),
+                                         (False, x, y, y + h, -1), (False, x + w, y, y + h, 1)):
+            if not a_muro(orizz, c, s0, s1):
+                fronti.append([s0, s1, c + dentro * 0.6, orizz, dentro, 1, base, base + alt])
+        piani.append([x, y, x + w, y + h, base + alt])
+    return fronti, piani
+
+
+FRONTI_ALZ, PIANI_ALZ = facce_alzatine()
+# le sommita' entrano nel conteggio come facce stese: una striscia lungo il lato lungo,
+# ognuna su un suo piano fittizio
+PIANI_CONTO = [[x0, x1, 10000.0 + i, True, 1, 1, 0.0, y1 - y0] if x1 - x0 >= y1 - y0
+               else [y0, y1, 10000.0 + i, False, 1, 1, 0.0, x1 - x0]
+               for i, (x0, y0, x1, y1, _z) in enumerate(PIANI_ALZ)]
+
+
 OFF_TAGLIO = 6.0   # quanto la misura del taglio sta dentro il pezzo, dal bordo
 
 
@@ -333,30 +360,30 @@ def _griglia(a, b, o, passo):
     return v + [b]
 
 
-def pezzi_riv(facce, ox, oy, mx, my, sf=0.0):
+def pezzi_riv(facce, oo, mx, my, sf=0.0):
     """Pezzi di rivestimento faccia per faccia: (faccia, s0, s1, q0, q1).
 
-    sf = sfalsamento dei corsi in frazione di modulo (1/2, 1/3...): il corso j
-    parte spostato di j * sf * mx."""
-    for f in facce:
-        sa, sb, _c, orizz, _d, _g, z0, z1 = f
+    oo = origine orizzontale della griglia per ogni faccia (una per piano di parete);
+    sf = sfalsamento dei corsi in frazione di modulo: il corso j parte spostato di j*sf*mx."""
+    for f, o in zip(facce, oo):
+        sa, sb, _c, _orizz, _d, _g, z0, z1 = f
         gz = _griglia(z0, z1, 0.0, my)
         for q0, q1 in zip(gz, gz[1:]):
             j = math.floor((q0 + 0.05) / my)
-            gs = _griglia(sa, sb, (ox if orizz else oy) + j * sf * mx, mx)
+            gs = _griglia(sa, sb, o + j * sf * mx, mx)
             for s0, s1 in zip(gs, gs[1:]):
                 # sotto il centimetro non e' un pezzo: lo assorbono fuga e collante
                 if s1 - s0 >= 1.0 and q1 - q0 >= 1.0:
                     yield f, s0, s1, q0, q1
 
 
-def tagli_riv(facce, ox, oy, mx, my, sf=0.0):
+def tagli_riv(facce, oo, mx, my, sf=0.0):
     """Come tagli_posa, ma sulle pareti rivestite del bagno.
 
     (quota della faccia, orizzontale, verso, s, z, testo verticale, etichetta)
     """
     out = []
-    for (_a, _b, faccia, orizz, dentro, _g, _z0, _z1), s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my, sf):
+    for (_a, _b, faccia, orizz, dentro, _g, _z0, _z1), s0, s1, q0, q1 in pezzi_riv(facce, oo, mx, my, sf):
         ds, dz = s1 - s0, q1 - q0
         if ds < mx - 0.5:
             out.append([faccia, orizz, dentro, (s0 + s1) / 2,
@@ -367,42 +394,94 @@ def tagli_riv(facce, ox, oy, mx, my, sf=0.0):
     return out
 
 
-def stat_riv(facce, ox, oy, mx, my, lastra, sf=0.0):
-    """Conteggio con lo stesso criterio del pavimento: i pezzi con entrambi i lati
-    oltre meta' modulo consumano una lastra, gli altri si ricavano a coppie."""
-    intere = tagli = sliver = inutili = grandi = 0
-    min_lato, area = 1e9, 0.0
-    for _f, s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my, sf):
+TAGLIO = 0.3   # spessore del disco: si perde a ogni taglio
+
+
+def lastre_per_tagli(pezzi, rx, ry):
+    """Lastre necessarie a ricavare i pezzi tagliati riusando gli avanzi.
+
+    Ogni lastra tiene la lista dei ritagli ancora liberi; un pezzo va nel ritaglio
+    che lo contiene con meno scarto, altrimenti si apre una lastra nuova. Tagli a
+    ghigliottina, pezzi mai ruotati (la venatura resta nel verso di posa)."""
+    lastre = []
+    for w, h in sorted(pezzi, key=lambda p: -p[0] * p[1]):
+        w, h = min(w, rx), min(h, ry)
+        best = None
+        for li, liberi in enumerate(lastre):
+            for fi, (fw, fh) in enumerate(liberi):
+                if w <= fw + 0.01 and h <= fh + 0.01:
+                    s = min(fw - w, fh - h)
+                    if best is None or s < best[0]:
+                        best = (s, li, fi)
+        if best is None:
+            lastre.append([(rx, ry)])
+            li, fi = len(lastre) - 1, 0
+        else:
+            _s, li, fi = best
+        fw, fh = lastre[li].pop(fi)
+        rw, rh = fw - w - TAGLIO, fh - h - TAGLIO
+        # il taglio lungo lascia il ritaglio piu' grande possibile
+        if rw * fh >= fw * rh:
+            lastre[li] += [r for r in ((rw, fh), (w, rh)) if min(r) > 1]
+        else:
+            lastre[li] += [r for r in ((fw, rh), (rw, h)) if min(r) > 1]
+    return len(lastre)
+
+
+def stat_riv(facce, oo, mx, my, rx, ry, sf=0.0):
+    """Lastre intere posate cosi' come sono, pezzi tagliati ricavati riusando gli avanzi."""
+    intere = inutili = sliver = 0
+    tagli, min_lato, area = [], 1e9, 0.0
+    for _f, s0, s1, q0, q1 in pezzi_riv(facce, oo, mx, my, sf):
         ds, dz = s1 - s0, q1 - q0
         area += ds * dz / 10000
         if ds > mx - 0.5 and dz > my - 0.5:
             intere += 1
             continue
-        tagli += 1
+        tagli.append((ds, dz))
         lato = min(ds, dz)
         min_lato = min(min_lato, lato)
         sliver += lato < cp.SLIVER
         inutili += lato < 10
-        grandi += ds > mx / 2 and dz > my / 2
-    lastre = intere + grandi + math.ceil((tagli - grandi) / 2)
-    acq = lastre * lastra
-    return dict(lastre=lastre, mq=round(acq, 2), intere=intere, tagli=tagli, sliver=sliver,
+    lastre = intere + lastre_per_tagli(tagli, rx, ry)
+    acq = lastre * rx * ry / 10000
+    return dict(lastre=lastre, mq=round(acq, 2), intere=intere, tagli=len(tagli), sliver=sliver,
                 minlato=round(min_lato if tagli else 0.0, 1),
                 sfrido=round((acq - area) / acq * 100 if acq else 0.0, 1),
-                punti=lastre * 10 + tagli + sliver * 3 + inutili * 10)
+                punti=lastre * 10 + len(tagli) + sliver * 3 + inutili * 10)
 
 
-def origine_riv(facce, m, orizz, my, sf=0.0):
-    """Origine orizzontale della griglia a parete: stessa ricerca del pavimento
-    (fughe sui bordi dei tratti e punti medi), per le sole facce di quell'asse."""
-    ff = [f for f in facce if f[3] == orizz]
-    if not ff:
-        return 0.0
-    corsi = max(math.ceil(f[7] / my) for f in ff)
-    vals = sorted({round((v - j * sf * m) % m, 3) for f in ff for v in (f[0], f[1])
-                   for j in (range(corsi) if sf else (0,))})
-    cand = vals + [(a + b) / 2 for a, b in zip(vals, vals[1:])] + [((vals[-1] + vals[0] + m) / 2) % m]
-    return min(cand, key=lambda o: stat_riv(ff, o, o, m, my, 1.0, sf)["punti"])
+def _piano(f):
+    return (f[3], round(f[2], 1))
+
+
+def origini_riv(facce, mx, my, rx, ry, sf=0.0):
+    """Origine orizzontale della griglia per ogni piano di parete.
+
+    Pareti su piani diversi (fondo, fronte della colonna, risvolti) non hanno fughe
+    da allineare: ognuna parte dove conviene. Prima ogni piano da solo, poi due
+    giri in cui ognuno si riaggiusta tenendo conto degli avanzi degli altri."""
+    piani = sorted({_piano(f) for f in facce})
+    cand = {}
+    for pk in piani:
+        ff = [f for f in facce if _piano(f) == pk]
+        corsi = max(math.ceil(f[7] / my) for f in ff)
+        vals = sorted({round((v - j * sf * mx) % mx, 3) for f in ff for v in (f[0], f[1])
+                       for j in (range(corsi) if sf else (0,))})
+        cand[pk] = sorted(set(vals + [(a + b) / 2 for a, b in zip(vals, vals[1:])]
+                              + [((vals[-1] + vals[0] + mx) / 2) % mx]))
+    orig = {}
+    for pk in piani:
+        ff = [f for f in facce if _piano(f) == pk]
+        orig[pk] = min(cand[pk], key=lambda o: stat_riv(ff, [o] * len(ff), mx, my, rx, ry, sf)["punti"])
+
+    def punti(o_):
+        return stat_riv(facce, [o_[_piano(f)] for f in facce], mx, my, rx, ry, sf)["punti"]
+
+    for _giro in range(2):
+        for pk in piani:
+            orig[pk] = min(cand[pk], key=lambda o: punti({**orig, pk: o}))
+    return orig
 
 
 def tagli_posa():
@@ -546,21 +625,24 @@ for _fr in FORMATI_RIV:
         _corsi = math.ceil((cp.H_TRAVE + FUGA_RIV) / (_ry + FUGA_RIV))
         _h, _quota = cp.H_TRAVE, "a filo trave"
     _mx, _my = _rx + FUGA_RIV, _ry + FUGA_RIV
-    _facce = facce_riv(_h)
+    _facce = facce_riv(_h) + FRONTI_ALZ
     _gruppi = []
     for _g in (0, 1):
         _ff = [f for f in _facce if f[5] == _g]
-        _ox, _oy = origine_riv(_ff, _mx, True, _my, _sf), origine_riv(_ff, _mx, False, _my, _sf)
-        _gruppi.append(dict(ox=_ox, oy=_oy,
-                            stat=stat_riv(_ff, _ox, _oy, _mx, _my, _rx * _ry / 10000, _sf),
-                            tagli=tagli_riv(_ff, _ox, _oy, _mx, _my, _sf)))
+        _fc = _ff + (PIANI_CONTO if _g == 1 else [])
+        _orig = origini_riv(_fc, _mx, _my, _rx, _ry, _sf)
+        _gruppi.append(dict(
+            o=[_orig[_piano(f)] if f[5] == _g else None for f in _facce],
+            otop=[_orig[_piano(f)] for f in PIANI_CONTO] if _g == 1 else [],
+            stat=stat_riv(_fc, [_orig[_piano(f)] for f in _fc], _mx, _my, _rx, _ry, _sf),
+            tagli=tagli_riv(_ff, [_orig[_piano(f)] for f in _ff], _mx, _my, _sf)))
     _nome = f"{_rx:.0f}x{_ry:.0f}, {_corsi} corsi {_quota}"
     if _sf:
         _nome += f", sfalsata 1/{round(1 / _sf)}"
     PARETI.append(dict(nome=_nome, cartella=f"{min(_rx, _ry):.0f}x{max(_rx, _ry):.0f}",
                        modx=_mx, mody=_my, fuga=FUGA_RIV, fugaProf=cp.FUGA_PROF,
                        sf=_sf, righe=round(1 / _sf) if _sf else 1,
-                       hriv=_h, facce=_facce, gruppi=_gruppi))
+                       hriv=_h, facce=_facce, piani=PIANI_ALZ, gruppi=_gruppi))
 for _g in (0, 1):
     for _p, _r in zip(PARETI, _classifica([p["gruppi"][_g]["stat"] for p in PARETI])):
         _p["gruppi"][_g]["rank"] = _r
@@ -1069,10 +1151,18 @@ function costruisciPav(cfg, i){
 }
 function costruisciRiv(P, k, gr){
   const M = matRiv[gr][k], G = P.gruppi[gr];
-  const cfg = Object.assign({}, P, {ox: G.ox, oy: G.oy, mody: P.mody * (P.righe || 1)});
+  const cfg = Object.assign({}, P, {mody: P.mody * (P.righe || 1)});
   const g = new THREE.Group(); scene.add(g);
-  for (const [a,b,c,o,dn,gg,z0,z1] of P.facce)
-    if (gg === gr) quad(a,b,c,o,dn,z0,z1, M, cfg, g);
+  // ogni piano di parete ha la sua origine orizzontale
+  P.facce.forEach(([a,b,c,o,dn,gg,z0,z1], i) => {
+    if (gg === gr) quad(a,b,c,o,dn,z0,z1, M, Object.assign({}, cfg, {ox: G.o[i], oy: G.o[i]}), g);
+  });
+  // sommita' delle alzatine, rivestite come le pareti B: striscia lungo il lato lungo
+  if (gr === 1) P.piani.forEach(([x0,y0,x1,y1,z], i) => {
+    const lx = x1 - x0 >= y1 - y0;
+    superficie([[x0, y0, x1, y1]], z + 0.3, M, false,
+               Object.assign({}, P, lx ? {ox: G.otop[i], oy: y0} : {ox: x0, oy: G.otop[i]}), g);
+  });
   // le misure del rivestimento non attraversano i muri: si leggono dal bagno
   const r = new THREE.Group(); r.visible = false; r.renderOrder = 2;
   etichRiv[gr][k] = r;
@@ -1080,7 +1170,8 @@ function costruisciRiv(P, k, gr){
   return g;
 }
 etichRiv.push([], []);
-// alzatine del bagno (nicchia e gradino sotto la finestra): intonacate, non piastrellate
+// alzatine del bagno (nicchia e gradino sotto la finestra): il corpo in muratura,
+// il rivestimento lo aggiungono le pareti B
 const matAlz = matMuro.clone();
 for (const [x,y,w,h,base,alt] of D.muretti){
   const x1 = x+w, y1 = y+h, z1 = base+alt;
