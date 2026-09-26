@@ -308,24 +308,28 @@ def _griglia(a, b, o, passo):
     return v + [b]
 
 
-def pezzi_riv(facce, ox, oy, mx, my):
-    """Pezzi di rivestimento faccia per faccia: (faccia, s0, s1, q0, q1)."""
+def pezzi_riv(facce, ox, oy, mx, my, sf=0.0):
+    """Pezzi di rivestimento faccia per faccia: (faccia, s0, s1, q0, q1).
+
+    sf = sfalsamento dei corsi in frazione di modulo (1/2, 1/3...): il corso j
+    parte spostato di j * sf * mx."""
     for f in facce:
         sa, sb, _c, orizz, _d, _g, z0, z1 = f
-        gs = _griglia(sa, sb, ox if orizz else oy, mx)
         gz = _griglia(z0, z1, 0.0, my)
-        for s0, s1 in zip(gs, gs[1:]):
-            for q0, q1 in zip(gz, gz[1:]):
+        for q0, q1 in zip(gz, gz[1:]):
+            j = math.floor((q0 + 0.05) / my)
+            gs = _griglia(sa, sb, (ox if orizz else oy) + j * sf * mx, mx)
+            for s0, s1 in zip(gs, gs[1:]):
                 yield f, s0, s1, q0, q1
 
 
-def tagli_riv(facce, ox, oy, mx, my):
+def tagli_riv(facce, ox, oy, mx, my, sf=0.0):
     """Come tagli_posa, ma sulle pareti rivestite del bagno.
 
     (quota della faccia, orizzontale, verso, s, z, testo verticale, etichetta)
     """
     out = []
-    for (_a, _b, faccia, orizz, dentro, _g, _z0, _z1), s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my):
+    for (_a, _b, faccia, orizz, dentro, _g, _z0, _z1), s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my, sf):
         ds, dz = s1 - s0, q1 - q0
         if ds < mx - 0.5:
             out.append([faccia, orizz, dentro, (s0 + s1) / 2,
@@ -336,12 +340,12 @@ def tagli_riv(facce, ox, oy, mx, my):
     return out
 
 
-def stat_riv(facce, ox, oy, mx, my, lastra):
+def stat_riv(facce, ox, oy, mx, my, lastra, sf=0.0):
     """Conteggio con lo stesso criterio del pavimento: i pezzi con entrambi i lati
     oltre meta' modulo consumano una lastra, gli altri si ricavano a coppie."""
     intere = tagli = sliver = inutili = grandi = 0
     min_lato, area = 1e9, 0.0
-    for _f, s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my):
+    for _f, s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my, sf):
         ds, dz = s1 - s0, q1 - q0
         area += ds * dz / 10000
         if ds > mx - 0.5 and dz > my - 0.5:
@@ -361,15 +365,17 @@ def stat_riv(facce, ox, oy, mx, my, lastra):
                 punti=lastre * 10 + tagli + sliver * 3 + inutili * 10)
 
 
-def origine_riv(facce, m, orizz, my):
+def origine_riv(facce, m, orizz, my, sf=0.0):
     """Origine orizzontale della griglia a parete: stessa ricerca del pavimento
     (fughe sui bordi dei tratti e punti medi), per le sole facce di quell'asse."""
     ff = [f for f in facce if f[3] == orizz]
     if not ff:
         return 0.0
-    vals = sorted({round(v % m, 3) for f in ff for v in (f[0], f[1])})
+    corsi = max(math.ceil(f[7] / my) for f in ff)
+    vals = sorted({round((v - j * sf * m) % m, 3) for f in ff for v in (f[0], f[1])
+                   for j in (range(corsi) if sf else (0,))})
     cand = vals + [(a + b) / 2 for a, b in zip(vals, vals[1:])] + [((vals[-1] + vals[0] + m) / 2) % m]
-    return min(cand, key=lambda o: stat_riv(ff, o, o, m, my, 1.0)["punti"])
+    return min(cand, key=lambda o: stat_riv(ff, o, o, m, my, 1.0, sf)["punti"])
 
 
 def tagli_posa():
@@ -464,12 +470,32 @@ for _i, _f in enumerate(cp.FORMATI):
 for _p, _r in zip(POSA, _classifica([p["stat"] for p in POSA])):
     _p["rank"] = _r
 
-# pareti: stesso catalogo di formati; A e B hanno ciascuna la sua origine orizzontale
-FORMATI_RIV = [(90.0, 90.0), (80.0, 80.0), (60.0, 60.0), (60.0, 120.0), (120.0, 60.0), (120.0, 120.0)]
+# pareti: stesso catalogo di formati; A e B hanno ciascuna la sua origine orizzontale.
+# quota None = regola generale (240 a corsi interi per 60/120, altrimenti filo trave);
+# sf = corsi sfalsati di quella frazione di lastra. Le varianti sono tutte sul 60x120.
+FORMATI_RIV = [dict(lato=l) for l in
+               [(90.0, 90.0), (80.0, 80.0), (60.0, 60.0), (60.0, 120.0), (120.0, 60.0), (120.0, 120.0)]]
+FORMATI_RIV += [
+    dict(lato=(60.0, 120.0), quota="trave"),
+    dict(lato=(120.0, 60.0), quota="trave"),
+    dict(lato=(60.0, 120.0), sf=1 / 2),
+    dict(lato=(120.0, 60.0), sf=1 / 2),
+    dict(lato=(120.0, 60.0), sf=1 / 3),
+    dict(lato=(120.0, 60.0), quota="trave", sf=1 / 2),
+]
+
+
+def idx_riv(lato, quota=None, sf=0.0):
+    return next(i for i, f in enumerate(FORMATI_RIV) if tuple(f["lato"]) == tuple(lato)
+                and f.get("quota") == quota and f.get("sf", 0.0) == sf)
+
+
 FUGA_RIV = cp.FORMATI[0]["fuga"]
 PARETI = []
-for _rx, _ry in FORMATI_RIV:
-    if _ry in cp.RIV_CORSI_INTERI:
+for _fr in FORMATI_RIV:
+    _rx, _ry = _fr["lato"]
+    _sf = _fr.get("sf", 0.0)
+    if _ry in cp.RIV_CORSI_INTERI and _fr.get("quota") != "trave":
         _corsi = round(cp.RIV_H_INTERI / _ry)
         _h, _quota = _corsi * _ry + (_corsi - 1) * FUGA_RIV, f"a {cp.RIV_H_INTERI:.0f}"
     else:
@@ -480,12 +506,16 @@ for _rx, _ry in FORMATI_RIV:
     _gruppi = []
     for _g in (0, 1):
         _ff = [f for f in _facce if f[5] == _g]
-        _ox, _oy = origine_riv(_ff, _mx, True, _my), origine_riv(_ff, _mx, False, _my)
-        _gruppi.append(dict(ox=_ox, oy=_oy, stat=stat_riv(_ff, _ox, _oy, _mx, _my, _rx * _ry / 10000),
-                            tagli=tagli_riv(_ff, _ox, _oy, _mx, _my)))
-    PARETI.append(dict(nome=f"{_rx:.0f}x{_ry:.0f}, {_corsi} corsi {_quota}",
-                       cartella=f"{min(_rx, _ry):.0f}x{max(_rx, _ry):.0f}",
+        _ox, _oy = origine_riv(_ff, _mx, True, _my, _sf), origine_riv(_ff, _mx, False, _my, _sf)
+        _gruppi.append(dict(ox=_ox, oy=_oy,
+                            stat=stat_riv(_ff, _ox, _oy, _mx, _my, _rx * _ry / 10000, _sf),
+                            tagli=tagli_riv(_ff, _ox, _oy, _mx, _my, _sf)))
+    _nome = f"{_rx:.0f}x{_ry:.0f}, {_corsi} corsi {_quota}"
+    if _sf:
+        _nome += f", sfalsata 1/{round(1 / _sf)}"
+    PARETI.append(dict(nome=_nome, cartella=f"{min(_rx, _ry):.0f}x{max(_rx, _ry):.0f}",
                        modx=_mx, mody=_my, fuga=FUGA_RIV, fugaProf=cp.FUGA_PROF,
+                       sf=_sf, righe=round(1 / _sf) if _sf else 1,
                        hriv=_h, facce=_facce, gruppi=_gruppi))
 for _g in (0, 1):
     for _p, _r in zip(PARETI, _classifica([p["gruppi"][_g]["stat"] for p in PARETI])):
@@ -493,7 +523,7 @@ for _g in (0, 1):
 cp.usa_formato(cp.POSA_ATTIVA)
 TEXTURE = {c: texture_cartella(c) for c in {p["cartella"] for p in POSA + PARETI}}
 AVVIO = dict(pav=_POSA_DI[_chiave_pav(cp.FORMATO)],
-             riv=[FORMATI_RIV.index(tuple(cp.FORMATO["lato_riv"]))] * 2)
+             riv=[idx_riv(cp.FORMATO["lato_riv"])] * 2)
 
 # configurazioni preferite, richiamate in sequenza col tasto P: formato di
 # pavimento, pareti A e B; texture per nome file (senza estensione), stesso ordine
@@ -503,7 +533,7 @@ PREFERITI = [
 ]
 for _p in PREFERITI:
     _p["posa"] = _POSA_DI[(_p["pav"], False, None)]
-    _p["riv"] = [FORMATI_RIV.index(t) for t in _p["pareti"]]
+    _p["riv"] = [idx_riv(t) for t in _p["pareti"]]
 
 DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobili,
             riv=riv, batt=batt, quote=quote, etichette=etichette, aree=aree,
@@ -717,12 +747,22 @@ let fugaNera = false;
 function texGres(img, cfg){
   const A = cfg.modx, B = cfg.mody, N = 2048;
   const W = A >= B ? N : Math.round(N*A/B), H = A >= B ? Math.round(N*B/A) : N;
+  // posa sfalsata: la texture contiene un corso per riga, ognuno spostato di sf
+  const nr = cfg.righe || 1, sf = cfg.sf || 0;
   const d = fugaNera ? 2 : 1;
   const gx = Math.max(2, Math.round(W*cfg.fuga/A))*d, gy = Math.max(2, Math.round(H*cfg.fuga/B))*d;
-  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const c = document.createElement('canvas'); c.width = W; c.height = H*nr;
   const k = c.getContext('2d');
-  k.fillStyle = fugaNera ? '#000000' : '#cdcdc9'; k.fillRect(0,0,W,H);
-  if (img) k.drawImage(img, gx/2, gy/2, W-gx, H-gy);
+  k.fillStyle = fugaNera ? '#000000' : '#cdcdc9'; k.fillRect(0,0,W,H*nr);
+  if (nr > 1){
+    const tt = texGres(img, Object.assign({}, cfg, {righe: 1, sf: 0})), t = tt.image;
+    for (let r = 0; r < nr; r++){
+      const x = ((r * sf) % 1) * W, y = H*(nr-1-r);     // corso 0 in basso (flipY)
+      k.drawImage(t, x, y); k.drawImage(t, x - W, y);
+    }
+    tt.dispose();
+  }
+  else if (img) k.drawImage(img, gx/2, gy/2, W-gx, H-gy);
   else {
     const gr = k.createLinearGradient(0,0,W,H);
     gr.addColorStop(0,'#f7f7f5'); gr.addColorStop(.5,'#eceae7'); gr.addColorStop(1,'#f5f4f2');
@@ -960,7 +1000,7 @@ function costruisciPav(cfg, i){
 }
 function costruisciRiv(P, k, gr){
   const M = matRiv[gr][k], G = P.gruppi[gr];
-  const cfg = Object.assign({}, P, {ox: G.ox, oy: G.oy});
+  const cfg = Object.assign({}, P, {ox: G.ox, oy: G.oy, mody: P.mody * (P.righe || 1)});
   const g = new THREE.Group(); scene.add(g);
   for (const [a,b,c,o,dn,gg,z0,z1] of P.facce)
     if (gg === gr) quad(a,b,c,o,dn,z0,z1, M, cfg, g);
