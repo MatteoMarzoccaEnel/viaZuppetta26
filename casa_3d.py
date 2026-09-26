@@ -461,7 +461,8 @@ def texture_cartella(nome):
 # Pavimento: una posa per disposizione distinta; le varianti di FORMATI che
 # cambiano solo il rivestimento qui coincidono.
 def _chiave_pav(f):
-    return (tuple(f["lato"]), bool(f.get("ingresso")), f.get("allinea"), bool(f.get("per_stanza")))
+    return (tuple(f["lato"]), bool(f.get("ingresso")), f.get("allinea"), bool(f.get("per_stanza")),
+            f.get("sf", 0.0))
 
 
 def _nome_pav(f):
@@ -472,6 +473,8 @@ def _nome_pav(f):
         n += ", a filo bagno"
     if f.get("per_stanza"):
         n += ", per stanza"
+    if f.get("sf"):
+        n += f", sfalsata 1/{round(1 / f['sf'])}"
     return n
 
 
@@ -503,6 +506,9 @@ for _i, _f in enumerate(cp.FORMATI):
         modx=cp.MODULO_X, mody=cp.MODULO_Y, fuga=cp.FUGA, fugaProf=cp.FUGA_PROF,
         ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1], tagli=tagli_posa(),
         stanze=_stanze() if _f.get("per_stanza") else None,
+        # posa sfalsata: corsi lungo x (righe) o lungo y (colonne), spostati di sf
+        sf=_f.get("sf", 0.0), righe=round(1 / _f["sf"]) if _f.get("sf") else 1,
+        colonne=bool(_f.get("sf")) and cp.MODULO_Y > cp.MODULO_X,
         pdf=f"computo_{cp.slug(_f['nome'])}.pdf",
         stat=dict(lastre=_t["lastre"], mq=round(_t["lastre"] * cp.LASTRA, 2),
                   intere=_t["intere"], tagli=_t["tagli"], sliver=_t["sliver"],
@@ -572,7 +578,7 @@ PREFERITI = [
          tex=["01-onice-avorio-lux", "01-onice-avorio-lux", "02-onice-verde"]),
 ]
 for _p in PREFERITI:
-    _p["posa"] = _POSA_DI[(_p["pav"], False, None, False)]
+    _p["posa"] = _POSA_DI[(_p["pav"], False, None, False, 0.0)]
     _p["riv"] = [idx_riv(t) for t in _p["pareti"]]
 
 DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobili,
@@ -788,18 +794,20 @@ let fugaNera = false;
 function texGres(img, cfg){
   const A = cfg.modx, B = cfg.mody, N = 2048;
   const W = A >= B ? N : Math.round(N*A/B), H = A >= B ? Math.round(N*B/A) : N;
-  // posa sfalsata: la texture contiene un corso per riga, ognuno spostato di sf
-  const nr = cfg.righe || 1, sf = cfg.sf || 0;
+  // posa sfalsata: la texture contiene un corso per riga (o per colonna), ognuno spostato di sf
+  const nr = cfg.righe || 1, sf = cfg.sf || 0, col = !!cfg.colonne;
   const d = fugaNera ? 2 : 1;
   const gx = Math.max(2, Math.round(W*cfg.fuga/A))*d, gy = Math.max(2, Math.round(H*cfg.fuga/B))*d;
-  const c = document.createElement('canvas'); c.width = W; c.height = H*nr;
+  const c = document.createElement('canvas');
+  c.width = col ? W*nr : W; c.height = col ? H : H*nr;
   const k = c.getContext('2d');
-  k.fillStyle = fugaNera ? '#000000' : '#cdcdc9'; k.fillRect(0,0,W,H*nr);
+  k.fillStyle = fugaNera ? '#000000' : '#cdcdc9'; k.fillRect(0,0,c.width,c.height);
   if (nr > 1){
-    const tt = texGres(img, Object.assign({}, cfg, {righe: 1, sf: 0})), t = tt.image;
+    const tt = texGres(img, Object.assign({}, cfg, {righe: 1, sf: 0, colonne: false})), t = tt.image;
     for (let r = 0; r < nr; r++){
-      const x = ((r * sf) % 1) * W, y = H*(nr-1-r);     // corso 0 in basso (flipY)
-      k.drawImage(t, x, y); k.drawImage(t, x - W, y);
+      const f = (r * sf) % 1;
+      if (col){ k.drawImage(t, W*r, -f*H); k.drawImage(t, W*r, H - f*H); }   // v verso l'alto (flipY)
+      else { const y = H*(nr-1-r); k.drawImage(t, f*W, y); k.drawImage(t, f*W - W, y); }
     }
     tt.dispose();
   }
@@ -993,12 +1001,26 @@ function segmentiFughe(cfg, rects){
   const MX = cfg.modx, MY = cfg.mody, V = new Map(), H = new Map();
   const agg = (m, c, a, b) => { const k = c.toFixed(2);
     const v = m.get(k) || []; v.push([a,b]); m.set(k, v); };
+  const sf = cfg.sf || 0, col = !!cfg.colonne;
   for (const [x0,y0,x1,y1] of (rects || D.pavimento)){
-    for (let k = Math.ceil((x0-cfg.ox)/MX); cfg.ox + k*MX < x1; k++){
+    // nella posa sfalsata i giunti di testa cambiano corso per corso
+    if (sf && !col){
+      for (let j = Math.floor((y0-cfg.oy)/MY); cfg.oy + j*MY < y1; j++){
+        const b0 = Math.max(y0, cfg.oy + j*MY), b1 = Math.min(y1, cfg.oy + (j+1)*MY), o = cfg.ox + j*sf*MX;
+        for (let k = Math.ceil((x0-o)/MX); o + k*MX < x1; k++)
+          if (o + k*MX > x0 && b1 > b0) agg(V, o + k*MX, b0, b1);
+      }
+    } else for (let k = Math.ceil((x0-cfg.ox)/MX); cfg.ox + k*MX < x1; k++){
       const x = cfg.ox + k*MX;
       if (x > x0) agg(V, x, y0, y1);
     }
-    for (let k = Math.ceil((y0-cfg.oy)/MY); cfg.oy + k*MY < y1; k++){
+    if (sf && col){
+      for (let i = Math.floor((x0-cfg.ox)/MX); cfg.ox + i*MX < x1; i++){
+        const a0 = Math.max(x0, cfg.ox + i*MX), a1 = Math.min(x1, cfg.ox + (i+1)*MX), o = cfg.oy + i*sf*MY;
+        for (let k = Math.ceil((y0-o)/MY); o + k*MY < y1; k++)
+          if (o + k*MY > y0 && a1 > a0) agg(H, o + k*MY, a0, a1);
+      }
+    } else for (let k = Math.ceil((y0-cfg.oy)/MY); cfg.oy + k*MY < y1; k++){
       const y = cfg.oy + k*MY;
       if (y > y0) agg(H, y, x0, x1);
     }
@@ -1030,10 +1052,13 @@ function mostraFughe(){
 function costruisciPav(cfg, i){
   const M = matPav[i];
   const g = new THREE.Group(); scene.add(g);
+  // posa sfalsata: la texture copre un ciclo di corsi, le UV si scalano di conseguenza
+  const cfgT = cfg.righe > 1 ? Object.assign({}, cfg, cfg.colonne ? {modx: cfg.modx * cfg.righe}
+                                                                   : {mody: cfg.mody * cfg.righe}) : cfg;
   if (cfg.stanze)       // posa per stanza: ogni locale con la sua origine
     for (const st of cfg.stanze)
-      superficie(st.rects, 0, M, false, Object.assign({}, cfg, {ox: st.ox, oy: st.oy}), g);
-  else superficie(D.pavimento, 0, M, false, cfg, g);
+      superficie(st.rects, 0, M, false, Object.assign({}, cfgT, {ox: st.ox, oy: st.oy}), g);
+  else superficie(D.pavimento, 0, M, false, cfgT, g);
   // il battiscopa si ricava dalle lastre del pavimento
   for (const [a,b,c,o,dn] of D.batt){
     const c2 = c + (dn>0?1:-1)*SP_BATT;

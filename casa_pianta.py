@@ -63,6 +63,11 @@ FORMATI = [
     # divisa sotto l'anta, o alla stanza che ha piu' margine per coprirla tutta
     dict(lato=(120.0, 60.0), fuga=0.2, per_stanza=True),
     dict(lato=(60.0, 120.0), fuga=0.2, per_stanza=True),
+    # sf = posa a correre: ogni corso spostato di quella frazione di lastra sul lato lungo
+    dict(lato=(120.0, 60.0), fuga=0.2, sf=1 / 2),
+    dict(lato=(120.0, 60.0), fuga=0.2, sf=1 / 3),
+    dict(lato=(60.0, 120.0), fuga=0.2, sf=1 / 2),
+    dict(lato=(60.0, 120.0), fuga=0.2, sf=1 / 3),
 ]
 for _f in FORMATI:
     _f.setdefault("lato_riv", _f["lato"])
@@ -90,6 +95,8 @@ for _f in FORMATI:
         _f["nome"] += ", a filo bagno"
     if _f.get("per_stanza"):
         _f["nome"] += ", per stanza"
+    if _f.get("sf"):
+        _f["nome"] += f", sfalsata 1/{round(1 / _f['sf'])}"
 # valori della configurazione attiva, rimpiazzati da usa_formato()
 FORMATO = FORMATI[0]
 PIASTRELLA_X, PIASTRELLA_Y = FORMATO["lato"]
@@ -838,28 +845,51 @@ _verifica(_sys.modules[__name__])
 # =====================================================================
 
 
+def _sfalsamento():
+    """(frazione, True se i corsi corrono lungo x): posa a correre sul lato lungo."""
+    return FORMATO.get("sf", 0.0), MODULO_X >= MODULO_Y
+
+
+def _griglia(bb, ox, oy):
+    """Rettangoli (a0, a1, b0, b1) delle celle che coprono bb. Nella posa sfalsata
+    ogni corso parte spostato di sf moduli rispetto al precedente."""
+    x0, y0, x1, y1 = bb
+    MX, MY = MODULO_X, MODULO_Y
+    sf, lx = _sfalsamento()
+    if sf and lx:
+        for j in range(math.floor((y0 - oy) / MY), math.ceil((y1 - oy) / MY) + 1):
+            o = ox + j * sf * MX
+            for i in range(math.floor((x0 - o) / MX), math.ceil((x1 - o) / MX) + 1):
+                yield o + i * MX, o + (i + 1) * MX, oy + j * MY, oy + (j + 1) * MY
+    elif sf:
+        for i in range(math.floor((x0 - ox) / MX), math.ceil((x1 - ox) / MX) + 1):
+            o = oy + i * sf * MY
+            for j in range(math.floor((y0 - o) / MY), math.ceil((y1 - o) / MY) + 1):
+                yield ox + i * MX, ox + (i + 1) * MX, o + j * MY, o + (j + 1) * MY
+    else:
+        for i in range(math.floor((x0 - ox) / MX), math.ceil((x1 - ox) / MX) + 1):
+            for j in range(math.floor((y0 - oy) / MY), math.ceil((y1 - oy) / MY) + 1):
+                yield ox + i * MX, ox + (i + 1) * MX, oy + j * MY, oy + (j + 1) * MY
+
+
 def celle(d, ox, oy):
     """Ogni cella della griglia che tocca il locale, con le sue parti effettive."""
-    x0, y0, x1, y1 = d["bb"]
     out = []
-    for i in range(math.floor((x0 - ox) / MODULO_X), math.ceil((x1 - ox) / MODULO_X) + 1):
-        for j in range(math.floor((y0 - oy) / MODULO_Y), math.ceil((y1 - oy) / MODULO_Y) + 1):
-            a0, a1 = ox + i * MODULO_X, ox + (i + 1) * MODULO_X
-            b0, b1 = oy + j * MODULO_Y, oy + (j + 1) * MODULO_Y
-            parti = []
-            for rx0, ry0, rx1, ry1 in d["rect"]:
-                cx0, cx1 = max(a0, rx0), min(a1, rx1)
-                cy0, cy1 = max(b0, ry0), min(b1, ry1)
-                if cx1 - cx0 > 0.05 and cy1 - cy0 > 0.05:
-                    parti.append((cx0, cy0, cx1, cy1))
-            if not parti:
-                continue
-            sup = sum((p[2] - p[0]) * (p[3] - p[1]) for p in parti)
-            dx = max(p[2] for p in parti) - min(p[0] for p in parti)
-            dy = max(p[3] for p in parti) - min(p[1] for p in parti)
-            out.append(dict(parti=parti, sup=sup, dx=dx, dy=dy,
-                            intera=sup > MODULO_X * MODULO_Y - 1.0,
-                            lato=min(dx, dy)))
+    for a0, a1, b0, b1 in _griglia(d["bb"], ox, oy):
+        parti = []
+        for rx0, ry0, rx1, ry1 in d["rect"]:
+            cx0, cx1 = max(a0, rx0), min(a1, rx1)
+            cy0, cy1 = max(b0, ry0), min(b1, ry1)
+            if cx1 - cx0 > 0.05 and cy1 - cy0 > 0.05:
+                parti.append((cx0, cy0, cx1, cy1))
+        if not parti:
+            continue
+        sup = sum((p[2] - p[0]) * (p[3] - p[1]) for p in parti)
+        dx = max(p[2] for p in parti) - min(p[0] for p in parti)
+        dy = max(p[3] for p in parti) - min(p[1] for p in parti)
+        out.append(dict(parti=parti, sup=sup, dx=dx, dy=dy,
+                        intera=sup > MODULO_X * MODULO_Y - 1.0,
+                        lato=min(dx, dy)))
     return out
 
 
@@ -950,6 +980,10 @@ def _candidati(idx):
     if FORMATO.get("allinea"):
         return [round(R(*FORMATO["allinea"])[idx] % M, 3)]
     vals = {round(p[idx] % M, 3) for d in LOCALI.values() for p in d["fin"]}
+    sf, lx = _sfalsamento()
+    if sf and (idx == 0) == lx:
+        # sul lato lungo i corsi sono spostati: un bordo conta per ogni corso del ciclo
+        vals = {round((v - j * sf * M) % M, 3) for v in vals for j in range(round(1 / sf))}
     if FORMATO.get("ingresso"):
         x0, x1, yf = SOGLIA[:3]
         vals |= ({round(x0 % M, 3), round((x1 - M) % M, 3),
@@ -1278,10 +1312,17 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
     by1 = max(d["bb"][3] for d in LOCALI.values()) + 14
 
     for nome, d in LOCALI.items():
+        sfalsata = FORMATO.get("sf")
         for c in var["loc"][nome]["celle"]:
             col = colore(c)
             for p in c["parti"]:
-                rect(p[0], p[1], p[2] - p[0], p[3] - p[1], extra=f'fill="{col}"')
+                # nella posa sfalsata le fughe sono il contorno di ogni pezzo
+                bordo = ' stroke="#8ea0b0" stroke-width="0.9"' if sfalsata else ""
+                rect(p[0], p[1], p[2] - p[0], p[3] - p[1], extra=f'fill="{col}"{bordo}')
+        if sfalsata:
+            pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in d["fin"])
+            add(f'<polygon points="{pts}" fill="none" stroke="#8a9aa8" stroke-width="0.8"/>')
+            continue
         # fughe
         ox, oy = var.get("o_loc", {}).get(nome, var["o"])
         x0, y0, x1, y1 = d["bb"]
