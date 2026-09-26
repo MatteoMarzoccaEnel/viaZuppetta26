@@ -659,7 +659,8 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>Q</kbd></span>quote dei locali</div>
   <div class="r"><span class="k"><kbd>O</kbd></span>ombre accese / spente</div>
   <div class="r"><span class="k"><kbd>L</kbd></span>occlusione ambientale (angoli)</div>
-  <div class="r"><span class="k"><kbd>B</kbd><kbd>N</kbd><kbd>M</kbd></span>posa: pavimento / pareti A / pareti B</div>
+  <div class="r"><span class="k"><kbd>B</kbd><kbd>N</kbd><kbd>M</kbd></span>posa: pavimento / pareti A / pareti B (ordine di tabella)</div>
+  <div class="r"><span class="k"><kbd>3</kbd><kbd>-</kbd><kbd>1</kbd><kbd>-</kbd><kbd>2</kbd></span>numeri di tabella pavimento-A-B, poi Invio</div>
   <div class="r"><span class="k"><kbd>T</kbd><kbd>Y</kbd><kbd>U</kbd></span>texture: pavimento / pareti A / pareti B</div>
   <div class="r"><span class="k"><kbd>P</kbd></span>configurazioni preferite (p1, p2...)</div>
   <div class="r"><span class="k"><kbd>F</kbd></span>fughe evidenziate in nero</div>
@@ -1073,24 +1074,26 @@ const gComp = [
 ];
 gComp.forEach((arr, c) => arr.forEach((g, k) => { g.visible = (k === sel[c]); }));
 
+// ordine di tabella (sfrido crescente): lo seguono i tasti a rotazione e il codice pav-A-B
+const statDi = c => c === 0 ? D.posa.map(p => p.stat) : D.pareti.map(p => p.gruppi[c-1].stat);
+const ORD = [0, 1, 2].map(c => { const s = statDi(c);
+  return s.map((_, k) => k).sort((a, b) => s[a].sfrido - s[b].sfrido || a - b); });
+const numDi = c => ORD[c].indexOf(sel[c]) + 1;
 function tabella(c){
   const f = v => String(v).replace('.', ',');
-  const voci = c === 0 ? D.posa.map((p, k) => ({k, nome: p.nome, rank: p.rank, s: p.stat}))
-    : D.pareti.map((p, k) => ({k, nome: p.nome, rank: p.gruppi[c-1].rank, s: p.gruppi[c-1].stat}));
-  const righe = voci.sort((a, b) => a.s.sfrido - b.s.sfrido).map(v =>
-    '<tr' + (v.k === sel[c] ? ' class="sel"' : '') + '><td>' + v.rank + '</td><td>' + v.nome
-    + '</td><td>' + v.s.lastre + '</td><td>' + f(v.s.mq.toFixed(2)) + '</td><td>' + v.s.intere
-    + '</td><td>' + v.s.tagli + '</td><td>' + v.s.sliver + '</td><td>' + f(v.s.minlato.toFixed(1))
-    + ' cm</td><td>' + f(v.s.sfrido.toFixed(1)) + '%</td></tr>');
+  const righe = ORD[c].map((k, i) => { const s = statDi(c)[k];
+    return '<tr' + (k === sel[c] ? ' class="sel"' : '') + '><td>' + (i + 1) + '</td><td>' + cfgDi(c, k).nome
+    + '</td><td>' + s.lastre + '</td><td>' + f(s.mq.toFixed(2)) + '</td><td>' + s.intere
+    + '</td><td>' + s.tagli + '</td><td>' + s.sliver + '</td><td>' + f(s.minlato.toFixed(1))
+    + ' cm</td><td>' + f(s.sfrido.toFixed(1)) + '%</td></tr>'; });
   return '<div class="t"><h3>' + COMP[c] + ' - ORDINE DI SFRIDO (con riuso)</h3><table>'
     + '<tr><th>#</th><th>posa</th><th>lastre</th><th>mq acq.</th><th>intere</th><th>tagliate</th>'
     + '<th>listelli &lt; 25</th><th>taglio min</th><th>sfrido</th></tr>' + righe.join('') + '</table></div>';
 }
 function mostraPosa(){
   document.getElementById('posa').innerHTML = [0, 1, 2].map(c => {
-    const p = cfgDi(c), s = c === 0 ? p.stat : p.gruppi[c-1].stat;
-    const rank = c === 0 ? p.rank : p.gruppi[c-1].rank;
-    return '<b>' + COMP[c] + ' #' + rank + ' ' + p.nome + '</b><span>' + s.lastre + ' lastre, '
+    const p = cfgDi(c), s = statDi(c)[sel[c]];
+    return '<b>' + COMP[c] + ' #' + numDi(c) + ' ' + p.nome + '</b><span>' + s.lastre + ' lastre, '
       + s.intere + ' intere, ' + s.sliver + ' listelli, sfrido ' + s.sfrido.toFixed(1) + '%<br>'
       + 'texture ' + etichettaTex(c) + '</span>';
   }).join('');
@@ -1510,6 +1513,33 @@ let avviso = 0;
 function dimmi(t){ msg.textContent = t; msg.style.opacity = 1; avviso = performance.now(); }
 
 const tasti = {};
+// codice pavimento-A-B con i numeri di tabella, es. 3-1-2: si applica con Invio o
+// dopo un attimo di pausa; Backspace corregge
+let codice = '', tCodice = 0;
+function applicaCodice(){
+  const m = codice.match(/^(\d+)-(\d+)-(\d+)$/);
+  codice = '';
+  if (!m){ dimmi('codice non valido: pavimento-A-B, es. 3-1-2'); return; }
+  const n = [m[1], m[2], m[3]].map(Number);
+  if (n.some((v, c) => v < 1 || v > ORD[c].length)){ dimmi('numero fuori tabella'); return; }
+  n.forEach((v, c) => vai(c, ORD[c][v - 1]));
+  mostraPosa(); mostraFughe();
+  dimmi(n.join('-') + ': ' + [0, 1, 2].map(c => cfgDi(c).nome).join(' / '));
+}
+addEventListener('keydown', e=>{
+  if (/^[0-9-]$/.test(e.key)){
+    if (performance.now() - tCodice > 4000) codice = '';
+    codice += e.key; tCodice = performance.now();
+    dimmi('codice ' + codice);
+    if (/^\d+-\d+-\d+$/.test(codice))
+      setTimeout(() => { if (codice && performance.now() - tCodice >= 1100) applicaCodice(); }, 1200);
+    return;
+  }
+  if (e.code === 'Enter' && codice){ applicaCodice(); return; }
+  if (e.code === 'Backspace' && codice){
+    codice = codice.slice(0, -1); tCodice = performance.now(); dimmi('codice ' + (codice || '...')); return;
+  }
+});
 addEventListener('keydown', e=>{
   if (!tasti[e.code]){
     if (e.code === 'KeyQ'){ gQuote.visible = !gQuote.visible;
@@ -1535,9 +1565,10 @@ addEventListener('keydown', e=>{
     const cPosa = {KeyB: 0, KeyN: 1, KeyM: 2}[e.code];
     const cTex = {KeyT: 0, KeyY: 1, KeyU: 2}[e.code];
     if (cPosa !== undefined){
-      vai(cPosa, giro(sel[cPosa], gComp[cPosa].length));
+      const o = ORD[cPosa];
+      vai(cPosa, o[giro(o.indexOf(sel[cPosa]), o.length)]);
       mostraPosa(); mostraFughe();
-      dimmi(COMP[cPosa].toLowerCase() + ': ' + cfgDi(cPosa).nome);
+      dimmi(COMP[cPosa].toLowerCase() + ' #' + numDi(cPosa) + ': ' + cfgDi(cPosa).nome);
     }
     if (cTex !== undefined){
       const n = catalogo(cTex).length;
