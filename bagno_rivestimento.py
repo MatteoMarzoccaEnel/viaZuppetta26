@@ -80,6 +80,23 @@ def _sviluppi():
 PARETI = _sviluppi()
 
 
+def _nascosta():
+    """mq di parete coperti dalle alzatine (nicchia e gradino): non si rivestono."""
+    out = {"proprio": 0.0, "pavimento": 0.0}
+    alz = [(x, y, w, h, cp.altezza(lb, tp)[0]) for lo, lb, x, y, w, h, tp in cp.ARREDO
+           if lo == "BAGNO" and tp == "muretto"]
+    for i, (orizz, c, a, b, _dentro) in enumerate(cp.lati(cp.LOCALI["BAGNO"]["poly"])):
+        for x, y, w, h, alt in alz:
+            lo, hi, p0, p1 = (y, y + h, x, x + w) if orizz else (x, x + w, y, y + h)
+            if min(abs(lo - c), abs(hi - c)) < 1.5:
+                out["proprio" if i in PROPRIO else "pavimento"] += \
+                    max(0.0, min(b, p1) - max(a, p0)) * min(alt, cp.H_RIV) / 10000
+    return out
+
+
+NASCOSTA = _nascosta()
+
+
 def calcola():
     """Conteggio per gruppo, con il formato attivo in casa_pianta."""
     P, F, C, H = cp.RIV_X, cp.FUGA, cp.RIV_CORSI, cp.H_RIV
@@ -106,7 +123,7 @@ def calcola():
             else:
                 lastre_tagli.append(t)
         sviluppo = sum(L for _, _, L in pareti)
-        out[g] = dict(pareti=pareti, sviluppo=sviluppo, sup=sviluppo * H / 10000,
+        out[g] = dict(pareti=pareti, sviluppo=sviluppo, sup=sviluppo * H / 10000 - NASCOSTA[g],
                       intere=intere, tagli=len(tagli), accoppiate=len(lastre_tagli),
                       lastre_riuso=intere + len(lastre_tagli),
                       lastre_senza=intere + len(tagli))

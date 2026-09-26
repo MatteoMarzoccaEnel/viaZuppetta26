@@ -281,17 +281,41 @@ for k, (tipo, x0, y0, x1, y1, lb) in enumerate(cp.APERTURE, 1):
     etichette.append([(x0 + x1) / 2, (y0 + y1) / 2, z1 + 22,
                       f"{k}: {lw:.0f}x{z1-z0:.0f}{fin}", "#b03020"])
 
+def _alzatine(orizz, c):
+    """Muretti addossati al filo c: (da, a, quota di sommita'). Non sono rivestiti e
+    nascondono la parete che hanno dietro fino alla loro sommita'."""
+    out = []
+    for x, y, w, h, base, alt in muretti:
+        if orizz and min(abs(y - c), abs(y + h - c)) < 1.5:
+            out.append((x, x + w, base + alt))
+        elif not orizz and min(abs(x - c), abs(x + w - c)) < 1.5:
+            out.append((y, y + h, base + alt))
+    return out
+
+
+def _tratti_alzati(sa, sb, alz):
+    """Il tratto sa-sb spezzato ai bordi dei muretti, con la quota da cui parte il rivestimento."""
+    tagli = sorted({sa, sb} | {v for m0, m1, _z in alz for v in (m0, m1) if sa < v < sb})
+    for a, b in zip(tagli, tagli[1:]):
+        m = (a + b) / 2
+        yield a, b, max([z for m0, m1, z in alz if m0 < m < m1], default=0.0)
+
+
 def facce_riv(h_tot):
     """Le facce del rivestimento del bagno fino all'altezza data."""
     out = []
     for a, b, vani, finestre, faccia, orizz, dentro, g in pareti_bagno:
+        alz = _alzatine(orizz, faccia - dentro * 0.6)
         for sa, sb in seg_meno(a, b, vani):   # tutte le aperture, anche le finestre
-            out.append([sa, sb, faccia, orizz, dentro, g, 0, h_tot])
+            for ta, tb, z0 in _tratti_alzati(sa, sb, alz):
+                if z0 < h_tot - 1:
+                    out.append([ta, tb, faccia, orizz, dentro, g, z0, h_tot])
         for va, vb, z0, z1 in finestre:       # fasce sotto e sopra il vano
-            if z0 > 1:
-                out.append([va, vb, faccia, orizz, dentro, g, 0, min(z0, h_tot)])
-            if z1 < h_tot - 1:
-                out.append([va, vb, faccia, orizz, dentro, g, z1, h_tot])
+            for ta, tb, zb in _tratti_alzati(va, vb, alz):
+                if min(z0, h_tot) > zb + 1:
+                    out.append([ta, tb, faccia, orizz, dentro, g, zb, min(z0, h_tot)])
+                if z1 < h_tot - 1:
+                    out.append([ta, tb, faccia, orizz, dentro, g, max(z1, zb), h_tot])
     return out
 
 
@@ -321,7 +345,9 @@ def pezzi_riv(facce, ox, oy, mx, my, sf=0.0):
             j = math.floor((q0 + 0.05) / my)
             gs = _griglia(sa, sb, (ox if orizz else oy) + j * sf * mx, mx)
             for s0, s1 in zip(gs, gs[1:]):
-                yield f, s0, s1, q0, q1
+                # sotto il centimetro non e' un pezzo: lo assorbono fuga e collante
+                if s1 - s0 >= 1.0 and q1 - q0 >= 1.0:
+                    yield f, s0, s1, q0, q1
 
 
 def tagli_riv(facce, ox, oy, mx, my, sf=0.0):
@@ -1023,15 +1049,6 @@ function costruisciRiv(P, k, gr){
   const g = new THREE.Group(); scene.add(g);
   for (const [a,b,c,o,dn,gg,z0,z1] of P.facce)
     if (gg === gr) quad(a,b,c,o,dn,z0,z1, M, cfg, g);
-  // i muretti del bagno sono rivestiti come le pareti A: facce e piano
-  if (gr === 0) for (const [x,y,w,h,base,alt] of D.muretti){
-    const x1 = x+w, y1 = y+h, z1 = base+alt;
-    quad(x, x1, y,  true, -1, base, z1, M, cfg, g);
-    quad(x, x1, y1, true,  1, base, z1, M, cfg, g);
-    quad(y, y1, x,  false, -1, base, z1, M, cfg, g);
-    quad(y, y1, x1, false,  1, base, z1, M, cfg, g);
-    superficie([[x, y, x1, y1]], z1, M, false, cfg, g);
-  }
   // le misure del rivestimento non attraversano i muri: si leggono dal bagno
   const r = new THREE.Group(); r.visible = false; r.renderOrder = 2;
   etichRiv[gr][k] = r;
@@ -1039,6 +1056,16 @@ function costruisciRiv(P, k, gr){
   return g;
 }
 etichRiv.push([], []);
+// alzatine del bagno (nicchia e gradino sotto la finestra): intonacate, non piastrellate
+const matAlz = matMuro.clone();
+for (const [x,y,w,h,base,alt] of D.muretti){
+  const x1 = x+w, y1 = y+h, z1 = base+alt;
+  quad(x, x1, y,  true, -1, base, z1, matAlz);
+  quad(x, x1, y1, true,  1, base, z1, matAlz);
+  quad(y, y1, x,  false, -1, base, z1, matAlz);
+  quad(y, y1, x1, false,  1, base, z1, matAlz);
+  superficie([[x, y, x1, y1]], z1, matAlz, false);
+}
 const gComp = [
   D.posa.map((cfg, i) => costruisciPav(cfg, i)),
   D.pareti.map((P, k) => costruisciRiv(P, k, 0)),
