@@ -401,7 +401,13 @@ for _i, _f in enumerate(cp.FORMATI):
         tagliRiv=tagli_riv_posa(),
         pdf=f"computo_{cp.slug(_f['nome'])}.pdf",
         nota=f"{_t['lastre']} lastre, {_t['intere']} intere, "
-             f"{_t['sliver']} listelli, sfrido {_t['sfrido']*100:.1f}%"))
+             f"{_t['sliver']} listelli, sfrido {_t['sfrido']*100:.1f}%",
+        stat=dict(lastre=_t["lastre"], mq=round(_t["lastre"] * cp.LASTRA, 2),
+                  intere=_t["intere"], tagli=_t["tagli"], sliver=_t["sliver"],
+                  minlato=round(_t["min_lato"], 1), sfrido=round(_t["sfrido"] * 100, 1))))
+# classifica per sfrido, a pari merito stessa posizione: e' la numerazione della tabella
+for _p in POSA:
+    _p["rank"] = 1 + sum(q["stat"]["sfrido"] < _p["stat"]["sfrido"] for q in POSA)
 cp.usa_formato(cp.POSA_ATTIVA)
 TEXTURE = {c: texture_cartella(c) for c in {f["cartella"] for f in cp.FORMATI}}
 
@@ -444,6 +450,15 @@ HTML = r"""<!DOCTYPE html>
         border-left:3px solid #ffd479}
   #posa b{display:block;font-size:13px;color:#ffd479;margin-bottom:2px}
   #posa span{color:#cfd8e0;font-size:11.5px;line-height:1.45}
+  #tab{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);color:#e8edf1;
+       background:rgba(0,0,0,.62);padding:8px 12px 10px;border-radius:8px;pointer-events:none;
+       font-size:12px}
+  #tab h3{margin:0 0 6px;font-size:12px;letter-spacing:.12em;color:#ffd479}
+  #tab table{border-collapse:collapse}
+  #tab th{font-weight:normal;color:#9fb0bf;text-align:right;padding:2px 8px}
+  #tab td{text-align:right;padding:2px 8px;white-space:nowrap}
+  #tab th:nth-child(2),#tab td:nth-child(2){text-align:left}
+  #tab tr.sel td{background:rgba(255,212,121,.28);color:#ffd479;font-weight:bold}
   canvas{touch-action:none}
   /* comandi touch: nascosti su desktop, mostrati se il puntatore e' grosso */
   #touch{display:none;position:fixed;inset:0;pointer-events:none;z-index:5;
@@ -474,6 +489,7 @@ HTML = r"""<!DOCTYPE html>
   b{font-size:22px}
 </style></head><body>
 <div id="hud"><span id="pos"></span></div>
+<div id="tab"><h3>POSE IN ORDINE DI SFRIDO (pavimento, con riuso)</h3><table></table></div>
 <div id="leg">
   <h3>POSA</h3>
   <div id="posa"></div>
@@ -482,7 +498,7 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>A</kbd><kbd>D</kbd></span>spostarsi di lato</div>
   <div class="r"><span class="k"><kbd>mouse</kbd></span>guardare intorno</div>
   <div class="r"><span class="k"><kbd>&#8592;</kbd><kbd>&#8593;</kbd><kbd>&#8595;</kbd><kbd>&#8594;</kbd></span>muoversi sul piano, a quota fissa</div>
-  <div class="r"><span class="k"><kbd>Shift</kbd></span>correre</div>
+  <div class="r"><span class="k"><kbd>Shift</kbd></span>correre; con B, C, R, P scorre all'indietro</div>
   <div class="r"><span class="k"><kbd>E</kbd></span>apri / chiudi la porta vicina</div>
   <div class="r"><span class="k"><kbd>Q</kbd></span>quote dei locali</div>
   <div class="r"><span class="k"><kbd>O</kbd></span>ombre accese / spente</div>
@@ -493,6 +509,7 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>F</kbd></span>fughe evidenziate in nero</div>
   <div class="r"><span class="k"><kbd>P</kbd></span>salta alla configurazione preferita (p1, p2...)</div>
   <div class="r"><span class="k"><kbd>K</kbd></span>scarica il computo in pdf del formato attivo</div>
+  <div class="r"><span class="k"><kbd>T</kbd></span>mostra / nascondi la tabella delle pose</div>
   <div class="r"><span class="k"><kbd>H</kbd></span>mostra / nascondi legenda</div>
   <div class="r"><span class="k"><kbd>Esc</kbd></span>liberare il mouse</div>
   <hr>
@@ -507,7 +524,8 @@ HTML = r"""<!DOCTYPE html>
     <button data-k="KeyE">porta</button><button data-k="KeyQ">quote</button>
     <button data-k="KeyB">posa</button><button data-k="KeyC">texture</button>
     <button data-k="KeyR">dedicata</button><button data-k="KeyP">preferito</button>
-    <button data-k="KeyF">fughe</button><button data-k="KeyH">menu</button>
+    <button data-k="KeyF">fughe</button><button data-k="KeyT">tabella</button>
+    <button data-k="KeyH">menu</button>
   </div>
 </div>
 <div id="start"><div><b>Appartamento - visita 3D</b><br><br>
@@ -882,12 +900,21 @@ const gPosa = D.posa.map((cfg, i) => {
 function mostraPosa(){
   const c = D.posa[iPosa];
   document.getElementById('posa').innerHTML =
-    '<b>' + c.nome + '</b><span>' + c.nota + '<br>modulo ' + c.modx.toFixed(2)
+    '<b>#' + c.rank + ' ' + c.nome + '</b><span>' + c.nota + '<br>modulo ' + c.modx.toFixed(2)
     + ' x ' + c.mody.toFixed(2) + ' cm &middot; rivestimento h ' + c.hriv.toFixed(0)
     + ' cm<br>texture ' + nomeTex(iPosa) + '</span>';
+  const f = v => String(v).replace('.', ',');
+  const righe = D.posa.map((p, i) => [p, i]).sort((a, b) => a[0].stat.sfrido - b[0].stat.sfrido)
+    .map(([p, i]) => '<tr' + (i === iPosa ? ' class="sel"' : '') + '><td>' + p.rank + '</td><td>'
+      + p.nome + '</td><td>' + p.stat.lastre + '</td><td>' + f(p.stat.mq.toFixed(2)) + '</td><td>'
+      + p.stat.intere + '</td><td>' + p.stat.tagli + '</td><td>' + p.stat.sliver + '</td><td>'
+      + f(p.stat.minlato.toFixed(1)) + ' cm</td><td>' + f(p.stat.sfrido.toFixed(1)) + '%</td></tr>');
+  document.querySelector('#tab table').innerHTML =
+    '<tr><th>#</th><th>posa</th><th>lastre</th><th>mq acquistati</th><th>intere</th>'
+    + '<th>tagliate</th><th>listelli &lt; 25</th><th>taglio min</th><th>sfrido</th></tr>' + righe.join('');
 }
 mostraPosa();
-let iPref = 0;
+let iPref = -1;
 function vaiPosa(k){
   gPosa[iPosa].visible = false;
   iPosa = k;
@@ -1308,6 +1335,10 @@ addEventListener('keydown', e=>{
       const l = document.getElementById('leg');
       l.style.display = l.style.display === 'none' ? 'block' : 'none';
     }
+    if (e.code === 'KeyT'){
+      const t = document.getElementById('tab');
+      t.style.display = t.style.display === 'none' ? 'block' : 'none';
+    }
     if (e.code === 'KeyO'){
       renderer.shadowMap.enabled = !renderer.shadowMap.enabled;
       scene.traverse(o => { if (o.isMesh) o.material.needsUpdate = true; });
@@ -1318,13 +1349,15 @@ addEventListener('keydown', e=>{
       ao.enabled = !ao.enabled;
       dimmi(ao.enabled ? 'occlusione ambientale attiva' : 'occlusione ambientale spenta');
     }
+    // Shift + tasto a rotazione (B, P, C, R) scorre all'indietro
+    const passo = e.shiftKey ? -1 : 1, giro = (i, n) => ((i + passo) % n + n) % n;
     if (e.code === 'KeyB'){
-      vaiPosa((iPosa + 1) % gPosa.length);
+      vaiPosa(giro(iPosa, gPosa.length));
       dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
     }
     if (e.code === 'KeyP' && D.preferiti.length){
+      iPref = giro(iPref, D.preferiti.length);
       const p = D.preferiti[iPref], l = catalogo(p.posa);
-      iPref = (iPref + 1) % D.preferiti.length;
       const k = nome => Math.max(0, l.findIndex(t => t[0] === nome));
       iTex = k(p.pav); iTexRiv = k(p.ded); DROP[p.posa] = null;
       vaiPosa(p.posa);
@@ -1335,7 +1368,7 @@ addEventListener('keydown', e=>{
       if (!n) dimmi('nessuna texture in ' + D.posa[iPosa].cartella);
       else {
         DROP[iPosa] = null;
-        if (e.code === 'KeyC') iTex = (iTex + 1) % n; else iTexRiv = (iTexRiv + 1) % n;
+        if (e.code === 'KeyC') iTex = giro(iTex, n); else iTexRiv = giro(iTexRiv, n);
         applicaTex(iPosa); mostraPosa();
         dimmi((e.code === 'KeyC' ? 'pavimento: ' : 'piastrella dedicata: ')
               + etichettaTex(iPosa, e.code === 'KeyC' ? iTex : iTexRiv));
