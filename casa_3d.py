@@ -308,28 +308,68 @@ def _griglia(a, b, o, passo):
     return v + [b]
 
 
-def tagli_riv_posa():
+def pezzi_riv(facce, ox, oy, mx, my):
+    """Pezzi di rivestimento faccia per faccia: (faccia, s0, s1, q0, q1)."""
+    for f in facce:
+        sa, sb, _c, orizz, _d, _g, z0, z1 = f
+        gs = _griglia(sa, sb, ox if orizz else oy, mx)
+        gz = _griglia(z0, z1, 0.0, my)
+        for s0, s1 in zip(gs, gs[1:]):
+            for q0, q1 in zip(gz, gz[1:]):
+                yield f, s0, s1, q0, q1
+
+
+def tagli_riv(facce, ox, oy, mx, my):
     """Come tagli_posa, ma sulle pareti rivestite del bagno.
 
     (quota della faccia, orizzontale, verso, s, z, testo verticale, etichetta)
     """
-    ox, oy = cp.OTTIMO["o"]
-    m, out = min(cp.MODULO_RIV_X, cp.MODULO_RIV_Y) - 0.5, []
-    for sa, sb, faccia, orizz, dentro, _g, z0, z1 in facce_riv(cp.H_RIV):
-        gs = _griglia(sa, sb, ox if orizz else oy, cp.MODULO_RIV_X)
-        gz = _griglia(z0, z1, 0.0, cp.MODULO_RIV_Y)
-        for s0, s1 in zip(gs, gs[1:]):
-            for q0, q1 in zip(gz, gz[1:]):
-                ds, dz = s1 - s0, q1 - q0
-                if ds > cp.MODULO_RIV_X - 0.5 and dz > cp.MODULO_RIV_Y - 0.5:
-                    continue
-                if ds < cp.MODULO_RIV_X - 0.5:
-                    out.append([faccia, orizz, dentro, (s0 + s1) / 2,
-                                q0 + min(OFF_TAGLIO, dz / 2), 0, f"{ds:.0f}"])
-                if dz < cp.MODULO_RIV_Y - 0.5:
-                    out.append([faccia, orizz, dentro, s0 + min(OFF_TAGLIO, ds / 2),
-                                (q0 + q1) / 2, 1, f"{dz:.0f}"])
+    out = []
+    for (_a, _b, faccia, orizz, dentro, _g, _z0, _z1), s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my):
+        ds, dz = s1 - s0, q1 - q0
+        if ds < mx - 0.5:
+            out.append([faccia, orizz, dentro, (s0 + s1) / 2,
+                        q0 + min(OFF_TAGLIO, dz / 2), 0, f"{ds:.0f}"])
+        if dz < my - 0.5:
+            out.append([faccia, orizz, dentro, s0 + min(OFF_TAGLIO, ds / 2),
+                        (q0 + q1) / 2, 1, f"{dz:.0f}"])
     return out
+
+
+def stat_riv(facce, ox, oy, mx, my, lastra):
+    """Conteggio con lo stesso criterio del pavimento: i pezzi con entrambi i lati
+    oltre meta' modulo consumano una lastra, gli altri si ricavano a coppie."""
+    intere = tagli = sliver = inutili = grandi = 0
+    min_lato, area = 1e9, 0.0
+    for _f, s0, s1, q0, q1 in pezzi_riv(facce, ox, oy, mx, my):
+        ds, dz = s1 - s0, q1 - q0
+        area += ds * dz / 10000
+        if ds > mx - 0.5 and dz > my - 0.5:
+            intere += 1
+            continue
+        tagli += 1
+        lato = min(ds, dz)
+        min_lato = min(min_lato, lato)
+        sliver += lato < cp.SLIVER
+        inutili += lato < 10
+        grandi += ds > mx / 2 and dz > my / 2
+    lastre = intere + grandi + math.ceil((tagli - grandi) / 2)
+    acq = lastre * lastra
+    return dict(lastre=lastre, mq=round(acq, 2), intere=intere, tagli=tagli, sliver=sliver,
+                minlato=round(min_lato if tagli else 0.0, 1),
+                sfrido=round((acq - area) / acq * 100 if acq else 0.0, 1),
+                punti=lastre * 10 + tagli + sliver * 3 + inutili * 10)
+
+
+def origine_riv(facce, m, orizz, my):
+    """Origine orizzontale della griglia a parete: stessa ricerca del pavimento
+    (fughe sui bordi dei tratti e punti medi), per le sole facce di quell'asse."""
+    ff = [f for f in facce if f[3] == orizz]
+    if not ff:
+        return 0.0
+    vals = sorted({round(v % m, 3) for f in ff for v in (f[0], f[1])})
+    cand = vals + [(a + b) / 2 for a, b in zip(vals, vals[1:])] + [((vals[-1] + vals[0] + m) / 2) % m]
+    return min(cand, key=lambda o: stat_riv(ff, o, o, m, my, 1.0)["punti"])
 
 
 def tagli_posa():
@@ -384,46 +424,90 @@ def texture_cartella(nome):
     return out
 
 
-# una configurazione di posa per ogni formato: origine della griglia, modulo e
-# rivestimento cambiano insieme, quindi ognuna ha le sue facce e le sue statistiche
-POSA = []
+# Tre componenti indipendenti, ognuna con posa e texture proprie: pavimento,
+# pareti A (le restanti) e pareti B (sanitari e testata finestra).
+# Pavimento: una posa per disposizione distinta; le varianti di FORMATI che
+# cambiano solo il rivestimento qui coincidono.
+def _chiave_pav(f):
+    return (tuple(f["lato"]), bool(f.get("ingresso")), f.get("allinea"))
+
+
+def _nome_pav(f):
+    n = f"{f['lato'][0]:.0f}x{f['lato'][1]:.0f}"
+    if f.get("ingresso"):
+        n += ", intera all'ingresso"
+    if f.get("allinea"):
+        n += ", a filo bagno"
+    return n
+
+
+def _classifica(voci):
+    """Posizione per sfrido, a pari merito stessa posizione."""
+    return [1 + sum(q["sfrido"] < s["sfrido"] for q in voci) for s in voci]
+
+
+POSA, _POSA_DI = [], {}
 for _i, _f in enumerate(cp.FORMATI):
+    if _chiave_pav(_f) in _POSA_DI:
+        continue
+    _POSA_DI[_chiave_pav(_f)] = len(POSA)
     cp.usa_formato(_i)
     _t = cp.OTTIMO["tot"]
     POSA.append(dict(
-        nome=_f["nome"], formato=cp.NOME_FORMATO, formatoRiv=cp.NOME_RIV,
-        cartella=_f["cartella"],
-        modx=cp.MODULO_X, mody=cp.MODULO_Y,
-        modrx=cp.MODULO_RIV_X, modry=cp.MODULO_RIV_Y,
-        fuga=cp.FUGA, fugaProf=cp.FUGA_PROF,
-        ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1],
-        hriv=cp.H_RIV, corsi=cp.RIV_CORSI, riv=facce_riv(cp.H_RIV), tagli=tagli_posa(),
-        tagliRiv=tagli_riv_posa(),
+        nome=_nome_pav(_f), cartella=_f["cartella"],
+        modx=cp.MODULO_X, mody=cp.MODULO_Y, fuga=cp.FUGA, fugaProf=cp.FUGA_PROF,
+        ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1], tagli=tagli_posa(),
         pdf=f"computo_{cp.slug(_f['nome'])}.pdf",
-        nota=f"{_t['lastre']} lastre, {_t['intere']} intere, "
-             f"{_t['sliver']} listelli, sfrido {_t['sfrido']*100:.1f}%",
         stat=dict(lastre=_t["lastre"], mq=round(_t["lastre"] * cp.LASTRA, 2),
                   intere=_t["intere"], tagli=_t["tagli"], sliver=_t["sliver"],
                   minlato=round(_t["min_lato"], 1), sfrido=round(_t["sfrido"] * 100, 1))))
-# classifica per sfrido, a pari merito stessa posizione: e' la numerazione della tabella
-for _p in POSA:
-    _p["rank"] = 1 + sum(q["stat"]["sfrido"] < _p["stat"]["sfrido"] for q in POSA)
-cp.usa_formato(cp.POSA_ATTIVA)
-TEXTURE = {c: texture_cartella(c) for c in {f["cartella"] for f in cp.FORMATI}}
+for _p, _r in zip(POSA, _classifica([p["stat"] for p in POSA])):
+    _p["rank"] = _r
 
-# configurazioni preferite, richiamate in sequenza col tasto P: posa per formato
-# di pavimento e rivestimento, texture per nome file (senza estensione)
+# pareti: stesso catalogo di formati; A e B hanno ciascuna la sua origine orizzontale
+FORMATI_RIV = [(90.0, 90.0), (80.0, 80.0), (60.0, 60.0), (60.0, 120.0), (120.0, 60.0), (120.0, 120.0)]
+FUGA_RIV = cp.FORMATI[0]["fuga"]
+PARETI = []
+for _rx, _ry in FORMATI_RIV:
+    if _ry in cp.RIV_CORSI_INTERI:
+        _corsi = round(cp.RIV_H_INTERI / _ry)
+        _h, _quota = _corsi * _ry + (_corsi - 1) * FUGA_RIV, f"a {cp.RIV_H_INTERI:.0f}"
+    else:
+        _corsi = math.ceil((cp.H_TRAVE + FUGA_RIV) / (_ry + FUGA_RIV))
+        _h, _quota = cp.H_TRAVE, "a filo trave"
+    _mx, _my = _rx + FUGA_RIV, _ry + FUGA_RIV
+    _facce = facce_riv(_h)
+    _gruppi = []
+    for _g in (0, 1):
+        _ff = [f for f in _facce if f[5] == _g]
+        _ox, _oy = origine_riv(_ff, _mx, True, _my), origine_riv(_ff, _mx, False, _my)
+        _gruppi.append(dict(ox=_ox, oy=_oy, stat=stat_riv(_ff, _ox, _oy, _mx, _my, _rx * _ry / 10000),
+                            tagli=tagli_riv(_ff, _ox, _oy, _mx, _my)))
+    PARETI.append(dict(nome=f"{_rx:.0f}x{_ry:.0f}, {_corsi} corsi {_quota}",
+                       cartella=f"{min(_rx, _ry):.0f}x{max(_rx, _ry):.0f}",
+                       modx=_mx, mody=_my, fuga=FUGA_RIV, fugaProf=cp.FUGA_PROF,
+                       hriv=_h, facce=_facce, gruppi=_gruppi))
+for _g in (0, 1):
+    for _p, _r in zip(PARETI, _classifica([p["gruppi"][_g]["stat"] for p in PARETI])):
+        _p["gruppi"][_g]["rank"] = _r
+cp.usa_formato(cp.POSA_ATTIVA)
+TEXTURE = {c: texture_cartella(c) for c in {p["cartella"] for p in POSA + PARETI}}
+AVVIO = dict(pav=_POSA_DI[_chiave_pav(cp.FORMATO)],
+             riv=[FORMATI_RIV.index(tuple(cp.FORMATO["lato_riv"]))] * 2)
+
+# configurazioni preferite, richiamate in sequenza col tasto P: formato di
+# pavimento, pareti A e B; texture per nome file (senza estensione), stesso ordine
 PREFERITI = [
-    dict(nome="p1", lato=(120.0, 60.0), lato_riv=(120.0, 60.0),
-         pav="01-onice-avorio-lux", ded="02-onice-verde"),
+    dict(nome="p1", pav=(120.0, 60.0), pareti=[(120.0, 60.0), (120.0, 60.0)],
+         tex=["01-onice-avorio-lux", "01-onice-avorio-lux", "02-onice-verde"]),
 ]
 for _p in PREFERITI:
-    _p["posa"] = next(i for i, f in enumerate(cp.FORMATI)
-                      if f["lato"] == _p["lato"] and f["lato_riv"] == _p["lato_riv"])
+    _p["posa"] = _POSA_DI[(_p["pav"], False, None)]
+    _p["riv"] = [FORMATI_RIV.index(t) for t in _p["pareti"]]
 
 DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobili,
             riv=riv, batt=batt, quote=quote, etichette=etichette, aree=aree,
-            muretti=muretti, posa=POSA, tex=TEXTURE, preferiti=PREFERITI,
+            muretti=muretti, posa=POSA, pareti=PARETI, tex=TEXTURE, preferiti=PREFERITI,
             balconi=BALCONI, box=cp.BOX, contro=cp.CONTROSOFFITTI,
             bagno=[list(r) for r in cp.LOCALI["BAGNO"]["rect"]],
             canali=cp.CANALI, bocchette=cp.BOCCHETTE, hcan=cp.H_CANALE,
@@ -432,7 +516,7 @@ DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobil
             h=H_INT, hbatt=H_BATT, hpar=BALC_P, spanta=SP_ANTA,
             colanta=cp.PORTE_COLORE, start=[1380, 655], guarda=0,
             texcucina=incorpora(BASE_DIR + "cucina.png", quadra=False),
-            avvio=cp.POSA_ATTIVA)
+            avvio=AVVIO)
 
 HTML = r"""<!DOCTYPE html>
 <html lang="it"><head><meta charset="utf-8">
@@ -440,7 +524,7 @@ HTML = r"""<!DOCTYPE html>
 <title>Appartamento - visita 3D</title>
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#111;font-family:Arial,Helvetica,sans-serif}
-  #hud{position:fixed;left:14px;bottom:14px;color:#fff;font-size:13px;line-height:1.6;
+  #hud{position:fixed;left:14px;top:14px;color:#fff;font-size:13px;line-height:1.6;
        background:rgba(0,0,0,.45);padding:8px 14px;border-radius:6px;pointer-events:none}
   #leg{position:fixed;right:14px;top:14px;color:#fff;font-size:13px;
        background:rgba(0,0,0,.55);padding:14px 18px 16px;border-radius:8px;pointer-events:none;
@@ -448,15 +532,17 @@ HTML = r"""<!DOCTYPE html>
   #leg h3{margin:0 0 10px;font-size:13px;letter-spacing:.14em;color:#ffd479}
   #posa{margin:0 0 12px;padding:7px 9px;border-radius:5px;background:rgba(255,212,121,.12);
         border-left:3px solid #ffd479}
-  #posa b{display:block;font-size:13px;color:#ffd479;margin-bottom:2px}
+  #posa b{display:block;font-size:12px;color:#ffd479;margin-top:5px}
+  #posa b:first-child{margin-top:0}
   #posa span{color:#cfd8e0;font-size:11.5px;line-height:1.45}
-  #tab{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);color:#e8edf1;
-       background:rgba(0,0,0,.62);padding:8px 12px 10px;border-radius:8px;pointer-events:none;
-       font-size:12px}
-  #tab h3{margin:0 0 6px;font-size:12px;letter-spacing:.12em;color:#ffd479}
+  #tab{position:fixed;left:14px;bottom:14px;display:flex;flex-wrap:wrap-reverse;gap:10px;
+       align-items:flex-end;pointer-events:none;max-width:max(320px, calc(100vw - 400px))}
+  #tab .t{color:#e8edf1;background:rgba(0,0,0,.62);padding:8px 10px 10px;border-radius:8px;
+          font-size:11.5px}
+  #tab h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.1em;color:#ffd479;white-space:nowrap}
   #tab table{border-collapse:collapse}
-  #tab th{font-weight:normal;color:#9fb0bf;text-align:right;padding:2px 8px}
-  #tab td{text-align:right;padding:2px 8px;white-space:nowrap}
+  #tab th{font-weight:normal;color:#9fb0bf;text-align:right;padding:2px 6px}
+  #tab td{text-align:right;padding:2px 6px;white-space:nowrap}
   #tab th:nth-child(2),#tab td:nth-child(2){text-align:left}
   #tab tr.sel td{background:rgba(255,212,121,.28);color:#ffd479;font-weight:bold}
   canvas{touch-action:none}
@@ -469,7 +555,7 @@ HTML = r"""<!DOCTYPE html>
   #pomo{position:absolute;left:39px;top:39px;width:50px;height:50px;border-radius:50%;
         background:rgba(255,255,255,.42);box-shadow:0 2px 10px rgba(0,0,0,.4)}
   #bott{position:absolute;right:16px;bottom:20px;display:grid;gap:10px;
-        grid-template-columns:56px 56px;pointer-events:auto}
+        grid-template-columns:56px 56px 56px;pointer-events:auto}
   #bott button{width:56px;height:56px;border-radius:50%;color:#fff;font:600 14px system-ui;
         border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.5);touch-action:none}
   #bott button:active{background:rgba(255,212,121,.35)}
@@ -489,7 +575,7 @@ HTML = r"""<!DOCTYPE html>
   b{font-size:22px}
 </style></head><body>
 <div id="hud"><span id="pos"></span></div>
-<div id="tab"><h3>POSE IN ORDINE DI SFRIDO (pavimento, con riuso)</h3><table></table></div>
+<div id="tab"></div>
 <div id="leg">
   <h3>POSA</h3>
   <div id="posa"></div>
@@ -498,34 +584,35 @@ HTML = r"""<!DOCTYPE html>
   <div class="r"><span class="k"><kbd>A</kbd><kbd>D</kbd></span>spostarsi di lato</div>
   <div class="r"><span class="k"><kbd>mouse</kbd></span>guardare intorno</div>
   <div class="r"><span class="k"><kbd>&#8592;</kbd><kbd>&#8593;</kbd><kbd>&#8595;</kbd><kbd>&#8594;</kbd></span>muoversi sul piano, a quota fissa</div>
-  <div class="r"><span class="k"><kbd>Shift</kbd></span>correre; con B, C, R, P scorre all'indietro</div>
+  <div class="r"><span class="k"><kbd>Shift</kbd></span>correre; con i tasti a rotazione scorre all'indietro</div>
   <div class="r"><span class="k"><kbd>E</kbd></span>apri / chiudi la porta vicina</div>
   <div class="r"><span class="k"><kbd>Q</kbd></span>quote dei locali</div>
   <div class="r"><span class="k"><kbd>O</kbd></span>ombre accese / spente</div>
   <div class="r"><span class="k"><kbd>L</kbd></span>occlusione ambientale (angoli)</div>
-  <div class="r"><span class="k"><kbd>B</kbd></span>cambia formato e corsi del rivestimento</div>
-  <div class="r"><span class="k"><kbd>C</kbd></span>cambia texture del pavimento (catalogo della cartella del formato)</div>
-  <div class="r"><span class="k"><kbd>R</kbd></span>cambia la piastrella dedicata del bagno (sanitari e testata)</div>
+  <div class="r"><span class="k"><kbd>B</kbd><kbd>N</kbd><kbd>M</kbd></span>posa: pavimento / pareti A / pareti B</div>
+  <div class="r"><span class="k"><kbd>T</kbd><kbd>Y</kbd><kbd>U</kbd></span>texture: pavimento / pareti A / pareti B</div>
+  <div class="r"><span class="k"><kbd>P</kbd></span>configurazioni preferite (p1, p2...)</div>
   <div class="r"><span class="k"><kbd>F</kbd></span>fughe evidenziate in nero</div>
-  <div class="r"><span class="k"><kbd>P</kbd></span>salta alla configurazione preferita (p1, p2...)</div>
-  <div class="r"><span class="k"><kbd>K</kbd></span>scarica il computo in pdf del formato attivo</div>
-  <div class="r"><span class="k"><kbd>T</kbd></span>mostra / nascondi la tabella delle pose</div>
-  <div class="r"><span class="k"><kbd>H</kbd></span>mostra / nascondi legenda</div>
+  <div class="r"><span class="k"><kbd>K</kbd></span>scarica il computo in pdf del pavimento attivo</div>
+  <div class="r"><span class="k"><kbd>H</kbd></span>mostra / nascondi legenda e tabelle</div>
   <div class="r"><span class="k"><kbd>Esc</kbd></span>liberare il mouse</div>
   <hr>
-  <div class="n">Sopra i 297 cm il soffitto diventa trasparente.<br>
+  <div class="n">Pareti A: le restanti; pareti B: sanitari e testata finestra.<br>
+  Sopra i 297 cm il soffitto diventa trasparente.<br>
   I numeri rossi identificano gli infissi.<br>
-  Trascina qui un png per cambiare la texture.</div>
+  Trascina qui un png per cambiare la texture del pavimento.</div>
 </div>
 <div id="msg"></div>
 <div id="touch">
   <div id="joy"><div id="pomo"></div></div>
   <div id="bott">
     <button data-k="KeyE">porta</button><button data-k="KeyQ">quote</button>
-    <button data-k="KeyB">posa</button><button data-k="KeyC">texture</button>
-    <button data-k="KeyR">dedicata</button><button data-k="KeyP">preferito</button>
-    <button data-k="KeyF">fughe</button><button data-k="KeyT">tabella</button>
-    <button data-k="KeyH">menu</button>
+    <button data-k="KeyF">fughe</button>
+    <button data-k="KeyB">pav</button><button data-k="KeyN">par A</button>
+    <button data-k="KeyM">par B</button>
+    <button data-k="KeyT">tex pav</button><button data-k="KeyY">tex A</button>
+    <button data-k="KeyU">tex B</button>
+    <button data-k="KeyP">prefe- rito</button><button data-k="KeyH">menu</button>
   </div>
 </div>
 <div id="start"><div><b>Appartamento - visita 3D</b><br><br>
@@ -652,18 +739,20 @@ function texGres(img, cfg){
   t.anisotropy = renderer.capabilities.getMaxAnisotropy();
   return t;
 }
-// un gres per configurazione: formato, fuga e immagine della lastra cambiano insieme
-const matPosa = D.posa.map(() => ({
-  pav:  new THREE.MeshStandardMaterial({color:0xf3f2ef, roughness:0.26}),
-  riv:  new THREE.MeshStandardMaterial({color:0xf3f2ef, roughness:0.22}),
-  riv2: new THREE.MeshStandardMaterial({color:0xf3f2ef, roughness:0.22}),
-}));
+// Tre componenti indipendenti, ognuna con posa e texture proprie:
+// 0 pavimento (B posa, T texture), 1 pareti A (N, Y), 2 pareti B (M, U).
+// Un materiale per posa: formato e fuga entrano nel disegno della texture.
+const COMP = ['PAVIMENTO', 'PARETI A', 'PARETI B'];
+const matPav = D.posa.map(() => new THREE.MeshStandardMaterial({color:0xf3f2ef, roughness:0.26}));
+const matRiv = [0, 1].map(() => D.pareti.map(() =>
+  new THREE.MeshStandardMaterial({color:0xf3f2ef, roughness:0.22})));
+const sel = [D.avvio.pav, D.avvio.riv[0], D.avvio.riv[1]];
+const iTex = [0, 0, 1];
+const cfgDi = (c, k) => c === 0 ? D.posa[k === undefined ? sel[0] : k]
+                                : D.pareti[k === undefined ? sel[c] : k];
+const matDi = (c, k) => c === 0 ? matPav[k] : matRiv[c-1][k];
 
 // le immagini sono incorporate come data URI: sono quindi same-origin e WebGL le accetta
-// La texture e' indipendente dal formato e le due del bagno sono indipendenti fra
-// loro: C scorre quella del pavimento (e della meta' bagno in gres uguale),
-// R quella della piastrella dedicata di parete sanitari e testata finestra.
-let iTex = 0, iTexRiv = 1;
 const IMG = new Map(), DROP = [];
 function carica(uri, cb){
   if (!uri){ cb(null); return; }
@@ -673,33 +762,24 @@ function carica(uri, cb){
   im.onerror = ()=>cb(null);
   im.src = uri;
 }
-function catalogo(i){ return D.tex[D.posa[i].cartella] || []; }
-function etichettaTex(i, k){
-  const l = catalogo(i);
-  return l.length ? (k % l.length + 1) + '/' + l.length + ' ' + l[k % l.length][0]
-                  : 'procedurale';
+function catalogo(c, k){ return D.tex[cfgDi(c, k).cartella] || []; }
+function etichettaTex(c){
+  if (c === 0 && DROP[sel[0]]) return 'immagine trascinata';
+  const l = catalogo(c), n = l.length;
+  return n ? (iTex[c] % n + 1) + '/' + n + ' ' + l[iTex[c] % n][0] : 'procedurale';
 }
-function nomeTex(i){
-  if (DROP[i]) return 'immagine trascinata';
-  return 'pav ' + etichettaTex(i, iTex) + ' &middot; dedicata ' + etichettaTex(i, iTexRiv);
-}
-function applicaTex(i){
-  const cfg = D.posa[i], l = catalogo(i), n = l.length;
-  const cfgR = Object.assign({}, cfg, {modx: cfg.modrx, mody: cfg.modry});
-  const a = n ? l[iTex % n][1] : null, b = n ? l[iTexRiv % n][1] : null;
-  carica(a, ia => carica(b, ib => {
-    const m = matPosa[i];
-    const pav = DROP[i] || ia;
-    m.pav.map  = texGres(pav, cfg);
-    m.riv.map  = texGres(pav, cfgR);           // meta' bagno e' lo stesso gres del pavimento
-    m.riv2.map = texGres(DROP[i] ? pav : ib, cfgR);  // l'altra meta' e' la piastrella dedicata
+function applica(c, k){
+  if (k === undefined) k = sel[c];
+  const cfg = cfgDi(c, k), l = catalogo(c, k), n = l.length, m = matDi(c, k);
+  carica(n ? l[iTex[c] % n][1] : null, im => {
+    if (m.map) m.map.dispose();
+    m.map = texGres((c === 0 && DROP[k]) || im, cfg);
     // la fuga disegnata nella texture diventa anche un rilievo: l'incavo e' quello reale
-    for (const k of ['pav','riv','riv2']){
-      m[k].bumpMap = m[k].map; m[k].bumpScale = cfg.fugaProf * S; m[k].needsUpdate = true;
-    }
-  }));
+    m.bumpMap = m.map; m.bumpScale = cfg.fugaProf * S; m.needsUpdate = true;
+  });
 }
-D.posa.forEach((cfg, i) => applicaTex(i));
+D.posa.forEach((_, k) => applica(0, k));
+D.pareti.forEach((_, k) => { applica(1, k); applica(2, k); });
 // aprendo l'html da file:// il browser puo' bloccare il png: si puo' trascinarlo qui
 addEventListener('dragover', e=>e.preventDefault());
 addEventListener('drop', e=>{
@@ -707,8 +787,8 @@ addEventListener('drop', e=>{
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
   if (!f) return;
   const im = new Image();
-  im.onload = ()=>{ DROP[iPosa] = im; applicaTex(iPosa);
-                    dimmi('texture caricata su ' + D.posa[iPosa].nome + ': ' + f.name); };
+  im.onload = ()=>{ DROP[sel[0]] = im; applica(0); mostraPosa();
+                    dimmi('texture caricata su ' + D.posa[sel[0]].nome + ': ' + f.name); };
   im.src = URL.createObjectURL(f);
 });
 
@@ -856,72 +936,87 @@ function retinoFughe(cfg, i){
   g.add(l);
   retini[i] = g;
   scenaOver.add(g);
-  // le misure del rivestimento non attraversano i muri: si leggono dal bagno
-  const r = new THREE.Group(); r.visible = false; r.renderOrder = 2;
-  etichRiv[i] = r;
-  scenaOver.add(r);
 }
 function inBagno(p){
   const x = p.x/S, z = p.z/S;
   return D.bagno.some(([a,b,c,d]) => x > a-2 && x < c+2 && z > b-2 && z < d+2);
 }
 function mostraFughe(){
-  retini.forEach((r, i) => { r.visible = fugaNera && i === iPosa; });
+  retini.forEach((r, i) => { r.visible = fugaNera && i === sel[0]; });
 }
-function costruisciPosa(cfg, i){
-  const M = matPosa[i];
-  const cfgR = Object.assign({}, cfg, {modx: cfg.modrx, mody: cfg.modry});
+function costruisciPav(cfg, i){
+  const M = matPav[i];
   const g = new THREE.Group(); scene.add(g);
-  superficie(D.pavimento, 0, M.pav, false, cfg, g);
-  for (const [a,b,c,o,dn,gr,z0,z1] of cfg.riv)
-    quad(a,b,c,o,dn,z0,z1, gr ? M.riv2 : M.riv, cfgR, g);
+  superficie(D.pavimento, 0, M, false, cfg, g);
+  // il battiscopa si ricava dalle lastre del pavimento
   for (const [a,b,c,o,dn] of D.batt){
     const c2 = c + (dn>0?1:-1)*SP_BATT;
-    quad(a, b, c2, o, dn, 0, D.hbatt, M.riv, cfg, g);
+    quad(a, b, c2, o, dn, 0, D.hbatt, M, cfg, g);
     const lo = Math.min(c,c2), hi = Math.max(c,c2);
-    superficie([o ? [a,lo,b,hi] : [lo,a,hi,b]], D.hbatt, M.riv, false, cfg, g);
-  }
-  // i muretti del bagno sono rivestiti: facce e piano con le UV del rivestimento
-  for (const [x,y,w,h,base,alt] of D.muretti){
-    const x1 = x+w, y1 = y+h, z1 = base+alt;
-    quad(x, x1, y,  true, -1, base, z1, M.riv, cfgR, g);
-    quad(x, x1, y1, true,  1, base, z1, M.riv, cfgR, g);
-    quad(y, y1, x,  false, -1, base, z1, M.riv, cfgR, g);
-    quad(y, y1, x1, false,  1, base, z1, M.riv, cfgR, g);
-    superficie([[x, y, x1, y1]], z1, M.riv, false, cfgR, g);
+    superficie([o ? [a,lo,b,hi] : [lo,a,hi,b]], D.hbatt, M, false, cfg, g);
   }
   retinoFughe(cfg, i);
   return g;
 }
-let iPosa = D.avvio;
-const gPosa = D.posa.map((cfg, i) => {
-  const g = costruisciPosa(cfg, i); g.visible = (i === iPosa); return g;
-});
-function mostraPosa(){
-  const c = D.posa[iPosa];
-  document.getElementById('posa').innerHTML =
-    '<b>#' + c.rank + ' ' + c.nome + '</b><span>' + c.nota + '<br>modulo ' + c.modx.toFixed(2)
-    + ' x ' + c.mody.toFixed(2) + ' cm &middot; rivestimento h ' + c.hriv.toFixed(0)
-    + ' cm<br>texture ' + nomeTex(iPosa) + '</span>';
+function costruisciRiv(P, k, gr){
+  const M = matRiv[gr][k], G = P.gruppi[gr];
+  const cfg = Object.assign({}, P, {ox: G.ox, oy: G.oy});
+  const g = new THREE.Group(); scene.add(g);
+  for (const [a,b,c,o,dn,gg,z0,z1] of P.facce)
+    if (gg === gr) quad(a,b,c,o,dn,z0,z1, M, cfg, g);
+  // i muretti del bagno sono rivestiti come le pareti A: facce e piano
+  if (gr === 0) for (const [x,y,w,h,base,alt] of D.muretti){
+    const x1 = x+w, y1 = y+h, z1 = base+alt;
+    quad(x, x1, y,  true, -1, base, z1, M, cfg, g);
+    quad(x, x1, y1, true,  1, base, z1, M, cfg, g);
+    quad(y, y1, x,  false, -1, base, z1, M, cfg, g);
+    quad(y, y1, x1, false,  1, base, z1, M, cfg, g);
+    superficie([[x, y, x1, y1]], z1, M, false, cfg, g);
+  }
+  // le misure del rivestimento non attraversano i muri: si leggono dal bagno
+  const r = new THREE.Group(); r.visible = false; r.renderOrder = 2;
+  etichRiv[gr][k] = r;
+  scenaOver.add(r);
+  return g;
+}
+etichRiv.push([], []);
+const gComp = [
+  D.posa.map((cfg, i) => costruisciPav(cfg, i)),
+  D.pareti.map((P, k) => costruisciRiv(P, k, 0)),
+  D.pareti.map((P, k) => costruisciRiv(P, k, 1)),
+];
+gComp.forEach((arr, c) => arr.forEach((g, k) => { g.visible = (k === sel[c]); }));
+
+function tabella(c){
   const f = v => String(v).replace('.', ',');
-  const righe = D.posa.map((p, i) => [p, i]).sort((a, b) => a[0].stat.sfrido - b[0].stat.sfrido)
-    .map(([p, i]) => '<tr' + (i === iPosa ? ' class="sel"' : '') + '><td>' + p.rank + '</td><td>'
-      + p.nome + '</td><td>' + p.stat.lastre + '</td><td>' + f(p.stat.mq.toFixed(2)) + '</td><td>'
-      + p.stat.intere + '</td><td>' + p.stat.tagli + '</td><td>' + p.stat.sliver + '</td><td>'
-      + f(p.stat.minlato.toFixed(1)) + ' cm</td><td>' + f(p.stat.sfrido.toFixed(1)) + '%</td></tr>');
-  document.querySelector('#tab table').innerHTML =
-    '<tr><th>#</th><th>posa</th><th>lastre</th><th>mq acquistati</th><th>intere</th>'
-    + '<th>tagliate</th><th>listelli &lt; 25</th><th>taglio min</th><th>sfrido</th></tr>' + righe.join('');
+  const voci = c === 0 ? D.posa.map((p, k) => ({k, nome: p.nome, rank: p.rank, s: p.stat}))
+    : D.pareti.map((p, k) => ({k, nome: p.nome, rank: p.gruppi[c-1].rank, s: p.gruppi[c-1].stat}));
+  const righe = voci.sort((a, b) => a.s.sfrido - b.s.sfrido).map(v =>
+    '<tr' + (v.k === sel[c] ? ' class="sel"' : '') + '><td>' + v.rank + '</td><td>' + v.nome
+    + '</td><td>' + v.s.lastre + '</td><td>' + f(v.s.mq.toFixed(2)) + '</td><td>' + v.s.intere
+    + '</td><td>' + v.s.tagli + '</td><td>' + v.s.sliver + '</td><td>' + f(v.s.minlato.toFixed(1))
+    + ' cm</td><td>' + f(v.s.sfrido.toFixed(1)) + '%</td></tr>');
+  return '<div class="t"><h3>' + COMP[c] + ' - ORDINE DI SFRIDO (con riuso)</h3><table>'
+    + '<tr><th>#</th><th>posa</th><th>lastre</th><th>mq acq.</th><th>intere</th><th>tagliate</th>'
+    + '<th>listelli &lt; 25</th><th>taglio min</th><th>sfrido</th></tr>' + righe.join('') + '</table></div>';
+}
+function mostraPosa(){
+  document.getElementById('posa').innerHTML = [0, 1, 2].map(c => {
+    const p = cfgDi(c), s = c === 0 ? p.stat : p.gruppi[c-1].stat;
+    const rank = c === 0 ? p.rank : p.gruppi[c-1].rank;
+    return '<b>' + COMP[c] + ' #' + rank + ' ' + p.nome + '</b><span>' + s.lastre + ' lastre, '
+      + s.intere + ' intere, ' + s.sliver + ' listelli, sfrido ' + s.sfrido.toFixed(1) + '%<br>'
+      + 'texture ' + etichettaTex(c) + '</span>';
+  }).join('');
+  document.getElementById('tab').innerHTML = [0, 1, 2].map(tabella).join('');
 }
 mostraPosa();
 let iPref = -1;
-function vaiPosa(k){
-  gPosa[iPosa].visible = false;
-  iPosa = k;
-  gPosa[iPosa].visible = true;
-  applicaTex(iPosa);
-  mostraPosa();
-  mostraFughe();
+function vai(c, k){
+  gComp[c][sel[c]].visible = false;
+  sel[c] = k;
+  gComp[c][k].visible = true;
+  applica(c);
 }
 
 // ---------- infissi ----------
@@ -1290,9 +1385,11 @@ function etichettaParete(txt, c, orizz, dentro, s, z, vert, dove){
 D.posa.forEach((cfg, i) => {
   for (const [x0,y0,x1,y1,txt] of cfg.tagli)
     quotaPiana(txt, x0*S, y0*S, x1*S, y1*S, 0.075, retini[i]);
-  for (const [c,o,dn,s,z,vert,txt] of cfg.tagliRiv)
-    etichettaParete(txt, c, o, dn, s, z, vert, etichRiv[i]);
 });
+D.pareti.forEach((P, k) => P.gruppi.forEach((G, gr) => {
+  for (const [c,o,dn,s,z,vert,txt] of G.tagli)
+    etichettaParete(txt, c, o, dn, s, z, vert, etichRiv[gr][k]);
+}));
 for (const [x0,y0,x1,y1,lb] of D.quote){
   const h = 0.015, pts = [new THREE.Vector3(x0*S,h,y0*S), new THREE.Vector3(x1*S,h,y1*S)];
   const vert = Math.abs(x1-x0) < Math.abs(y1-y0);
@@ -1332,12 +1429,9 @@ addEventListener('keydown', e=>{
     if (e.code === 'KeyQ'){ gQuote.visible = !gQuote.visible;
       dimmi(gQuote.visible ? 'quote visibili' : 'quote nascoste'); }
     if (e.code === 'KeyH'){
-      const l = document.getElementById('leg');
-      l.style.display = l.style.display === 'none' ? 'block' : 'none';
-    }
-    if (e.code === 'KeyT'){
-      const t = document.getElementById('tab');
-      t.style.display = t.style.display === 'none' ? 'block' : 'none';
+      const l = document.getElementById('leg'), t = document.getElementById('tab');
+      const via = l.style.display !== 'none';
+      l.style.display = t.style.display = via ? 'none' : '';
     }
     if (e.code === 'KeyO'){
       renderer.shadowMap.enabled = !renderer.shadowMap.enabled;
@@ -1349,39 +1443,45 @@ addEventListener('keydown', e=>{
       ao.enabled = !ao.enabled;
       dimmi(ao.enabled ? 'occlusione ambientale attiva' : 'occlusione ambientale spenta');
     }
-    // Shift + tasto a rotazione (B, P, C, R) scorre all'indietro
+    // tasti a rotazione in due righe allineate: B N M posa, T Y U texture
+    // (pavimento, pareti A, pareti B); con Shift scorrono all'indietro
     const passo = e.shiftKey ? -1 : 1, giro = (i, n) => ((i + passo) % n + n) % n;
-    if (e.code === 'KeyB'){
-      vaiPosa(giro(iPosa, gPosa.length));
-      dimmi(D.posa[iPosa].nome + '  -  ' + D.posa[iPosa].nota);
+    const cPosa = {KeyB: 0, KeyN: 1, KeyM: 2}[e.code];
+    const cTex = {KeyT: 0, KeyY: 1, KeyU: 2}[e.code];
+    if (cPosa !== undefined){
+      vai(cPosa, giro(sel[cPosa], gComp[cPosa].length));
+      mostraPosa(); mostraFughe();
+      dimmi(COMP[cPosa].toLowerCase() + ': ' + cfgDi(cPosa).nome);
+    }
+    if (cTex !== undefined){
+      const n = catalogo(cTex).length;
+      if (!n) dimmi('nessuna texture in ' + cfgDi(cTex).cartella);
+      else {
+        if (cTex === 0) DROP[sel[0]] = null;
+        iTex[cTex] = giro(iTex[cTex], n);
+        applica(cTex); mostraPosa();
+        dimmi(COMP[cTex].toLowerCase() + ': ' + etichettaTex(cTex));
+      }
     }
     if (e.code === 'KeyP' && D.preferiti.length){
       iPref = giro(iPref, D.preferiti.length);
-      const p = D.preferiti[iPref], l = catalogo(p.posa);
-      const k = nome => Math.max(0, l.findIndex(t => t[0] === nome));
-      iTex = k(p.pav); iTexRiv = k(p.ded); DROP[p.posa] = null;
-      vaiPosa(p.posa);
-      dimmi(p.nome + ': ' + D.posa[iPosa].nome);
-    }
-    if (e.code === 'KeyC' || e.code === 'KeyR'){
-      const n = catalogo(iPosa).length;
-      if (!n) dimmi('nessuna texture in ' + D.posa[iPosa].cartella);
-      else {
-        DROP[iPosa] = null;
-        if (e.code === 'KeyC') iTex = giro(iTex, n); else iTexRiv = giro(iTexRiv, n);
-        applicaTex(iPosa); mostraPosa();
-        dimmi((e.code === 'KeyC' ? 'pavimento: ' : 'piastrella dedicata: ')
-              + etichettaTex(iPosa, e.code === 'KeyC' ? iTex : iTexRiv));
-      }
+      const p = D.preferiti[iPref];
+      DROP[p.posa] = null;
+      [p.posa, p.riv[0], p.riv[1]].forEach((k, c) => {
+        iTex[c] = Math.max(0, catalogo(c, k).findIndex(t => t[0] === p.tex[c]));
+        vai(c, k);
+      });
+      mostraPosa(); mostraFughe();
+      dimmi(p.nome + ': ' + [0, 1, 2].map(c => cfgDi(c).nome).join(' / '));
     }
     if (e.code === 'KeyK'){
-      const a = document.createElement('a');
-      a.href = D.posa[iPosa].pdf; a.download = D.posa[iPosa].pdf; a.click();
-      dimmi('computo ' + D.posa[iPosa].pdf);
+      const f = D.posa[sel[0]].pdf, a = document.createElement('a');
+      a.href = f; a.download = f; a.click();
+      dimmi('computo ' + f);
     }
     if (e.code === 'KeyF'){
       fugaNera = !fugaNera;
-      applicaTex(iPosa);
+      [0, 1, 2].forEach(c => applica(c));
       mostraFughe();
       dimmi(fugaNera ? 'fughe evidenziate in nero' : 'fughe normali');
     }
@@ -1493,7 +1593,9 @@ function loop(){
   // soffitto trasparente quando lo si supera
   const sopra = controls.getObject().position.y > D.h*S;
   const dentroBagno = inBagno(controls.getObject().position);
-  etichRiv.forEach((r, i) => { r.visible = fugaNera && i === iPosa && dentroBagno; });  matSoff.opacity += ((sopra ? 0.06 : 1) - matSoff.opacity) * Math.min(1, dt*8);
+  etichRiv.forEach((arr, gr) => arr.forEach((r, k) => {
+    r.visible = fugaNera && k === sel[gr+1] && dentroBagno; }));
+  matSoff.opacity += ((sopra ? 0.06 : 1) - matSoff.opacity) * Math.min(1, dt*8);
   soffitto.visible = matSoff.opacity > 0.07;
   soffitto.castShadow = !sopra;
   // animazione delle porte
