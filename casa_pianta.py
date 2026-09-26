@@ -54,8 +54,9 @@ FORMATI = [
     # a filo soglia del portoncino, che ne copre tutta la luce
     dict(lato=(120.0, 120.0), fuga=0.2, ingresso=True),
     # allinea=(x, y) di rilievo, a filo finito: griglia bloccata, niente ricerca.
-    # Lato corto sul lato corridoio del bagno (y 162), lato lungo sul muro da 325 (x 513,1)
-    dict(lato=(60.0, 120.0), fuga=0.2, allinea=(513.1 - 1.0, 162.0 + 1.0)),
+    # Lato corto a filo del muro bagno/corridoio lato corridoio (y 152), lato lungo
+    # sul muro del bagno da 325 (x 513,1)
+    dict(lato=(60.0, 120.0), fuga=0.2, allinea=(513.1 - 1.0, 152.0 - 1.0)),
 ]
 for _f in FORMATI:
     _f.setdefault("lato_riv", _f["lato"])
@@ -1089,7 +1090,9 @@ print()
 # DISEGNO
 # =====================================================================
 
-W, H = 1800, 1190
+# la tabella di confronto cresce con i formati: il foglio si allunga sotto
+TAB_H = max(104, 50 + 15 * len(FORMATI))
+W, H = 1800, 1086 + TAB_H
 TX, TY = 155, 250
 
 COL_INT = "#ffffff"
@@ -1154,7 +1157,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 .ext { stroke: #aaa; stroke-width: 0.5; stroke-dasharray: 4 3; }
 </style></defs>""")
     rect(0, 0, W, H, extra='fill="#ffffff"')
-    txt(30, 45, f"APPARTAMENTO - posa gres {NOME_FORMATO}", "t1", "start")
+    txt(30, 45, f"APPARTAMENTO - posa gres {FORMATO['nome']}", "t1", "start")
     txt(30, 72, f"origine di posa ottimale {ox:.1f} / {oy:.1f} cm - minimo numero di "
                 f"lastre e di tagli; rivestimento bagno su {RIV_CORSI} corsi {FORMATO['quota_riv']}",
         "t2", "start")
@@ -1470,7 +1473,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
     add("</g>")
 
     # scalimetro
-    sx, sy = 155, H - 250
+    sx, sy = 155, H - TAB_H - 146
     txt(sx, sy - 6, f"scala 1:{SCALA} alla stampa 100%", "t2", "start")
     rect(sx, sy, 300, 12, extra='fill="none" stroke="#333" stroke-width="1"')
     for i in range(3):
@@ -1480,7 +1483,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
     txt(sx + 300, sy + 28, "3 m", "t2")
 
     # legenda
-    ly = H - 170
+    ly = H - TAB_H - 66
     txt(30, ly - 8, "LEGENDA LASTRE", "t3", "start")
     for i, (col, lab) in enumerate([
             (COL_INT, f"intera {NOME_FORMATO}"),
@@ -1490,10 +1493,10 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
         rect(30 + i * 330, ly, 28, 20, extra=f'fill="{col}" stroke="#3a3a3a" stroke-width="1"')
         txt(66 + i * 330, ly + 15, lab, "t2", "start")
 
-    by = H - 120
-    rect(30, by, W - 60, 104, extra='fill="#f5f7f9" stroke="#9aa5b1" stroke-width="1"')
+    by = H - TAB_H - 16
+    rect(30, by, W - 60, TAB_H, extra='fill="#f5f7f9" stroke="#9aa5b1" stroke-width="1"')
     txt(45, by + 22, "CONFRONTO FORMATI (ognuno con la sua origine di posa ottimale)", "t3", "start")
-    col = [45, 300, 500, 660, 800, 980, 1110, 1260, 1420, 1580]
+    col = [45, 400, 560, 700, 830, 990, 1110, 1250, 1400, 1580]
     intest = ["formato", "origine X/Y", "lastre intere", "tagliate", "tagli &lt; 25 cm",
               "tagli 25-45", "tagli &gt; 45", "lato minimo", "% sup. con intere", "lastre / sfrido"]
     for c, t in zip(col, intest):
@@ -1530,5 +1533,14 @@ try:
         renderPDF.drawToFile(svg2rlg(p + ".svg"), p + ".pdf")
         fitz.open(p + ".pdf")[0].get_pixmap(matrix=fitz.Matrix(2, 2)).save(p + ".png")
     print("scritti:", ", ".join(p + ".svg/.pdf/.png" for p in paths))
+    # tutte le tavole in un unico pdf, nell'ordine di FORMATI
+    unico = fitz.open()
+    for p in paths:
+        unico.insert_pdf(fitz.open(p + ".pdf"))
+    try:
+        unico.save(OUT + "_piantine.pdf")
+        print("scritto:", OUT + "_piantine.pdf")
+    except Exception as e:
+        print("piantine non scritte (pdf aperto?):", e)
 except Exception as e:
     print("anteprima non generata:", e)

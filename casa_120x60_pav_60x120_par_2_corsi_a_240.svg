@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="30.00cm" height="19.83cm" viewBox="0 0 1800 1190">
+<svg xmlns="http://www.w3.org/2000/svg" width="30.00cm" height="21.18cm" viewBox="0 0 1800 1271">
 <defs>
 <marker id="tick" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto">
   <line x1="1.5" y1="7.5" x2="7.5" y2="1.5" stroke="#555" stroke-width="1.1"/></marker>
@@ -24,8 +24,8 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 .dr { stroke: #0b4fa0; stroke-width: 1.1; }
 .ext { stroke: #aaa; stroke-width: 0.5; stroke-dasharray: 4 3; }
 </style></defs>
-<rect x="0.0" y="0.0" width="1800.0" height="1190.0" class="" fill="#ffffff"/>
-<text x="30.0" y="45.0" class="t1" text-anchor="start">APPARTAMENTO - posa gres 120x60</text>
+<rect x="0.0" y="0.0" width="1800.0" height="1271.0" class="" fill="#ffffff"/>
+<text x="30.0" y="45.0" class="t1" text-anchor="start">APPARTAMENTO - posa gres 120x60 pav 60x120 par, 2 corsi a 240</text>
 <text x="30.0" y="72.0" class="t2" text-anchor="start">origine di posa ottimale 88.6 / 53.6 cm - minimo numero di lastre e di tagli; rivestimento bagno su 2 corsi a 240</text>
 <text x="30.0" y="95.0" class="t2" text-anchor="start">fuga 2.0 mm - modulo 120.20 x 60.20 cm - griglia unica continua su tutta la casa - battiscopa/rivestimento 1 cm - origine 88.6/53.6 - stampa 100% = 1:60</text>
 <g transform="translate(155,250)">
@@ -979,106 +979,106 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="726.0" y="1035.0" class="t2" text-anchor="start">tagliata, lato 25-45 cm</text>
 <rect x="1020.0" y="1020.0" width="28.0" height="20.0" class="" fill="#ff9b8a" stroke="#3a3a3a" stroke-width="1"/>
 <text x="1056.0" y="1035.0" class="t2" text-anchor="start">tagliata, lato &lt; 25 cm (listello: da evitare)</text>
-<rect x="30.0" y="1070.0" width="1740.0" height="104.0" class="" fill="#f5f7f9" stroke="#9aa5b1" stroke-width="1"/>
+<rect x="30.0" y="1070.0" width="1740.0" height="185.0" class="" fill="#f5f7f9" stroke="#9aa5b1" stroke-width="1"/>
 <text x="45.0" y="1092.0" class="t3" text-anchor="start">CONFRONTO FORMATI (ognuno con la sua origine di posa ottimale)</text>
 <text x="45.0" y="1114.0" class="t2" text-anchor="start">formato</text>
-<text x="300.0" y="1114.0" class="t2" text-anchor="start">origine X/Y</text>
-<text x="500.0" y="1114.0" class="t2" text-anchor="start">lastre intere</text>
-<text x="660.0" y="1114.0" class="t2" text-anchor="start">tagliate</text>
-<text x="800.0" y="1114.0" class="t2" text-anchor="start">tagli &lt; 25 cm</text>
-<text x="980.0" y="1114.0" class="t2" text-anchor="start">tagli 25-45</text>
+<text x="400.0" y="1114.0" class="t2" text-anchor="start">origine X/Y</text>
+<text x="560.0" y="1114.0" class="t2" text-anchor="start">lastre intere</text>
+<text x="700.0" y="1114.0" class="t2" text-anchor="start">tagliate</text>
+<text x="830.0" y="1114.0" class="t2" text-anchor="start">tagli &lt; 25 cm</text>
+<text x="990.0" y="1114.0" class="t2" text-anchor="start">tagli 25-45</text>
 <text x="1110.0" y="1114.0" class="t2" text-anchor="start">tagli &gt; 45</text>
-<text x="1260.0" y="1114.0" class="t2" text-anchor="start">lato minimo</text>
-<text x="1420.0" y="1114.0" class="t2" text-anchor="start">% sup. con intere</text>
+<text x="1250.0" y="1114.0" class="t2" text-anchor="start">lato minimo</text>
+<text x="1400.0" y="1114.0" class="t2" text-anchor="start">% sup. con intere</text>
 <text x="1580.0" y="1114.0" class="t2" text-anchor="start">lastre / sfrido</text>
 <text x="45.0" y="1134.0" class="t2" text-anchor="start">90x90, 3 corsi a filo trave</text>
-<text x="300.0" y="1134.0" class="t2" text-anchor="start">26.8 / 24.0</text>
-<text x="500.0" y="1134.0" class="t2" text-anchor="start">63</text>
-<text x="660.0" y="1134.0" class="t2" text-anchor="start">83</text>
-<text x="800.0" y="1134.0" class="t2" text-anchor="start">3</text>
-<text x="980.0" y="1134.0" class="t2" text-anchor="start">45</text>
+<text x="400.0" y="1134.0" class="t2" text-anchor="start">26.8 / 24.0</text>
+<text x="560.0" y="1134.0" class="t2" text-anchor="start">63</text>
+<text x="700.0" y="1134.0" class="t2" text-anchor="start">83</text>
+<text x="830.0" y="1134.0" class="t2" text-anchor="start">3</text>
+<text x="990.0" y="1134.0" class="t2" text-anchor="start">45</text>
 <text x="1110.0" y="1134.0" class="t2" text-anchor="start">35</text>
-<text x="1260.0" y="1134.0" class="t2" text-anchor="start">4 cm</text>
-<text x="1420.0" y="1134.0" class="t2" text-anchor="start">61%</text>
+<text x="1250.0" y="1134.0" class="t2" text-anchor="start">4 cm</text>
+<text x="1400.0" y="1134.0" class="t2" text-anchor="start">61%</text>
 <text x="1580.0" y="1134.0" class="t2" text-anchor="start">123 / 16%</text>
 <text x="45.0" y="1149.0" class="t2" text-anchor="start">80x80, 4 corsi a filo trave</text>
-<text x="300.0" y="1149.0" class="t2" text-anchor="start">37.7 / 74.0</text>
-<text x="500.0" y="1149.0" class="t2" text-anchor="start">70</text>
-<text x="660.0" y="1149.0" class="t2" text-anchor="start">90</text>
-<text x="800.0" y="1149.0" class="t2" text-anchor="start">5</text>
-<text x="980.0" y="1149.0" class="t2" text-anchor="start">25</text>
+<text x="400.0" y="1149.0" class="t2" text-anchor="start">37.7 / 74.0</text>
+<text x="560.0" y="1149.0" class="t2" text-anchor="start">70</text>
+<text x="700.0" y="1149.0" class="t2" text-anchor="start">90</text>
+<text x="830.0" y="1149.0" class="t2" text-anchor="start">5</text>
+<text x="990.0" y="1149.0" class="t2" text-anchor="start">25</text>
 <text x="1110.0" y="1149.0" class="t2" text-anchor="start">60</text>
-<text x="1260.0" y="1149.0" class="t2" text-anchor="start">14 cm</text>
-<text x="1420.0" y="1149.0" class="t2" text-anchor="start">54%</text>
+<text x="1250.0" y="1149.0" class="t2" text-anchor="start">14 cm</text>
+<text x="1400.0" y="1149.0" class="t2" text-anchor="start">54%</text>
 <text x="1580.0" y="1149.0" class="t2" text-anchor="start">148 / 12%</text>
 <text x="45.0" y="1164.0" class="t2" text-anchor="start">60x60, 4 corsi a 240</text>
-<text x="300.0" y="1164.0" class="t2" text-anchor="start">28.5 / 53.6</text>
-<text x="500.0" y="1164.0" class="t2" text-anchor="start">155</text>
-<text x="660.0" y="1164.0" class="t2" text-anchor="start">121</text>
-<text x="800.0" y="1164.0" class="t2" text-anchor="start">28</text>
-<text x="980.0" y="1164.0" class="t2" text-anchor="start">40</text>
+<text x="400.0" y="1164.0" class="t2" text-anchor="start">28.5 / 53.6</text>
+<text x="560.0" y="1164.0" class="t2" text-anchor="start">155</text>
+<text x="700.0" y="1164.0" class="t2" text-anchor="start">121</text>
+<text x="830.0" y="1164.0" class="t2" text-anchor="start">28</text>
+<text x="990.0" y="1164.0" class="t2" text-anchor="start">40</text>
 <text x="1110.0" y="1164.0" class="t2" text-anchor="start">53</text>
-<text x="1260.0" y="1164.0" class="t2" text-anchor="start">2 cm</text>
-<text x="1420.0" y="1164.0" class="t2" text-anchor="start">67%</text>
+<text x="1250.0" y="1164.0" class="t2" text-anchor="start">2 cm</text>
+<text x="1400.0" y="1164.0" class="t2" text-anchor="start">67%</text>
 <text x="1580.0" y="1164.0" class="t2" text-anchor="start">259 / 11%</text>
 <text x="45.0" y="1179.0" class="t2" text-anchor="start">60x120, 2 corsi a 240</text>
-<text x="300.0" y="1179.0" class="t2" text-anchor="start">28.5 / 62.2</text>
-<text x="500.0" y="1179.0" class="t2" text-anchor="start">60</text>
-<text x="660.0" y="1179.0" class="t2" text-anchor="start">95</text>
-<text x="800.0" y="1179.0" class="t2" text-anchor="start">4</text>
-<text x="980.0" y="1179.0" class="t2" text-anchor="start">16</text>
+<text x="400.0" y="1179.0" class="t2" text-anchor="start">28.5 / 62.2</text>
+<text x="560.0" y="1179.0" class="t2" text-anchor="start">60</text>
+<text x="700.0" y="1179.0" class="t2" text-anchor="start">95</text>
+<text x="830.0" y="1179.0" class="t2" text-anchor="start">4</text>
+<text x="990.0" y="1179.0" class="t2" text-anchor="start">16</text>
 <text x="1110.0" y="1179.0" class="t2" text-anchor="start">75</text>
-<text x="1260.0" y="1179.0" class="t2" text-anchor="start">2 cm</text>
-<text x="1420.0" y="1179.0" class="t2" text-anchor="start">52%</text>
+<text x="1250.0" y="1179.0" class="t2" text-anchor="start">2 cm</text>
+<text x="1400.0" y="1179.0" class="t2" text-anchor="start">52%</text>
 <text x="1580.0" y="1179.0" class="t2" text-anchor="start">136 / 15%</text>
 <text x="45.0" y="1194.0" class="t2" text-anchor="start">60x120 pav 120x60 par, 4 corsi a 240</text>
-<text x="300.0" y="1194.0" class="t2" text-anchor="start">28.5 / 62.2</text>
-<text x="500.0" y="1194.0" class="t2" text-anchor="start">60</text>
-<text x="660.0" y="1194.0" class="t2" text-anchor="start">95</text>
-<text x="800.0" y="1194.0" class="t2" text-anchor="start">4</text>
-<text x="980.0" y="1194.0" class="t2" text-anchor="start">16</text>
+<text x="400.0" y="1194.0" class="t2" text-anchor="start">28.5 / 62.2</text>
+<text x="560.0" y="1194.0" class="t2" text-anchor="start">60</text>
+<text x="700.0" y="1194.0" class="t2" text-anchor="start">95</text>
+<text x="830.0" y="1194.0" class="t2" text-anchor="start">4</text>
+<text x="990.0" y="1194.0" class="t2" text-anchor="start">16</text>
 <text x="1110.0" y="1194.0" class="t2" text-anchor="start">75</text>
-<text x="1260.0" y="1194.0" class="t2" text-anchor="start">2 cm</text>
-<text x="1420.0" y="1194.0" class="t2" text-anchor="start">52%</text>
+<text x="1250.0" y="1194.0" class="t2" text-anchor="start">2 cm</text>
+<text x="1400.0" y="1194.0" class="t2" text-anchor="start">52%</text>
 <text x="1580.0" y="1194.0" class="t2" text-anchor="start">136 / 15%</text>
 <text x="45.0" y="1209.0" class="t3" text-anchor="start">120x60 pav 60x120 par, 2 corsi a 240</text>
-<text x="300.0" y="1209.0" class="t3" text-anchor="start">88.6 / 53.6</text>
-<text x="500.0" y="1209.0" class="t3" text-anchor="start">55</text>
-<text x="660.0" y="1209.0" class="t3" text-anchor="start">94</text>
-<text x="800.0" y="1209.0" class="t3" text-anchor="start">12</text>
-<text x="980.0" y="1209.0" class="t3" text-anchor="start">16</text>
+<text x="400.0" y="1209.0" class="t3" text-anchor="start">88.6 / 53.6</text>
+<text x="560.0" y="1209.0" class="t3" text-anchor="start">55</text>
+<text x="700.0" y="1209.0" class="t3" text-anchor="start">94</text>
+<text x="830.0" y="1209.0" class="t3" text-anchor="start">12</text>
+<text x="990.0" y="1209.0" class="t3" text-anchor="start">16</text>
 <text x="1110.0" y="1209.0" class="t3" text-anchor="start">66</text>
-<text x="1260.0" y="1209.0" class="t3" text-anchor="start">13 cm</text>
-<text x="1420.0" y="1209.0" class="t3" text-anchor="start">47%</text>
+<text x="1250.0" y="1209.0" class="t3" text-anchor="start">13 cm</text>
+<text x="1400.0" y="1209.0" class="t3" text-anchor="start">47%</text>
 <text x="1580.0" y="1209.0" class="t3" text-anchor="start">134 / 14%</text>
 <text x="45.0" y="1224.0" class="t2" text-anchor="start">120x60, 4 corsi a 240</text>
-<text x="300.0" y="1224.0" class="t2" text-anchor="start">88.6 / 53.6</text>
-<text x="500.0" y="1224.0" class="t2" text-anchor="start">55</text>
-<text x="660.0" y="1224.0" class="t2" text-anchor="start">94</text>
-<text x="800.0" y="1224.0" class="t2" text-anchor="start">12</text>
-<text x="980.0" y="1224.0" class="t2" text-anchor="start">16</text>
+<text x="400.0" y="1224.0" class="t2" text-anchor="start">88.6 / 53.6</text>
+<text x="560.0" y="1224.0" class="t2" text-anchor="start">55</text>
+<text x="700.0" y="1224.0" class="t2" text-anchor="start">94</text>
+<text x="830.0" y="1224.0" class="t2" text-anchor="start">12</text>
+<text x="990.0" y="1224.0" class="t2" text-anchor="start">16</text>
 <text x="1110.0" y="1224.0" class="t2" text-anchor="start">66</text>
-<text x="1260.0" y="1224.0" class="t2" text-anchor="start">13 cm</text>
-<text x="1420.0" y="1224.0" class="t2" text-anchor="start">47%</text>
+<text x="1250.0" y="1224.0" class="t2" text-anchor="start">13 cm</text>
+<text x="1400.0" y="1224.0" class="t2" text-anchor="start">47%</text>
 <text x="1580.0" y="1224.0" class="t2" text-anchor="start">134 / 14%</text>
 <text x="45.0" y="1239.0" class="t2" text-anchor="start">120x120, 2 corsi a 240, intera all'ingresso</text>
-<text x="300.0" y="1239.0" class="t2" text-anchor="start">118.3 / 95.0</text>
-<text x="500.0" y="1239.0" class="t2" text-anchor="start">31</text>
-<text x="660.0" y="1239.0" class="t2" text-anchor="start">76</text>
-<text x="800.0" y="1239.0" class="t2" text-anchor="start">23</text>
-<text x="980.0" y="1239.0" class="t2" text-anchor="start">29</text>
+<text x="400.0" y="1239.0" class="t2" text-anchor="start">118.3 / 95.0</text>
+<text x="560.0" y="1239.0" class="t2" text-anchor="start">31</text>
+<text x="700.0" y="1239.0" class="t2" text-anchor="start">76</text>
+<text x="830.0" y="1239.0" class="t2" text-anchor="start">23</text>
+<text x="990.0" y="1239.0" class="t2" text-anchor="start">29</text>
 <text x="1110.0" y="1239.0" class="t2" text-anchor="start">24</text>
-<text x="1260.0" y="1239.0" class="t2" text-anchor="start">3 cm</text>
-<text x="1420.0" y="1239.0" class="t2" text-anchor="start">54%</text>
+<text x="1250.0" y="1239.0" class="t2" text-anchor="start">3 cm</text>
+<text x="1400.0" y="1239.0" class="t2" text-anchor="start">54%</text>
 <text x="1580.0" y="1239.0" class="t2" text-anchor="start">82 / 29%</text>
 <text x="45.0" y="1254.0" class="t2" text-anchor="start">60x120, 2 corsi a 240, a filo bagno</text>
-<text x="300.0" y="1254.0" class="t2" text-anchor="start">30.5 / 114.4</text>
-<text x="500.0" y="1254.0" class="t2" text-anchor="start">71</text>
-<text x="660.0" y="1254.0" class="t2" text-anchor="start">97</text>
-<text x="800.0" y="1254.0" class="t2" text-anchor="start">31</text>
-<text x="980.0" y="1254.0" class="t2" text-anchor="start">24</text>
-<text x="1110.0" y="1254.0" class="t2" text-anchor="start">42</text>
-<text x="1260.0" y="1254.0" class="t2" text-anchor="start">1 cm</text>
-<text x="1420.0" y="1254.0" class="t2" text-anchor="start">61%</text>
-<text x="1580.0" y="1254.0" class="t2" text-anchor="start">139 / 17%</text>
+<text x="400.0" y="1254.0" class="t2" text-anchor="start">30.5 / 6.2</text>
+<text x="560.0" y="1254.0" class="t2" text-anchor="start">71</text>
+<text x="700.0" y="1254.0" class="t2" text-anchor="start">97</text>
+<text x="830.0" y="1254.0" class="t2" text-anchor="start">32</text>
+<text x="990.0" y="1254.0" class="t2" text-anchor="start">7</text>
+<text x="1110.0" y="1254.0" class="t2" text-anchor="start">58</text>
+<text x="1250.0" y="1254.0" class="t2" text-anchor="start">1 cm</text>
+<text x="1400.0" y="1254.0" class="t2" text-anchor="start">61%</text>
+<text x="1580.0" y="1254.0" class="t2" text-anchor="start">142 / 18%</text>
 </svg>
