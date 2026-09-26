@@ -57,6 +57,8 @@ FORMATI = [
     # Lato corto a filo del muro bagno/corridoio lato corridoio (y 152), lato lungo
     # sul muro del bagno da 325 (x 513,1)
     dict(lato=(60.0, 120.0), fuga=0.2, allinea=(513.1 - 1.0, 152.0 - 1.0)),
+    # stessi fili, ruotata di 90 gradi: lato lungo sul corridoio, corto sul muro da 325
+    dict(lato=(120.0, 60.0), fuga=0.2, allinea=(513.1 - 1.0, 152.0 - 1.0)),
 ]
 for _f in FORMATI:
     _f.setdefault("lato_riv", _f["lato"])
