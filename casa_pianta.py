@@ -53,6 +53,9 @@ FORMATI = [
     # ingresso=True: la griglia si cerca solo fra quelle con una lastra intera
     # a filo soglia del portoncino, che ne copre tutta la luce
     dict(lato=(120.0, 120.0), fuga=0.2, ingresso=True),
+    # allinea=(x, y) di rilievo, a filo finito: griglia bloccata, niente ricerca.
+    # Lato corto sul lato corridoio del bagno (y 162), lato lungo sul muro da 325 (x 513,1)
+    dict(lato=(60.0, 120.0), fuga=0.2, allinea=(513.1 - 1.0, 162.0 + 1.0)),
 ]
 for _f in FORMATI:
     _f.setdefault("lato_riv", _f["lato"])
@@ -76,6 +79,8 @@ for _f in FORMATI:
     _f["nome"] = f"{_n}, {_f['riv_corsi']} corsi {_quota}"
     if _f.get("ingresso"):
         _f["nome"] += ", intera all'ingresso"
+    if _f.get("allinea"):
+        _f["nome"] += ", a filo bagno"
 # valori della configurazione attiva, rimpiazzati da usa_formato()
 FORMATO = FORMATI[0]
 PIASTRELLA_X, PIASTRELLA_Y = FORMATO["lato"]
@@ -932,6 +937,8 @@ def _candidati(idx):
     """Offset critici: la funzione obiettivo cambia solo quando una fuga
     attraversa un bordo, quindi basta provare quei valori e i punti medi."""
     M = MODULO_X if idx == 0 else MODULO_Y
+    if FORMATO.get("allinea"):
+        return [round(R(*FORMATO["allinea"])[idx] % M, 3)]
     vals = {round(p[idx] % M, 3) for d in LOCALI.values() for p in d["fin"]}
     if FORMATO.get("ingresso"):
         x0, x1, yf = SOGLIA[:3]

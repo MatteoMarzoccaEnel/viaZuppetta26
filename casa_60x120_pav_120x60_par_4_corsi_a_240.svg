@@ -1052,4 +1052,14 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 <text x="1260.0" y="1239.0" class="t2" text-anchor="start">3 cm</text>
 <text x="1420.0" y="1239.0" class="t2" text-anchor="start">54%</text>
 <text x="1580.0" y="1239.0" class="t2" text-anchor="start">82 / 29%</text>
+<text x="45.0" y="1254.0" class="t2" text-anchor="start">60x120, 2 corsi a 240, a filo bagno</text>
+<text x="300.0" y="1254.0" class="t2" text-anchor="start">30.5 / 114.4</text>
+<text x="500.0" y="1254.0" class="t2" text-anchor="start">71</text>
+<text x="660.0" y="1254.0" class="t2" text-anchor="start">97</text>
+<text x="800.0" y="1254.0" class="t2" text-anchor="start">31</text>
+<text x="980.0" y="1254.0" class="t2" text-anchor="start">24</text>
+<text x="1110.0" y="1254.0" class="t2" text-anchor="start">42</text>
+<text x="1260.0" y="1254.0" class="t2" text-anchor="start">1 cm</text>
+<text x="1420.0" y="1254.0" class="t2" text-anchor="start">61%</text>
+<text x="1580.0" y="1254.0" class="t2" text-anchor="start">139 / 17%</text>
 </svg>
