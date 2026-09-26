@@ -85,7 +85,7 @@ seg_meno = cp.seg_meno
 
 
 pavimento, muri, vetri, ante, mobili, riv, batt, quote = [], [], [], [], [], [], [], []
-etichette, aree, pareti_bagno, muretti = [], [], [], []
+etichette, aree, pareti_bagno, muretti, soglie_loc = [], [], [], [], []
 fatte, soglie = set(), set()
 
 for nome, d in cp.LOCALI.items():
@@ -129,6 +129,7 @@ for nome, d in cp.LOCALI.items():
                     e1 = c - dentro * (sp + cp.FINITURA)
                     lo, hi = min(e0, e1), max(e0, e1)
                     pavimento.append([va, lo, vb, hi] if orizz else [lo, va, hi, vb])
+                    soglie_loc.append((nome, k, pavimento[-1]))
             else:
                 finestre.append((va, vb, z0, z1))
             if z1 < H_INT:
@@ -384,10 +385,9 @@ def tagli_posa():
     Il segmento e' il bordo misurato, cosi' il numero si scrive parallelo a
     quel bordo: un'etichetta per ogni lato che viene tagliato.
     """
-    ox, oy = cp.OTTIMO["o"]
     out = []
-    for d in cp.LOCALI.values():
-        for c in cp.celle(d, ox, oy):
+    for d in cp.OTTIMO["loc"].values():
+        for c in d["celle"]:
             if c["intera"]:
                 continue
             x0 = min(p[0] for p in c["parti"])
@@ -435,7 +435,7 @@ def texture_cartella(nome):
 # Pavimento: una posa per disposizione distinta; le varianti di FORMATI che
 # cambiano solo il rivestimento qui coincidono.
 def _chiave_pav(f):
-    return (tuple(f["lato"]), bool(f.get("ingresso")), f.get("allinea"))
+    return (tuple(f["lato"]), bool(f.get("ingresso")), f.get("allinea"), bool(f.get("per_stanza")))
 
 
 def _nome_pav(f):
@@ -444,7 +444,20 @@ def _nome_pav(f):
         n += ", intera all'ingresso"
     if f.get("allinea"):
         n += ", a filo bagno"
+    if f.get("per_stanza"):
+        n += ", per stanza"
     return n
+
+
+_SOGLIE_INT = {s["k"] for s in cp.SOGLIE_INTERNE}
+
+
+def _stanze():
+    """Posa per stanza: rettangoli di ogni locale con le sue soglie e la sua origine."""
+    return [dict(rects=[list(r) for r in d["rect"]] + [list(r) for r in cp.OTTIMO["soglie"][nome]]
+                 + [r for n, k, r in soglie_loc if n == nome and k not in _SOGLIE_INT],
+                 ox=cp.OTTIMO["o_loc"][nome][0], oy=cp.OTTIMO["o_loc"][nome][1])
+            for nome, d in cp.LOCALI.items()]
 
 
 def _classifica(voci):
@@ -463,6 +476,7 @@ for _i, _f in enumerate(cp.FORMATI):
         nome=_nome_pav(_f), cartella=_f["cartella"],
         modx=cp.MODULO_X, mody=cp.MODULO_Y, fuga=cp.FUGA, fugaProf=cp.FUGA_PROF,
         ox=cp.OTTIMO["o"][0], oy=cp.OTTIMO["o"][1], tagli=tagli_posa(),
+        stanze=_stanze() if _f.get("per_stanza") else None,
         pdf=f"computo_{cp.slug(_f['nome'])}.pdf",
         stat=dict(lastre=_t["lastre"], mq=round(_t["lastre"] * cp.LASTRA, 2),
                   intere=_t["intere"], tagli=_t["tagli"], sliver=_t["sliver"],
@@ -532,7 +546,7 @@ PREFERITI = [
          tex=["01-onice-avorio-lux", "01-onice-avorio-lux", "02-onice-verde"]),
 ]
 for _p in PREFERITI:
-    _p["posa"] = _POSA_DI[(_p["pav"], False, None)]
+    _p["posa"] = _POSA_DI[(_p["pav"], False, None, False)]
     _p["riv"] = [idx_riv(t) for t in _p["pareti"]]
 
 DATI = dict(pavimento=pavimento, muri=muri, vetri=vetri, ante=ante, mobili=mobili,
@@ -946,11 +960,13 @@ function unisci(arr){      // tratti contigui sulla stessa retta diventano uno s
   }
   return out;
 }
-function segmentiFughe(cfg){
+function segmentiFughe(cfg, rects){
+  if (!rects && cfg.stanze)
+    return cfg.stanze.flatMap(st => segmentiFughe(Object.assign({}, cfg, {ox: st.ox, oy: st.oy}), st.rects));
   const MX = cfg.modx, MY = cfg.mody, V = new Map(), H = new Map();
   const agg = (m, c, a, b) => { const k = c.toFixed(2);
     const v = m.get(k) || []; v.push([a,b]); m.set(k, v); };
-  for (const [x0,y0,x1,y1] of D.pavimento){
+  for (const [x0,y0,x1,y1] of (rects || D.pavimento)){
     for (let k = Math.ceil((x0-cfg.ox)/MX); cfg.ox + k*MX < x1; k++){
       const x = cfg.ox + k*MX;
       if (x > x0) agg(V, x, y0, y1);
@@ -987,7 +1003,10 @@ function mostraFughe(){
 function costruisciPav(cfg, i){
   const M = matPav[i];
   const g = new THREE.Group(); scene.add(g);
-  superficie(D.pavimento, 0, M, false, cfg, g);
+  if (cfg.stanze)       // posa per stanza: ogni locale con la sua origine
+    for (const st of cfg.stanze)
+      superficie(st.rects, 0, M, false, Object.assign({}, cfg, {ox: st.ox, oy: st.oy}), g);
+  else superficie(D.pavimento, 0, M, false, cfg, g);
   // il battiscopa si ricava dalle lastre del pavimento
   for (const [a,b,c,o,dn] of D.batt){
     const c2 = c + (dn>0?1:-1)*SP_BATT;

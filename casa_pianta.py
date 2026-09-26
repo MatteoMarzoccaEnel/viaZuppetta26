@@ -59,6 +59,10 @@ FORMATI = [
     dict(lato=(60.0, 120.0), fuga=0.2, allinea=(513.1 - 1.0, 152.0 - 1.0)),
     # stessi fili, ruotata di 90 gradi: lato lungo sul corridoio, corto sul muro da 325
     dict(lato=(120.0, 60.0), fuga=0.2, allinea=(513.1 - 1.0, 152.0 - 1.0)),
+    # per_stanza=True: ogni locale ha la sua griglia; la soglia sotto la porta va
+    # divisa sotto l'anta, o alla stanza che ha piu' margine per coprirla tutta
+    dict(lato=(120.0, 60.0), fuga=0.2, per_stanza=True),
+    dict(lato=(60.0, 120.0), fuga=0.2, per_stanza=True),
 ]
 for _f in FORMATI:
     _f.setdefault("lato_riv", _f["lato"])
@@ -84,6 +88,8 @@ for _f in FORMATI:
         _f["nome"] += ", intera all'ingresso"
     if _f.get("allinea"):
         _f["nome"] += ", a filo bagno"
+    if _f.get("per_stanza"):
+        _f["nome"] += ", per stanza"
 # valori della configurazione attiva, rimpiazzati da usa_formato()
 FORMATO = FORMATI[0]
 PIASTRELLA_X, PIASTRELLA_Y = FORMATO["lato"]
@@ -857,48 +863,49 @@ def celle(d, ox, oy):
     return out
 
 
-def analizza(ox, oy):
+def _stat_loc(d, ox, oy):
+    """Classificazione lastra per lastra di un locale (o di una regione) con la griglia data."""
+    cs = celle(d, ox, oy)
+    ints = [c for c in cs if c["intera"]]
+    cut = [c for c in cs if not c["intera"]]
+    # una lastra intera per ogni pezzo con entrambi i lati > meta' modulo,
+    # due pezzi piccoli si ricavano dalla stessa lastra
+    grandi = sum(1 for c in cut if c["dx"] > MODULO_X / 2 and c["dy"] > MODULO_Y / 2)
+    return dict(celle=cs, intere=len(ints), tagli=len(cut),
+                sliver=sum(1 for c in cut if c["lato"] < SLIVER),
+                medi=sum(1 for c in cut if SLIVER <= c["lato"] < MEZZA),
+                buoni=sum(1 for c in cut if c["lato"] >= MEZZA),
+                inutili=sum(1 for c in cut if c["lato"] < 10),
+                lastre=len(ints) + grandi + math.ceil((len(cut) - grandi) / 2),
+                min_lato=min([c["lato"] for c in cut], default=min(PIASTRELLA_X, PIASTRELLA_Y)),
+                q_intere=len(ints) * LASTRA / d["area"])
+
+
+def _somma(per_loc, area_tot):
     tot = dict(intere=0, tagli=0, sliver=0, medi=0, buoni=0, lastre=0, min_lato=1e9)
-    per_loc = {}
-    for nome, d in LOCALI.items():
-        cs = celle(d, ox, oy)
-        ints = [c for c in cs if c["intera"]]
-        cut = [c for c in cs if not c["intera"]]
-        sliver = [c for c in cut if c["lato"] < SLIVER]
-        medi = [c for c in cut if SLIVER <= c["lato"] < MEZZA]
-        buoni = [c for c in cut if c["lato"] >= MEZZA]
-        # una lastra intera per ogni pezzo con entrambi i lati > meta' modulo,
-        # due pezzi piccoli si ricavano dalla stessa lastra
-        grandi = sum(1 for c in cut if c["dx"] > MODULO_X / 2 and c["dy"] > MODULO_Y / 2)
-        piccoli = len(cut) - grandi
-        lastre = len(ints) + grandi + math.ceil(piccoli / 2)
-        mlato = min([c["lato"] for c in cut], default=min(PIASTRELLA_X, PIASTRELLA_Y))
-        per_loc[nome] = dict(celle=cs, intere=len(ints), tagli=len(cut),
-                             sliver=len(sliver), medi=len(medi), buoni=len(buoni),
-                             lastre=lastre, min_lato=mlato,
-                             q_intere=len(ints) * LASTRA / d["area"])
-        tot["intere"] += len(ints)
-        tot["tagli"] += len(cut)
-        tot["sliver"] += len(sliver)
-        tot["medi"] += len(medi)
-        tot["buoni"] += len(buoni)
-        tot["lastre"] += lastre
-        tot["min_lato"] = min(tot["min_lato"], mlato)
-    tot["q_intere"] = tot["intere"] * LASTRA / AREA_TOT
-    tot["sfrido"] = (tot["lastre"] * LASTRA - AREA_TOT) / (tot["lastre"] * LASTRA)
-    return tot, per_loc
+    for l in per_loc.values():
+        for k in ("intere", "tagli", "sliver", "medi", "buoni", "lastre"):
+            tot[k] += l[k]
+        tot["min_lato"] = min(tot["min_lato"], l["min_lato"])
+    tot["q_intere"] = tot["intere"] * LASTRA / area_tot
+    tot["sfrido"] = (tot["lastre"] * LASTRA - area_tot) / (tot["lastre"] * LASTRA)
+    return tot
+
+
+def _punti(l):
+    """Costo: meno lastre acquistate, poi meno pezzi da tagliare. I listelli restano
+    penalizzati perche' lenti e fragili, quelli sotto i 10 cm non si posano affatto."""
+    return l["lastre"] * 10 + l["tagli"] + l["sliver"] * 3 + l["inutili"] * 10
+
+
+def analizza(ox, oy):
+    per_loc = {nome: _stat_loc(d, ox, oy) for nome, d in LOCALI.items()}
+    return _somma(per_loc, AREA_TOT), per_loc
 
 
 def obiettivo(ox, oy):
-    """Costo della griglia: meno lastre acquistate, poi meno pezzi da tagliare.
-
-    I listelli restano penalizzati perche' in opera sono lenti e fragili, e
-    quelli sotto i 10 cm non si posano affatto.
-    """
-    tot, per = analizza(ox, oy)
-    inutili = sum(1 for l in per.values() for c in l["celle"]
-                  if not c["intera"] and c["lato"] < 10)
-    return tot["lastre"] * 10 + tot["tagli"] + tot["sliver"] * 3 + inutili * 10
+    """Costo della griglia unica: somma dei costi dei locali."""
+    return sum(_punti(l) for l in analizza(ox, oy)[1].values())
 
 
 def _soglia_ingresso():
@@ -971,9 +978,102 @@ def cerca():
 
 
 def _ottimo():
+    if FORMATO.get("per_stanza"):
+        return _ottimo_stanze()
     o = cerca()
     tot, loc = analizza(*o)
-    return dict(o=o, tot=tot, loc=loc)
+    return dict(o=o, tot=tot, loc=loc, punti=sum(_punti(l) for l in loc.values()))
+
+
+def _soglie_interne():
+    """Soglie delle porte fra due locali: la striscia di pavimento sotto la porta,
+    larga quanto il vano e profonda quanto il muro (fra i due fili finiti)."""
+    out = []
+    for k, (tipo, x0, y0, x1, y1, _lb) in enumerate(APERTURE):
+        if tipo not in ("porta", "passaggio"):
+            continue
+        ao = abs(y1 - y0) < abs(x1 - x0)
+        c = y0 if ao else x0
+        va, vb = (min(x0, x1), max(x0, x1)) if ao else (min(y0, y1), max(y0, y1))
+        lati = {}
+        for nome, d in LOCALI.items():
+            for r in d["rect"]:
+                a0, a1, lo, hi = (r[0], r[2], r[1], r[3]) if ao else (r[1], r[3], r[0], r[2])
+                if min(a1, vb) - max(a0, va) < 1:
+                    continue
+                if c - 20 < hi <= c:
+                    lati[-1] = (nome, hi)
+                if c <= lo < c + 20:
+                    lati[1] = (nome, lo)
+        if len(lati) == 2:
+            out.append(dict(k=k, ao=ao, c=c, va=va, vb=vb, lo=lati[-1], hi=lati[1]))
+    return out
+
+
+SOGLIE_INTERNE = _soglie_interne()
+
+
+def _rett_soglia(s, f0, f1):
+    a, b = sorted((f0, f1))
+    return (s["va"], a, s["vb"], b) if s["ao"] else (a, s["va"], b, s["vb"])
+
+
+def _regione(d, extra):
+    """Il locale allargato alle soglie che gli sono state cedute."""
+    rects = list(d["rect"]) + list(extra)
+    return dict(rect=rects, area=d["area"] + sum((r[2] - r[0]) * (r[3] - r[1]) for r in extra) / 10000,
+                bb=(min(r[0] for r in rects), min(r[1] for r in rects),
+                    max(r[2] for r in rects), max(r[3] for r in rects)))
+
+
+def _cerca_loc(d):
+    """Origine ottimale di un solo locale: stessi offset critici della ricerca globale."""
+    cand = []
+    for idx, M in ((0, MODULO_X), (1, MODULO_Y)):
+        vals = sorted({round(p[idx] % M, 3) for p in d["fin"]})
+        cand.append(sorted(set(vals + [(a + b) / 2 for a, b in zip(vals, vals[1:])]
+                               + [((vals[-1] + vals[0] + M) / 2) % M])))
+    return min(((o, p) for o in cand[0] for p in cand[1]),
+               key=lambda op: _punti(_stat_loc(d, *op)))
+
+
+def _margine(d, o, r, ao):
+    """Quanto resta della lastra che copre la soglia r: piu' margine, taglio piu' comodo."""
+    M = MODULO_Y if ao else MODULO_X
+    ext = [c["dy"] if ao else c["dx"] for c in celle(d, *o)
+           if any(min(p[2], r[2]) - max(p[0], r[0]) > 0.05 and min(p[3], r[3]) - max(p[1], r[1]) > 0.05
+                  for p in c["parti"])]
+    return min(M - e for e in ext) if ext else 0.0
+
+
+def _ottimo_stanze():
+    """Ogni locale ha la sua griglia. La soglia sotto una porta va divisa sotto
+    l'anta se entrambe le lastre ci arrivano senza pezzi in piu', altrimenti
+    la copre tutta il locale con piu' margine."""
+    o_loc = {nome: _cerca_loc(d) for nome, d in LOCALI.items()}
+    extra = {nome: [] for nome in LOCALI}
+    scelte = {}
+    for s in SOGLIE_INTERNE:
+        (nl, fl), (nh, fh) = s["lo"], s["hi"]
+        tutta = _rett_soglia(s, fl, fh)
+        opzioni = [("sotto la porta", [(nl, _rett_soglia(s, fl, s["c"])), (nh, _rett_soglia(s, s["c"], fh))]),
+                   (nl, [(nl, tutta)]), (nh, [(nh, tutta)])]
+
+        def chiave(op):
+            costo = sum(_punti(_stat_loc(_regione(LOCALI[n], extra[n] + [r for m, r in op[1] if m == n]),
+                                         *o_loc[n])) for n in (nl, nh))
+            n0 = op[1][0][0]
+            marg = _margine(_regione(LOCALI[n0], extra[n0] + [tutta]), o_loc[n0], tutta, s["ao"])
+            return (costo, op[0] != "sotto la porta", -marg)
+
+        nome_s, parti = min(opzioni, key=chiave)
+        for n, r in parti:
+            extra[n].append(r)
+        scelte[s["k"]] = nome_s
+    loc = {nome: _stat_loc(_regione(d, extra[nome]), *o_loc[nome]) for nome, d in LOCALI.items()}
+    area = AREA_TOT + sum((r[2] - r[0]) * (r[3] - r[1]) for v in extra.values() for r in v) / 10000
+    return dict(o=o_loc["ZONA GIORNO"], o_loc=o_loc, soglie=extra, scelte=scelte,
+                tot=_somma(loc, area), loc=loc, punti=sum(_punti(l) for l in loc.values()))
 
 
 def usa_formato(i):
@@ -1017,7 +1117,7 @@ for _i, _f in enumerate(FORMATI):
     usa_formato(_i)
     RIEPILOGO.append(dict(i=_i, nome=_f["nome"], modulo=f"{MODULO_X:.1f}x{MODULO_Y:.1f}",
                           hriv=H_RIV, corsi=RIV_CORSI, o=OTTIMO["o"], tot=OTTIMO["tot"],
-                          punteggio=obiettivo(*OTTIMO["o"])))
+                          punteggio=OTTIMO["punti"]))
 
 # negli elaborati va il formato che minimizza obiettivo(), salvo --posa=N
 POSA_ATTIVA = min(RIEPILOGO, key=lambda r: r["punteggio"])["i"]
@@ -1160,10 +1260,14 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
 </style></defs>""")
     rect(0, 0, W, H, extra='fill="#ffffff"')
     txt(30, 45, f"APPARTAMENTO - posa gres {FORMATO['nome']}", "t1", "start")
-    txt(30, 72, f"origine di posa ottimale {ox:.1f} / {oy:.1f} cm - minimo numero di "
+    orig = "origine di posa ottimale per ogni stanza" if var.get("o_loc") else \
+        f"origine di posa ottimale {ox:.1f} / {oy:.1f} cm"
+    txt(30, 72, f"{orig} - minimo numero di "
                 f"lastre e di tagli; rivestimento bagno su {RIV_CORSI} corsi {FORMATO['quota_riv']}",
         "t2", "start")
-    txt(30, 95, f"fuga {FUGA*10:.1f} mm - modulo {MODULO_X:.2f} x {MODULO_Y:.2f} cm - griglia unica continua su tutta la casa - "
+    griglia = ("griglia ottimizzata stanza per stanza, soglie divise sotto la porta o alla stanza con piu' margine"
+               if var.get("o_loc") else "griglia unica continua su tutta la casa")
+    txt(30, 95, f"fuga {FUGA*10:.1f} mm - modulo {MODULO_X:.2f} x {MODULO_Y:.2f} cm - {griglia} - "
                 f"battiscopa/rivestimento {FINITURA:.0f} cm - origine {ox:.1f}/{oy:.1f} - stampa 100% = 1:{SCALA}", "t2", "start")
 
     add(f'<g transform="translate({TX},{TY})">')
@@ -1179,6 +1283,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
             for p in c["parti"]:
                 rect(p[0], p[1], p[2] - p[0], p[3] - p[1], extra=f'fill="{col}"')
         # fughe
+        ox, oy = var.get("o_loc", {}).get(nome, var["o"])
         x0, y0, x1, y1 = d["bb"]
         k = math.ceil((x0 - ox) / MODULO_X)
         while ox + k * MODULO_X < x1:
