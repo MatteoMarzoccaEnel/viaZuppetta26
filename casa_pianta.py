@@ -407,8 +407,7 @@ SEPARE = [(1471, -36, 1471, 74, H_SEPARE)]
 # pilastri squadrati: (x0, y0, x1, y1, etichetta). Rilievo in sito: 32 cm di
 # larghezza per tutti, 56 solo per PX all'ingresso.
 PILASTRI = [
-    (372.8, 73, 425.8, 99, "P1"),
-    (506, 76, 560, 94, "P2"),
+    (372.8, 73, 404.8, 99, "P1"),        # sotto T3; a fianco la colonna di scarico
     (778.1, 14, 810.1, 45, "P3"),
     (778.1, -88, 810.1, -59, "P4"),
     (1204.3, -88, 1236.3, -59, "P5"),
@@ -417,6 +416,12 @@ PILASTRI = [
     (778.1, 601, 810.1, 621, "P8"),    # sotto T2, sporge 20 nel disimpegno
     (1204.3, 601, 1260.3, 621, "PX"),  # ingresso: 56 cm, T1 a filo del lato P8
 ]
+# canne non strutturali (coordinate di disegno): la colonna montante di scarico
+# allarga P1 fino al filo del bagno (x 423); la canna fumaria sta tutta nella
+# camera singola, dal filo del muro col bagno (x 523,1)
+CANNE = [(404.8, 73, 423, 99, "COLONNA SCARICO"),
+         (523.1, 76, 560, 94, "CANNA FUMARIA")]
+
 # le tre travi sono TRASVERSALI (corrono da balcone a ingresso, non lungo la casa)
 # e appoggiano sui pilastri: T3 su P1, T2 su P3/P4, T1 su P5/P6
 TRAVI = [
@@ -1460,6 +1465,10 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #222; }
         rect(x0, y0, x1 - x0, y1 - y0, extra='fill="#5d4037" stroke="#3e2723"')
         txt((x0 + x1) / 2, (y0 + y1) / 2 + 4,
             f"{lb} {x1-x0:.0f}x{y1-y0:.0f}", "num", alone=True)
+
+    for x0, y0, x1, y1, lb in CANNE:
+        rect(x0, y0, x1 - x0, y1 - y0, extra='fill="#9e9e9e" stroke="#424242"')
+        txt((x0 + x1) / 2, y1 + 14, f"{lb} {x1-x0:.0f}x{y1-y0:.0f}", "lbl", alone=True)
 
     # canalizzato: cassonetto in cartongesso e bocchette di mandata
     # un tratto puo' essere spezzato in piu' rettangoli: l'etichetta va sul maggiore

@@ -247,6 +247,11 @@ for x0, y0, x1, y1, lb in cp.PILASTRI:
     etichette.append([(x0 + x1) / 2, (y0 + y1) / 2, H_INT + 16,
                       f"{lb} {x1-x0:.0f}x{y1-y0:.0f}", "#5d4037"])
 
+for x0, y0, x1, y1, lb in cp.CANNE:
+    muri.append([y0, y1, (x0 + x1) / 2, False, 0, H_INT, x1 - x0])
+    etichette.append([(x0 + x1) / 2, (y0 + y1) / 2, H_INT + 16,
+                      f"{lb} {x1-x0:.0f}x{y1-y0:.0f}", "#616161"])
+
 for x0, y0, x1, y1, lb in cp.TRAVI:
     orizz = (x1 - x0) >= (y1 - y0)
     if orizz:

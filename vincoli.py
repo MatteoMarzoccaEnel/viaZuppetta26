@@ -49,7 +49,7 @@ PERIMETRO = (0.0, -59.0, 1471.0, 697.0)
 # firme dei dati immutabili (vedi --firme)
 FIRME = {
     "muri_esistenti": "698afb97395b6729",
-    "pilastri": "788252a2eadcc581",
+    "pilastri": "c89031dfdc42fcb9",
     "travi": "7c5edfc530ae127c",
 }
 
@@ -156,6 +156,30 @@ def _controlla_struttura(cp, errori):
         ry0, ry1 = cp.RY - y1, cp.RY - y0
         if x0 < px0 - 0.1 or x1 > px1 + 0.1 or ry0 < py0 - 30.1 or ry1 > py1 + 30.1:
             errori.append(f"pilastro {lb} fuori dal perimetro dell'edificio")
+    # un solido dentro il bagno coprirebbe il rivestimento: deve stare oltre i fili
+    bagno = cp.LOCALI_RILIEVO["BAGNO"]
+    for x0, y0, x1, y1, lb in cp.PILASTRI + cp.CANNE:
+        a = _area_dentro(bagno, x0, cp.RY - y1, x1, cp.RY - y0)
+        if a > 1.0:
+            errori.append(f"{lb}: sporge nel bagno per {a:.0f} cm2 oltre il filo del rivestimento")
+
+
+def _dentro(poly, x, y):
+    n, ok = len(poly), False
+    for i in range(n):
+        (xa, ya), (xb, yb) = poly[i], poly[(i + 1) % n]
+        if (ya > y) != (yb > y) and x < xa + (y - ya) * (xb - xa) / (yb - ya):
+            ok = not ok
+    return ok
+
+
+def _area_dentro(poly, x0, y0, x1, y1):
+    """Area del rettangolo che cade dentro un poligono rettilineo."""
+    xs = sorted({x0, x1} | {p[0] for p in poly if x0 < p[0] < x1})
+    ys = sorted({y0, y1} | {p[1] for p in poly if y0 < p[1] < y1})
+    return sum((xb - xa) * (yb - ya)
+               for xa, xb in zip(xs, xs[1:]) for ya, yb in zip(ys, ys[1:])
+               if _dentro(poly, (xa + xb) / 2, (ya + yb) / 2))
 
 
 def spessore_apertura(cp, orizz, c, va, vb):
