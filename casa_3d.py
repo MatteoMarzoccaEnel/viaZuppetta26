@@ -735,7 +735,9 @@ for _g in (0, 1):
         _p["gruppi"][_g]["rank"] = _r
 cp.usa_formato(cp.POSA_ATTIVA)
 TEXTURE = {c: texture_cartella(c) for c in {p["cartella"] for p in POSA + PARETI}}
-AVVIO = dict(pav=_POSA_DI[_chiave_pav(cp.FORMATO)],
+# pavimento all'avvio: la posa #N in ordine di sfrido, come la tabella e piantina_2d.py
+POSA_AVVIO = 5
+AVVIO = dict(pav=sorted(range(len(POSA)), key=lambda k: (POSA[k]["stat"]["sfrido"], k))[POSA_AVVIO - 1],
              riv=[idx_riv((100.0, 35.0))] * 2)
 
 # configurazioni preferite, richiamate in sequenza col tasto P: formato di
