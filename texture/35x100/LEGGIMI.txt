@@ -1,0 +1,15 @@
+Texture per il formato 35x100 (rivestimento del bagno, posato orizzontale come
+100x35: e' la stessa piastrella girata).
+
+Mettere qui i file png / jpg / jpeg / webp / bmp della lastra: casa_3d.py li
+incorpora tutti nel modello e i tasti Y (pareti A) e U (pareti B) li scorrono uno
+per uno. L'immagine viene deformata per coprire l'intera piastrella, quindi
+conviene fotografare o ritagliare la sola lastra, senza fughe, con il lato lungo
+in orizzontale.
+
+Se la cartella e' vuota il modello usa una texture procedurale di ripiego.
+
+Posa a fasce: le pareti A partono con la prima texture in ordine di nome (A, tinta
+unita: primo corso e dal quinto a filo trave, doccia e nicchia lavatrice), le
+pareti B con la seconda (B, decoro: corsi 2-4). Per questo i nomi iniziano con
+01-A e 02-B.

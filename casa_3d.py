@@ -604,13 +604,62 @@ for _p, _r in zip(POSA, _classifica([p["stat"] for p in POSA])):
 # altezza: 240 a corsi interi per 60/120, altrimenti filo trave;
 # sf = corsi sfalsati di quella frazione di lastra. Le varianti sono tutte sul 60x120,
 # sempre a 240: con altezze multiple di 60 il filo trave lascerebbe una fascia di 21 cm.
+# fasce=True: A e B non sono pareti ma due texture dello stesso formato, a corsi (vedi FASCIA_B)
 FORMATI_RIV = [dict(lato=l) for l in
                [(90.0, 90.0), (80.0, 80.0), (60.0, 60.0), (60.0, 120.0), (120.0, 60.0), (120.0, 120.0)]]
 FORMATI_RIV += [
     dict(lato=(60.0, 120.0), sf=1 / 2),
     dict(lato=(120.0, 60.0), sf=1 / 2),
     dict(lato=(120.0, 60.0), sf=1 / 3),
+    dict(lato=(100.0, 35.0), fasce=True),
 ]
+
+# Rivestimento a fasce: texture A sul primo corso e dal quinto fino a filo trave, B sui
+# corsi 2-4. In doccia (fino al bordo del piatto) e nella nicchia della lavatrice e' tutto A,
+# tranne il fronte sporgente di P1 + colonna di scarico, che segue le fasce.
+FASCIA_B = (1, 4)                       # corsi [da, a) in texture B
+_DOCCIA = next((y, h) for lo, _lb, _x, y, _w, h, tp in cp.ARREDO if lo == "BAGNO" and tp == "doccia")
+# in pianta (x0, y0, x1, y1), con i fili delle facce dentro
+ZONE_TUTTA_A = [(343.0, 72.0, 514.0, sum(_DOCCIA)),     # doccia
+                (513.1, 401.0, 589.0, 477.0)]           # nicchia lavatrice
+FRONTE_SPORGENTE = (True, 99.6, 372.8, 423.0)           # orizzontale, filo, da, a
+
+
+def _zona_tutta_a(orizz, c, a, b):
+    x, y = ((a + b) / 2, c) if orizz else (c, (a + b) / 2)
+    fo, fc, fa, fb = FRONTE_SPORGENTE
+    if orizz == fo and abs(c - fc) < 1 and fa - 0.5 <= a and b <= fb + 0.5:
+        return False
+    return any(x0 <= x <= x1 and y0 <= y <= y1 for x0, y0, x1, y1 in ZONE_TUTTA_A)
+
+
+def facce_a_fasce(facce, my):
+    """Le facce divise per texture: gruppo 0 = A, 1 = B. Solo la fascia B si spezza ai
+    bordi delle zone tutte in A, cosi' le lastre in A a cavallo restano intere."""
+    b0, b1 = FASCIA_B[0] * my, FASCIA_B[1] * my
+    out = []
+    for sa, sb, c, orizz, dentro, _g, z0, z1 in facce:
+        for q0, q1, fascia_b in ((z0, min(z1, b0), False), (max(z0, b0), min(z1, b1), True),
+                                 (max(z0, b1), z1, False)):
+            if q1 - q0 <= 0.5:
+                continue
+            if not fascia_b:
+                out.append([sa, sb, c, orizz, dentro, 0, q0, q1])
+                continue
+            tagli = {sa, sb}
+            for x0, y0, x1, y1 in ZONE_TUTTA_A:
+                lo, hi, t0, t1 = (x0, x1, y0, y1) if orizz else (y0, y1, x0, x1)
+                if t0 <= c <= t1:
+                    tagli |= {v for v in (lo, hi) if sa < v < sb}
+            pezzi = []
+            for a, b in zip(sorted(tagli), sorted(tagli)[1:]):
+                g = 0 if _zona_tutta_a(orizz, c, a, b) else 1
+                if pezzi and pezzi[-1][5] == g:
+                    pezzi[-1][1] = b
+                else:
+                    pezzi.append([a, b, c, orizz, dentro, g, q0, q1])
+            out += pezzi
+    return out
 
 
 def idx_riv(lato, sf=0.0):
@@ -631,22 +680,31 @@ for _fr in FORMATI_RIV:
         _h, _quota = cp.H_TRAVE, "a filo trave"
     _mx, _my = _rx + FUGA_RIV, _ry + FUGA_RIV
     _facce = facce_riv(_h) + FRONTI_ALZ
+    _fasce = _fr.get("fasce", False)
+    # a fasce le sommita' delle alzatine stanno in doccia: texture A
+    _gtop = 0 if _fasce else 1
+    if _fasce:
+        _facce = facce_a_fasce(_facce, _my)
+        # A e B sulla stessa parete: le fughe verticali devono proseguire, origine comune
+        _orig_tutte = origini_riv(_facce + PIANI_CONTO, _mx, _my, _rx, _ry, _sf)
     _gruppi = []
     for _g in (0, 1):
         _ff = [f for f in _facce if f[5] == _g]
-        _fc = _ff + (PIANI_CONTO if _g == 1 else [])
-        _orig = origini_riv(_fc, _mx, _my, _rx, _ry, _sf)
+        _fc = _ff + (PIANI_CONTO if _g == _gtop else [])
+        _orig = _orig_tutte if _fasce else origini_riv(_fc, _mx, _my, _rx, _ry, _sf)
         _gruppi.append(dict(
             o=[_orig[_piano(f)] if f[5] == _g else None for f in _facce],
-            otop=[_orig[_piano(f)] for f in PIANI_CONTO] if _g == 1 else [],
+            otop=[_orig[_piano(f)] for f in PIANI_CONTO] if _g == _gtop else [],
             stat=stat_riv(_fc, [_orig[_piano(f)] for f in _fc], _mx, _my, _rx, _ry, _sf),
             tagli=tagli_riv(_ff, [_orig[_piano(f)] for f in _ff], _mx, _my, _sf)))
     _nome = f"{_rx:.0f}x{_ry:.0f}, {_corsi} corsi {_quota}"
     if _sf:
         _nome += f", sfalsata 1/{round(1 / _sf)}"
+    if _fasce:
+        _nome += ", fasce A/B"
     PARETI.append(dict(nome=_nome, cartella=f"{min(_rx, _ry):.0f}x{max(_rx, _ry):.0f}",
                        modx=_mx, mody=_my, fuga=FUGA_RIV, fugaProf=cp.FUGA_PROF,
-                       sf=_sf, righe=round(1 / _sf) if _sf else 1,
+                       sf=_sf, righe=round(1 / _sf) if _sf else 1, gtop=_gtop,
                        hriv=_h, facce=_facce, piani=PIANI_ALZ, gruppi=_gruppi))
 for _g in (0, 1):
     for _p, _r in zip(PARETI, _classifica([p["gruppi"][_g]["stat"] for p in PARETI])):
@@ -654,7 +712,7 @@ for _g in (0, 1):
 cp.usa_formato(cp.POSA_ATTIVA)
 TEXTURE = {c: texture_cartella(c) for c in {p["cartella"] for p in POSA + PARETI}}
 AVVIO = dict(pav=_POSA_DI[_chiave_pav(cp.FORMATO)],
-             riv=[idx_riv(cp.FORMATO["lato_riv"])] * 2)
+             riv=[idx_riv((100.0, 35.0))] * 2)
 
 # configurazioni preferite, richiamate in sequenza col tasto P: formato di
 # pavimento, pareti A e B; texture per nome file (senza estensione), stesso ordine
@@ -1172,8 +1230,8 @@ function costruisciRiv(P, k, gr){
   P.facce.forEach(([a,b,c,o,dn,gg,z0,z1], i) => {
     if (gg === gr) quad(a,b,c,o,dn,z0,z1, M, Object.assign({}, cfg, {ox: G.o[i], oy: G.o[i]}), g);
   });
-  // sommita' delle alzatine, rivestite come le pareti B: striscia lungo il lato lungo
-  if (gr === 1) P.piani.forEach(([x0,y0,x1,y1,z], i) => {
+  // sommita' delle alzatine, rivestite come le pareti B (A nel rivestimento a fasce)
+  if (gr === P.gtop) P.piani.forEach(([x0,y0,x1,y1,z], i) => {
     const lx = x1 - x0 >= y1 - y0;
     superficie([[x0, y0, x1, y1]], z + 0.3, M, false,
                Object.assign({}, P, lx ? {ox: G.otop[i], oy: y0} : {ox: x0, oy: G.otop[i]}), g);
