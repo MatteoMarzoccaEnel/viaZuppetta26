@@ -94,7 +94,10 @@ def _nascosta():
                 out["proprio" if i in PROPRIO else "pavimento"] += \
                     max(0.0, min(b, p1) - max(a, p0)) * min(alt, cp.H_RIV) / 10000
     for x, y, w, h, alt in alz:
-        out["proprio"] -= w * h / 10000           # sommita'
+        # la sommita' del gradino doccia la copre il piatto: non si riveste
+        if not any(min(x + w, dx + dw) - max(x, dx) > 0.9 * w and min(y + h, dy + dh) - max(y, dy) > 0.9 * h
+                   for lo, _lb, dx, dy, dw, dh, tp in cp.ARREDO if lo == "BAGNO" and tp == "doccia"):
+            out["proprio"] -= w * h / 10000           # sommita'
         for orizz, c, s0, s1 in ((True, y, x, x + w), (True, y + h, x, x + w),
                                  (False, x, y, y + h), (False, x + w, y, y + h)):
             if not any(o == orizz and abs(cc - c) < 1.5 and min(b, s1) - max(a, s0) > 1

@@ -333,13 +333,32 @@ def facce_alzatine():
         return any(o == orizz and abs(cc - c) < 1.5 and min(b, s1) - max(a, s0) > 1
                    for o, cc, a, b, _d in lati)
 
+    def appoggi(orizz, c, altri):
+        """Alzatine attraversate dal filo c: davanti a loro il fronte parte dalla loro sommita'."""
+        out = []
+        for mx, my, mw, mh, mb, ma in altri:
+            lo, hi, p0, p1 = (my, my + mh, mx, mx + mw) if orizz else (mx, mx + mw, my, my + mh)
+            if lo - 1.5 < c < hi + 1.5:
+                out.append((p0, p1, mb + ma))
+        return out
+
+    dx0, dy0, dx1, dy1 = next((x, y, x + w, y + h) for x, y, w, h, _b, _a, _c, tp in mobili
+                              if tp == "doccia")
     fronti, piani = [], []
-    for x, y, w, h, base, alt in muretti:
+    for i, (x, y, w, h, base, alt) in enumerate(muretti):
+        altri = muretti[:i] + muretti[i + 1:]
         for orizz, c, s0, s1, dentro in ((True, y, x, x + w, -1), (True, y + h, x, x + w, 1),
                                          (False, x, y, y + h, -1), (False, x + w, y, y + h, 1)):
-            if not a_muro(orizz, c, s0, s1):
-                fronti.append([s0, s1, c + dentro * 0.6, orizz, dentro, 1, base, base + alt])
-        piani.append([x, y, x + w, y + h, base + alt])
+            if a_muro(orizz, c, s0, s1):
+                continue
+            for ta, tb, zb in _tratti_alzati(s0, s1, appoggi(orizz, c, altri)):
+                if max(base, zb) < base + alt - 0.5:
+                    fronti.append([ta, tb, c + dentro * 0.6, orizz, dentro, 1,
+                                   max(base, zb), base + alt])
+        # la sommita' del gradino doccia la copre il piatto: non si riveste
+        coperta = max(0.0, min(x + w, dx1) - max(x, dx0)) * max(0.0, min(y + h, dy1) - max(y, dy0))
+        if coperta < 0.9 * w * h:
+            piani.append([x, y, x + w, y + h, base + alt])
     return fronti, piani
 
 
@@ -614,10 +633,10 @@ FORMATI_RIV += [
     dict(lato=(100.0, 35.0), fasce=True),
 ]
 
-# Rivestimento a fasce: texture A sul primo corso e dal quinto fino a filo trave, B sui
-# corsi 2-4. In doccia (fino al bordo del piatto) e nella nicchia della lavatrice e' tutto A,
-# tranne il fronte sporgente di P1 + colonna di scarico, che segue le fasce.
-FASCIA_B = (1, 4)                       # corsi [da, a) in texture B
+# Rivestimento a fasce: texture A sui primi due corsi e dal sesto fino a filo trave, B sui
+# corsi 3-5. In doccia (fino al bordo del piatto) e nella nicchia della lavatrice e' tutto A,
+# tranne il fronte sporgente di P1 + colonna di scarico, che e' tutto B da terra a filo trave.
+FASCIA_B = (2, 5)                       # corsi [da, a) in texture B
 _DOCCIA = next((y, h) for lo, _lb, _x, y, _w, h, tp in cp.ARREDO if lo == "BAGNO" and tp == "doccia")
 # in pianta (x0, y0, x1, y1), con i fili delle facce dentro
 ZONE_TUTTA_A = [(343.0, 72.0, 514.0, sum(_DOCCIA)),     # doccia
@@ -625,11 +644,13 @@ ZONE_TUTTA_A = [(343.0, 72.0, 514.0, sum(_DOCCIA)),     # doccia
 FRONTE_SPORGENTE = (True, 99.6, 372.8, 423.0)           # orizzontale, filo, da, a
 
 
+def _fronte_sporgente(orizz, c, a, b):
+    fo, fc, fa, fb = FRONTE_SPORGENTE
+    return orizz == fo and abs(c - fc) < 1 and fa - 0.5 <= a and b <= fb + 0.5
+
+
 def _zona_tutta_a(orizz, c, a, b):
     x, y = ((a + b) / 2, c) if orizz else (c, (a + b) / 2)
-    fo, fc, fa, fb = FRONTE_SPORGENTE
-    if orizz == fo and abs(c - fc) < 1 and fa - 0.5 <= a and b <= fb + 0.5:
-        return False
     return any(x0 <= x <= x1 and y0 <= y <= y1 for x0, y0, x1, y1 in ZONE_TUTTA_A)
 
 
@@ -639,6 +660,9 @@ def facce_a_fasce(facce, my):
     b0, b1 = FASCIA_B[0] * my, FASCIA_B[1] * my
     out = []
     for sa, sb, c, orizz, dentro, _g, z0, z1 in facce:
+        if _fronte_sporgente(orizz, c, sa, sb):
+            out.append([sa, sb, c, orizz, dentro, 1, z0, z1])
+            continue
         for q0, q1, fascia_b in ((z0, min(z1, b0), False), (max(z0, b0), min(z1, b1), True),
                                  (max(z0, b1), z1, False)):
             if q1 - q0 <= 0.5:
@@ -1424,7 +1448,7 @@ for (const [a,b,c,o,z0,z1,tipo,dentro,verso,num,card,spMuro] of D.ante){
   const B = D.box, alt = B.h*S, sp = 0.008;
   function vetro(x0, y, mobile){
     const m = new THREE.Mesh(new THREE.BoxGeometry(B.luce*S, alt, sp), matVetro);
-    m.position.set((x0 + B.luce/2)*S, alt/2, y*S);
+    m.position.set((x0 + B.luce/2)*S, alt/2 + B.z0*S, y*S);
     m.receiveShadow = true;
     const t = new THREE.Mesh(new THREE.BoxGeometry(B.luce*S, 0.035, 0.035), matPvc);
     t.position.set(0, alt/2 + 0.02, 0); t.castShadow = true; m.add(t);

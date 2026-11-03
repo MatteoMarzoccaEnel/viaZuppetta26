@@ -10,6 +10,7 @@ in orizzontale.
 Se la cartella e' vuota il modello usa una texture procedurale di ripiego.
 
 Posa a fasce: le pareti A partono con la prima texture in ordine di nome (A, tinta
-unita: primo corso e dal quinto a filo trave, doccia e nicchia lavatrice), le
-pareti B con la seconda (B, decoro: corsi 2-4). Per questo i nomi iniziano con
+unita: primi due corsi e dal sesto a filo trave, doccia e nicchia lavatrice), le
+pareti B con la seconda (B, decoro: corsi 3-5, e tutto il fronte della colonna in
+doccia). Per questo i nomi iniziano con
 01-A e 02-B.

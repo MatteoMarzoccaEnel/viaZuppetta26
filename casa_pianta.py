@@ -141,6 +141,7 @@ ALT_VANO = {"porta": 210, "battente": 210, "passaggio": 210,
 VANO_SPECIALE = {7: (114.0, 110.0)}
 SP_EST = 30.0        # spessore delle murature perimetrali
 SP_FACCIATA_BAGNO = 35.0   # sguincio misurato della finestra del bagno
+H_GRADINO_DOCCIA = 10.0    # gradino in muratura sotto piatto e box doccia
 
 
 def quote_vano(n, tipo):
@@ -232,6 +233,8 @@ ARREDO = [
     # dietro il piatto doccia: riempiono i due rientri fino al filo della colonna
     ("BAGNO", "MURETTO 29x26", 344, 539, 28.8, 26, "muretto"),
     ("BAGNO", "MURETTO 90x23", 423, 539, 90.1, 23, "muretto"),
+    # gradino sotto piatto e box: da muro a muro, dal fronte del piatto ai muretti
+    ("BAGNO", "GRADINO DOCCIA 169x82", 344, 457, 169.1, 82, "muretto"),
 
     # composizione a parete: libreria + scrivania + armadio, con due mensole sopra
     ("LETTO SINGOLO", "LETTO CONTENITORE 204x94", 523.1, 247, 94.2, 204.2, "letto"),
@@ -274,7 +277,7 @@ MURI_NUOVI = [
 ]
 
 # box doccia: vetro fisso da x0, anta mobile della stessa luce su binario sfalsato
-BOX = dict(x0=345, luce=60, h=200, y=457, sfalso=1.0)
+BOX = dict(x0=345, luce=60, h=200, y=457, sfalso=1.0, z0=H_GRADINO_DOCCIA)
 
 # quote di verifica: (x0, y0, x1, y1, etichetta) in coordinate di rilievo
 QUOTE = [
@@ -769,7 +772,7 @@ BATTISCOPA = battiscopa_locali()
 # tipo -> (altezza, quota di attacco: 0 = appoggiato a terra)
 H_TIPO = {
     "letto": (45, 0), "divano": (80, 0), "cucina": (231, 0), "elettro": (85, 0),
-    "lavello": (90, 0), "fuochi": (90, 0), "doccia": (4, 0),
+    "lavello": (90, 0), "fuochi": (90, 0), "doccia": (4, H_GRADINO_DOCCIA),
     "wc": (25, 15),                       # sospeso: seduta a 40
     "appendi": (8, 165), "box": (75, 0), "cassetti": (150, 0),
     "scaffale": (220, 0), "mensola": (20, 112), "mensola2": (20, 152),
@@ -784,7 +787,7 @@ H_LABEL = {
     "LAVATRICE": 85, "LAVABO": 85, "SEDIA": 45, "SGABELLO": 45,
     "MOBILETTO": 150, "LETTO CONTENITORE": 50, "TAVOLO": 75, "POLTRONA": 75,
     "CONSOLLE": 80, "SCRIVANIA 100x50": 70,
-    "MURETTO 29": 120, "MURETTO 90": 40,
+    "MURETTO 29": 120, "MURETTO 90": 40, "GRADINO DOCCIA": H_GRADINO_DOCCIA,
 }
 
 
